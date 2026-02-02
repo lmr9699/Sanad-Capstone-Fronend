@@ -25,7 +25,9 @@ export const generateCarePath = async () => {
   return response;
 };
 
-export const getChildren = async () => {
-  const response = await instance.get("/care-path/children");
-  return response;
+import { Child } from "../types/child.types";
+
+export const getChildren = async (): Promise<Child[]> => {
+  const response = await instance.get<Child[]>("/care-path/children");
+  return response.data;
 };

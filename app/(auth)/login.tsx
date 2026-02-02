@@ -1,20 +1,20 @@
+import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
-  View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { useMutation } from "@tanstack/react-query";
-import * as SecureStore from "expo-secure-store";
-import { Ionicons } from "@expo/vector-icons";
 import { login } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -25,6 +25,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
+
+
+
+console.log(email , password , keepSignedIn , isPasswordVisible );
 
   const loginMutation = useMutation({
     mutationFn: login,
