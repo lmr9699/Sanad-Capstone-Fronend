@@ -22,7 +22,7 @@ export default function CenteredInfo({ icon, title, subtitle }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F7F6F2",
+    backgroundColor: "#FAF9F6",
     paddingHorizontal: 20,
     justifyContent: "center",
   },
@@ -42,12 +42,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: "600",
-    color: "#2B2B2B",
+    color: "#2F2F2F",
     textAlign: "center",
   },
   subtitle: {
     fontSize: 14,
-    color: "#6B6B6B",
+    color: "#4A4A4A",
     textAlign: "center",
     lineHeight: 20,
     maxWidth: 320,

@@ -11,22 +11,22 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Exact CSS values from styles.css
+// Design system colors
 const colors = {
-  bgApp: "#FAF6F2", // var(--bg-app)
-  bgCard: "#FFFFFF", // var(--bg-card)
-  primary: "#C89B8B", // var(--primary)
-  primaryHover: "#B88A7A", // var(--primary-hover)
-  primarySoft: "#F0E6E2", // var(--primary-soft)
-  accentCare: "#7BA68A", // var(--accent-care)
-  accentCareSoft: "#E8F0EB", // var(--accent-care-soft)
-  accentLearn: "#9B8BA6", // var(--accent-learn)
-  accentLearnSoft: "#F0EDF2", // var(--accent-learn-soft)
-  text: "#3A3A3A", // var(--text)
-  textSecondary: "#6B6B6B", // var(--text-secondary)
-  textTertiary: "#9A9A9A", // var(--text-tertiary)
-  border: "rgba(0, 0, 0, 0.05)", // var(--border)
-  badge: "#D49A8A",
+  bgApp: "#FAF9F6",
+  bgCard: "#FFFFFF",
+  primary: "#7FB77E",
+  primaryHover: "#6A9E69",
+  primarySoft: "#E8F0E8",
+  accentCare: "#5F8F8B",
+  accentCareSoft: "#E8F0EF",
+  accentLearn: "#5F8F8B",
+  accentLearnSoft: "#E8F0EF",
+  text: "#2F2F2F",
+  textSecondary: "#4A4A4A",
+  textTertiary: "#8A8A8A",
+  border: "rgba(0, 0, 0, 0.05)",
+  badge: "#7FB77E",
 };
 
 function getGreeting(): string {
@@ -57,30 +57,9 @@ export default function HomeScreen() {
             <View style={styles.avatar} />
             <View style={styles.headerText}>
               <Text style={styles.greeting}>{greeting}, Sarah</Text>
-              <Text style={styles.headerSub}>How are you today?</Text>
             </View>
           </View>
           <View style={styles.headerActions}>
-            <Pressable
-              onPress={() => router.push("/(auth)/login")}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {({ pressed }) => (
-                <Text style={[styles.linkSignin, pressed && { opacity: 0.7 }]}>
-                  Sign in
-                </Text>
-              )}
-            </Pressable>
-            <Pressable
-              onPress={() => router.push("/(auth)/register")}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              {({ pressed }) => (
-                <Text style={[styles.linkCreate, pressed && { opacity: 0.7 }]}>
-                  Create account
-                </Text>
-              )}
-            </Pressable>
             <Pressable
               onPress={() => router.push("/(auth)/login")}
               style={styles.linkSignout}
@@ -114,22 +93,8 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Create account CTA */}
-        <View style={styles.createCta}>
-          <Text style={styles.createCtaText}>
-            New to SANAD? Create your account and we'll support you step by
-            step.
-          </Text>
-          <Pressable
-            style={({ pressed }) => [
-              styles.btnPrimary,
-              pressed && { opacity: 0.8 },
-            ]}
-            onPress={() => router.push("/(auth)/register")}
-          >
-            <Text style={styles.btnPrimaryText}>Create account</Text>
-          </Pressable>
-        </View>
+        {/* How are you today - Centered */}
+        <Text style={styles.questionText}>How are you today?</Text>
 
         {/* Mood Row */}
         <View style={styles.moodRow}>
@@ -457,12 +422,20 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   headerSub: {
-    fontSize: 14, // 0.875rem = 14px - SMALLER SUBTITLE
-    fontWeight: "400", // REGULAR WEIGHT - CLEAR DISTINCTION
-    color: colors.textSecondary, // #6B6B6B - LIGHTER COLOR
-    lineHeight: 19.6, // 1.4
+    fontSize: 14,
+    fontWeight: "400",
+    color: colors.textSecondary,
+    lineHeight: 19.6,
     marginTop: 4,
     marginBottom: 0,
+  },
+  questionText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: colors.text,
+    textAlign: "center",
+    marginTop: 20,
+    marginBottom: 16,
   },
   headerActions: {
     flexDirection: "row",

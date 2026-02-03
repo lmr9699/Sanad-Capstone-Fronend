@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+// Design system colors
 const colors = {
-  bgApp: "#F7F6F2",
-  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
-  text: "#2B2B2B", // Soft gray (dark gray)
-  textSecondary: "#6B6B6B", // Soft gray (lighter gray)
+  bgApp: "#FAF9F6",
+  bgCard: "rgba(255, 255, 255, 0.6)",
+  text: "#2F2F2F",
+  textSecondary: "#4A4A4A",
   border: "rgba(0, 0, 0, 0.06)",
 };
 

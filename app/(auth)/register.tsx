@@ -13,16 +13,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+// Design system colors
 const colors = {
-  bgApp: "#F7F6F2",
-  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
-  primary: "#C89B8B",
-  primaryHover: "#B88A7A",
-  primarySoft: "#F0E6E2",
-  text: "#2B2B2B", // Soft gray
-  textSecondary: "#6B6B6B", // Soft gray
-  textTertiary: "#8A8A8A", // Soft gray
+  bgApp: "#FAF9F6",
+  bgCard: "rgba(255, 255, 255, 0.6)",
+  primary: "#7FB77E",
+  primaryHover: "#6A9E69",
+  primarySoft: "#E8F0E8",
+  text: "#2F2F2F",
+  textSecondary: "#4A4A4A",
+  textTertiary: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.06)",
 };
 

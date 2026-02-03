@@ -2,16 +2,16 @@ import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+// Design system colors
 const colors = {
-  bgApp: "#F7F6F2",
-  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
-  primary: "#C89B8B",
-  text: "#2B2B2B", // Soft gray (dark brown/black)
-  textSecondary: "#6B6B6B", // Soft gray (lighter brown/gray)
-  textTertiary: "#8A8A8A", // Light to medium gray for placeholders
+  bgApp: "#FAF9F6",
+  bgCard: "rgba(255, 255, 255, 0.6)",
+  primary: "#7FB77E",
+  text: "#2F2F2F",
+  textSecondary: "#4A4A4A",
+  textTertiary: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.06)",
-  signOut: "#DC7633", // Reddish-orange for sign out
+  signOut: "#D9534F",
 };
 
 export default function ProfileScreen() {
