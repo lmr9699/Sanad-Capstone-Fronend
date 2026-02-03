@@ -4,6 +4,8 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getCenterDetails } from "../../../api/directory.api";
 import { colors, sectionSpacing, spacing, typography } from "../../../theme";
+import { useRouter } from "expo-router";
+import { Linking, Platform } from "react-native";
 
 export default function CenterDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -135,12 +137,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#1f2937",
-    marginBottom: 12,
-  },
+  // title: {
+  //   fontSize: 26,
+  //   fontWeight: "bold",
+  //   color: "#1f2937",
+  //   marginBottom: 12,
+  // },
   typeBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,

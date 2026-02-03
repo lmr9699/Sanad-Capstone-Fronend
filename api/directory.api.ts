@@ -1,6 +1,5 @@
 import { HealthCenter, Professional } from "../types/directory.types";
 import instance from "./axios";
-import { HealthCenter, Professional } from "@/types/directory.types";
 
 
 export interface CenterFilters {

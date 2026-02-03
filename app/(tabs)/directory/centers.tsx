@@ -18,13 +18,18 @@ import {
   typography,
 } from "../../../theme";
 import { HealthCenter } from "../../../types/directory.types";
+import { useState } from "react";
+import { getCities, getSpecialties } from "../../../api/directory.api";
 
 export default function CentersScreen() {
+
+  type FilterType = "all" | "public" | "private";
+  
   const router = useRouter();
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedCity, setSelectedCity] = useState<string>("");
-const [selectedTags, setSelectedTags] = useState<string[]>([]);
-const [showFilters, setShowFilters] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
     // جلب قائمة المدن
     const { data: cities = [] } = useQuery({
@@ -125,11 +130,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#fff",
   },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-  },
+  // loadingText: {
+  //   marginTop: 12,
+  //   fontSize: 16,
+  //   color: "#666",
+  // },
   title: {
     fontSize: typography.title,
     lineHeight: typography.h1LineHeight,
