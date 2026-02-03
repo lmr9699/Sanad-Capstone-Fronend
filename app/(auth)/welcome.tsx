@@ -28,7 +28,7 @@ export default function WelcomeScreen() {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push("/(onboarding)/parent-profile");
+    router.replace("/(auth)/register");
   };
 
   const handleAlreadyHaveAccount = () => {
@@ -41,8 +41,8 @@ export default function WelcomeScreen() {
         {/* App Branding */}
         <View style={styles.brandingSection}>
           <Text style={styles.appName}>SANAD</Text>
-          <Text style={styles.subtitle}>You're not alone.</Text>
-          <Text style={styles.subtitle}>We'll guide you step by step.</Text>
+          <Text style={styles.subtitle}>You&apos;re not alone.</Text>
+          <Text style={styles.subtitle}>We&apos;ll guide you step by step.</Text>
         </View>
 
         {/* Feature Card */}

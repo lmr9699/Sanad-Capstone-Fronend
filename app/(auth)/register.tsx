@@ -67,7 +67,7 @@ export default function RegisterScreen() {
 
           {/* Subtext - smaller */}
           <Text style={styles.authSub}>
-            Create your account and we'll support you step by step. You're not
+            Create your account and we&apos;ll support you step by step. You&apos;re not
             alone.
           </Text>
 

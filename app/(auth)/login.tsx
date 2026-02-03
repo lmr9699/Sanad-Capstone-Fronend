@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +12,10 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useMutation } from "@tanstack/react-query";
+import * as SecureStore from "expo-secure-store";
+import { login } from "../../api/auth.api";
+import { useAuth } from "../../context/AuthContext";
 
 // Design system colors
 const colors = {
@@ -27,16 +32,10 @@ const colors = {
 
 export default function LoginScreen() {
   const router = useRouter();
-
   const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [keepSignedIn, setKeepSignedIn] = useState(false);
-
-
-// test 
-console.log(email , password , keepSignedIn , isPasswordVisible );
 
   const loginMutation = useMutation({
     mutationFn: login,
@@ -44,14 +43,23 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
       if (data.token) {
         await SecureStore.setItemAsync("token", data.token);
       }
-      setUser(data.user);
-      router.replace("/(tabs)/plan");
+      if (data.user) {
+        setUser(data.user);
+      }
+      router.replace("/(tabs)");
     },
     onError: (error: any) => {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
     },
-
   });
+
+  const handleLogin = () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+    loginMutation.mutate({ email, password });
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -77,7 +85,7 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
           <Text style={styles.authTitle}>Sign In</Text>
           <Text style={styles.authWelcome}>Welcome back</Text>
           <Text style={styles.authSub}>
-            Sign in to continue. We're here to support you every step of the
+            Sign in to continue. We&apos;re here to support you every step of the
             way.
           </Text>
 
@@ -89,10 +97,8 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
                 style={styles.input}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.textTertiary}
-                value={formData.email}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, email: text })
-                }
+                value={email}
+                onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -105,18 +111,16 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
                   style={styles.inputInWrap}
                   placeholder="Enter your password"
                   placeholderTextColor={colors.textTertiary}
-                  value={formData.password}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, password: text })
-                  }
-                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!isPasswordVisible}
                 />
                 <Pressable
                   style={({ pressed }) => [
                     styles.togglePassword,
                     pressed && { opacity: 0.7 },
                   ]}
-                  onPress={() => setShowPassword((p) => !p)}
+                  onPress={() => setIsPasswordVisible((prev) => !prev)}
                 >
                   <Text style={styles.togglePasswordText}>👁</Text>
                 </Pressable>
@@ -128,15 +132,19 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
                 styles.btnPrimary,
                 pressed && { opacity: 0.8 },
               ]}
+              onPress={handleLogin}
+              disabled={loginMutation.isPending}
             >
-              <Text style={styles.btnPrimaryText}>Sign In</Text>
+              <Text style={styles.btnPrimaryText}>
+                {loginMutation.isPending ? "Signing In..." : "Sign In"}
+              </Text>
             </Pressable>
           </View>
 
           <Pressable onPress={() => router.push("/(auth)/register")}>
             {({ pressed }) => (
               <Text style={[styles.authFooter, pressed && { opacity: 0.7 }]}>
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Text style={styles.authFooterLink}>Create account</Text>
               </Text>
             )}
@@ -281,7 +289,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
   },
   createAccountContainer: {
     alignItems: "center",
