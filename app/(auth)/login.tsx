@@ -27,10 +27,30 @@ const colors = {
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+
+  const { setUser } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
+
+
+// test 
+console.log(email , password , keepSignedIn , isPasswordVisible );
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: async (data) => {
+      if (data.token) {
+        await SecureStore.setItemAsync("token", data.token);
+      }
+      setUser(data.user);
+      router.replace("/(tabs)/plan");
+    },
+    onError: (error: any) => {
+      Alert.alert("Login Failed", error.message || "Invalid credentials");
+    },
+
   });
 
   return (
