@@ -3,45 +3,46 @@
  *
  * DESIGN DIRECTION:
  * - Calm, soft, minimal, mobile-first
- * - Primary: #D99E8E (warm coral/peach)
- * - Background: #F6E4DE (soft warm beige)
- * - Text: #333333 (dark gray)
+ * - Primary: #7FB77E (sage green)
+ * - Background: #FAF9F6 (off-white)
+ * - Secondary: #5F8F8B (teal)
+ * - Text: #2F2F2F (dark gray)
  */
 
 export const colors = {
   // Surfaces — soft, warm, minimal
-  background: "#F6E4DE",
+  background: "#FAF9F6",         // off-white
   backgroundCard: "#FFFFFF",
   backgroundElevated: "#FFFFFF",
-  backgroundSecondary: "#F0E0DA",
+  backgroundSecondary: "#EDE7DB", // beige
 
-  // Primary (warm coral/peach — calm, soft)
-  primary: "#D99E8E",
-  primaryLight: "#F5E8E3",
-  primaryMuted: "#C88E7E",
+  // Primary (sage green — calm, natural)
+  primary: "#7FB77E",
+  primaryLight: "#A8D4A7",
+  primaryMuted: "#6A9E69",
 
-  // Secondary (complementary soft tones)
-  secondary: "#D99E8E",
-  secondaryLight: "#F5E8E3",
+  // Secondary (teal — complementary)
+  secondary: "#5F8F8B",
+  secondaryLight: "#8FBAB7",
 
   // Text — clear hierarchy
-  text: "#333333",
-  textSecondary: "#555555",
-  textMuted: "#777777",
-  textLight: "#999999",
+  text: "#2F2F2F",
+  textSecondary: "#4A4A4A",
+  textMuted: "#6B6B6B",
+  textLight: "#8A8A8A",
 
-  // UI — soft borders (no sharp contrast)
-  border: "#E8D8D2",
-  borderLight: "#F0E8E3",
+  // UI — soft borders
+  border: "#EDE7DB",
+  borderLight: "#F5F3EF",
 
   // Semantic
-  success: "#D99E8E",
-  error: "#C88E7E",
-  errorLight: "#F9EEED",
-  warning: "#D99E8E",
-  info: "#D99E8E",
+  success: "#7FB77E",
+  error: "#D9534F",
+  errorLight: "#FDECEA",
+  warning: "#E8A838",
+  info: "#5F8F8B",
 
   // Specific
-  signOut: "#C88E7E",
-  accent: "#D99E8E",
+  signOut: "#D9534F",
+  accent: "#7FB77E",
 } as const;

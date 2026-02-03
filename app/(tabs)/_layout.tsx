@@ -7,8 +7,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Design system colors
 const colors = {
   bgCard: "#FFFFFF",
-  primary: "#C89B8B",
-  textTertiary: "#ADADAD",
+  primary: "#7FB77E",
+  textTertiary: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.08)",
 };
 
