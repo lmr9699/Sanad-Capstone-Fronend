@@ -1,10 +1,27 @@
 export interface HealthCenter {
   id: string;
   name: string;
+  type: "public" | "private";
   address: string;
-  phone: string;
+  city: string;
+  phone: string | number;
+  email?: string;
   description?: string;
   specialties?: string[];
+  operatingHours?: string;
+  rating?: number;
+  latitude?: number;          
+  longitude?: number; 
+  reviews?: Review[];
+}
+
+export interface Review {
+  id: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
 }
 
 export interface Professional {
