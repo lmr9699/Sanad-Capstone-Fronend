@@ -22,7 +22,7 @@ export default function LandingScreen() {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push("/(onboarding)/parent-profile");
+    router.replace("/(tabs)");
   };
 
   const handleAlreadyHaveAccount = () => {
