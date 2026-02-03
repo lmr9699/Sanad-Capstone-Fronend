@@ -13,7 +13,7 @@ export const register = async (data: RegisterRequest): Promise<AuthResponse> => 
 
 export const forgotPassword = async (data: ForgotPasswordRequest) => {
   const response = await instance.post("/auth/forgot-password", data);
-  return response;
+  return response.data;
 };
 
 export const logout = async () => {

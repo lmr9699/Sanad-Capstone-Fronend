@@ -1,6 +1,22 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getChildren } from "../../../api/care-path.api";
+import {
+  cardShadow,
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../../theme";
+import { Child } from "../../../types/child.types";
 
 export default function ManageChildrenScreen() {
   const { data: children, isLoading } = useQuery({
@@ -10,64 +26,89 @@ export default function ManageChildrenScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Manage Children</Text>
-      {children?.map((child: any, index: number) => (
-        <View key={index} style={styles.childCard}>
-          <Text style={styles.childName}>{child.name}</Text>
-          <Text style={styles.childAge}>Age: {child.age}</Text>
-        </View>
-      ))}
-      <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addButtonText}>+ Add Child</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+      >
+        <Text style={styles.title}>Manage Children</Text>
+        {children?.map((child: Child) => (
+          <View key={child.id} style={[styles.childCard, cardShadow]}>
+            <Text style={styles.childName}>{child.name}</Text>
+            <Text style={styles.childAge}>Age: {child.age}</Text>
+          </View>
+        ))}
+        <TouchableOpacity style={styles.addButton} activeOpacity={0.85}>
+          <Text style={styles.addButtonText}>+ Add Child</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.pageBottom,
+  },
+  loadingText: {
+    fontSize: typography.body,
+    color: colors.textMuted,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 24,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
   },
   childCard: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
   },
   childName: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: typography.h3,
+    lineHeight: typography.h3LineHeight,
+    fontWeight: typography.weightSemibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   childAge: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: typography.caption,
+    lineHeight: typography.captionLineHeight,
+    color: colors.textMuted,
   },
   addButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
-    marginTop: 16,
+    justifyContent: "center",
+    marginTop: spacing.lg,
+    minHeight: 52,
   },
   addButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
   },
 });

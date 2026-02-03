@@ -1,5 +1,11 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import * as SecureStore from "expo-secure-store";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { User } from "../types/auth.types";
 
 interface AuthContextType {
@@ -23,11 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = await SecureStore.getItemAsync("token");
       if (token) {
-        // TODO: Fetch user data from API
+        // Token exists, user data will be set via setUser after login
         // For now, just set loading to false
+        // In production, you would fetch user data from API here
       }
     } catch (error) {
-      console.error("Error loading user:", error);
+      // Silently handle error - user will need to login again
+      // In production, you might want to log this to an error tracking service
     } finally {
       setLoading(false);
     }

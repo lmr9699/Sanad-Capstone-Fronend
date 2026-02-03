@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking, ActivityIndicator, Platform } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getCenterDetails } from "../../../api/directory.api";
-import { HealthCenter, Review } from "../../../types/directory.types";
+import { colors, sectionSpacing, spacing, typography } from "../../../theme";
 
 export default function CenterDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -58,166 +59,65 @@ export default function CenterDetailsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2563eb" />
-        <Text style={styles.loadingText}>Loading center details...</Text>
-      </View>
-    );
-  }
-
-  if (isError || !center) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.errorText}>Failed to load center details</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>{center.name}</Text>
-        <View style={styles.headerMeta}>
-          <View
-            style={[
-              styles.typeBadge,
-              center.type === "public" ? styles.publicBadge : styles.privateBadge,
-            ]}
-          >
-            <Text
-              style={[
-                styles.typeBadgeText,
-                center.type === "public" ? styles.publicText : styles.privateText,
-              ]}
-            >
-              {center.type === "public" ? "Public Center" : "Private Center"}
-            </Text>
-          </View>
-          {center.rating && renderStars(center.rating)}
-        </View>
-      </View>
-
-      {/* Description */}
-      {center.description && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.description}>{center.description}</Text>
-        </View>
-      )}
-
-      {/* الخدمات المتوفرة */}
-      {center.specialties && center.specialties.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🏥 Services Offered</Text>
-          <View style={styles.servicesContainer}>
-          {center.specialties.map((specialty: string, index: number) => (
-              <View key={index} style={styles.serviceChip}>
-                <Text style={styles.serviceChipText}>{specialty}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
-
-      {/* ساعات العمل */}
-      {center.operatingHours && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🕐 Operating Hours</Text>
-          <Text style={styles.hoursText}>{center.operatingHours}</Text>
-        </View>
-      )}
-
-      {/* معلومات التواصل */}
-      <View style={styles.section}>
-      <Text style={styles.sectionTitle}>📋 Contact Information</Text>
-
-        <View style={styles.infoRow}>
-        <Text style={styles.infoLabel}>📍 Address</Text>
-          <Text style={styles.infoValue}>{center.address}</Text>
-          {center.city && <Text style={styles.cityText}>{center.city}</Text>}
-          <TouchableOpacity style={styles.mapLinkBtn} onPress={handleOpenMap}>
-          <Text style={styles.mapLinkText}>🗺️ Open in Maps</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.infoRow}>
-        <Text style={styles.infoLabel}>📞 Phone</Text>
-          <TouchableOpacity onPress={handleCall}>
-            <Text style={styles.infoLink}>{center.phone}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {center.email && (
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>✉️ Email</Text>
-            <TouchableOpacity onPress={handleEmail}>
-              <Text style={styles.infoLink}>{center.email}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      {/* أزرار الإجراءات */}
-      <View style={styles.actionsContainer}>
-        <TouchableOpacity style={styles.primaryButton} onPress={handleCall}>
-        <Text style={styles.primaryButtonText}>📞 Call Now</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.secondaryButton} onPress={handleOpenMap}>
-        <Text style={styles.secondaryButtonText}>🗺️ Get Directions</Text>
-        </TouchableOpacity>
-      </View>
-            {/* Reviews Section */}
-            {center.reviews && center.reviews.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⭐ Reviews ({center.reviews.length})</Text>
-          {center.reviews.map((review: Review, index: number) => (
-            <View key={index} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <Text style={styles.reviewerName}>{review.userName}</Text>
-                <View style={styles.reviewRating}>
-                  <Text style={styles.reviewStars}>
-                    {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                  </Text>
-                </View>
-              </View>
-              <Text style={styles.reviewComment}>{review.comment}</Text>
-              <Text style={styles.reviewDate}>
-                {new Date(review.createdAt).toLocaleDateString()}
-              </Text>
-            </View>
-          ))}
-        </View>
-      )}
-    </ScrollView>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+      >
+        <Text style={styles.title}>{center?.name}</Text>
+        <Text style={styles.address}>{center?.address}</Text>
+        <Text style={styles.phone}>{center?.phone}</Text>
+        <Text style={styles.description}>{center?.description}</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
-  loadingContainer: {
+  scroll: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
+  },
+  container: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.pageBottom,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
+    fontSize: typography.body,
+    color: colors.textMuted,
   },
-  errorText: {
-    fontSize: 16,
-    color: "#ef4444",
-    marginBottom: 16,
+  title: {
+    fontSize: typography.title,
+    lineHeight: typography.h1LineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
+  },
+  address: {
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+  },
+  phone: {
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textMuted,
+    marginBottom: spacing.lg,
   },
   backButton: {
     paddingVertical: 10,
@@ -276,9 +176,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   description: {
-    fontSize: 16,
-    color: "#4b5563",
-    lineHeight: 24,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textSecondary,
   },
   infoRow: {
     marginBottom: 16,

@@ -1,172 +1,21 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getChildren } from "../../../api/care-path.api";
-import { useAuth } from "../../../context/AuthContext";
-import { Child } from "../../../types/child.types";
 
-// Reusable Card Component
-const Card = ({ children, style }: { children: React.ReactNode; style?: any }) => (
-  <View style={[styles.card, style]}>{children}</View>
-);
-
-// Section Header Row Component
-const SectionHeaderRow = ({
-  icon,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: string;
-  title: string;
-  subtitle?: string;
-  onPress?: () => void;
-}) => (
-  <TouchableOpacity
-    style={styles.sectionHeaderRow}
-    onPress={onPress}
-    disabled={!onPress}
-  >
-    <View style={styles.iconContainer}>
-      <Ionicons name={icon as any} size={20} color="#D99E8E" />
-    </View>
-    <View style={styles.sectionHeaderText}>
-      <Text style={styles.sectionHeaderTitle}>{title}</Text>
-      {subtitle && <Text style={styles.sectionHeaderSubtitle}>{subtitle}</Text>}
-    </View>
-    {onPress && (
-      <Ionicons name="chevron-forward" size={20} color="rgba(51,51,51,0.4)" />
-    )}
-  </TouchableOpacity>
-);
-
-// Menu Row Component
-const MenuRow = ({
-  icon,
-  title,
-  subtitle,
-  onPress,
-}: {
-  icon: string;
-  title: string;
-  subtitle: string;
-  onPress: () => void;
-}) => (
-  <TouchableOpacity style={styles.menuRow} onPress={onPress}>
-    <View style={styles.iconContainer}>
-      <Ionicons name={icon as any} size={20} color="#D99E8E" />
-    </View>
-    <View style={styles.menuRowText}>
-      <Text style={styles.menuRowTitle}>{title}</Text>
-      <Text style={styles.menuRowSubtitle}>{subtitle}</Text>
-    </View>
-    <Ionicons name="chevron-forward" size={20} color="rgba(51,51,51,0.4)" />
-  </TouchableOpacity>
-);
-
-// Preference Row Component
-const PreferenceRow = ({
-  title,
-  helper,
-  value,
-  onValueChange,
-}: {
-  title: string;
-  helper: string;
-  value: boolean;
-  onValueChange: (value: boolean) => void;
-}) => (
-  <View style={styles.preferenceRow}>
-    <View style={styles.preferenceRowText}>
-      <Text style={styles.preferenceRowTitle}>{title}</Text>
-      <Text style={styles.preferenceRowHelper}>{helper}</Text>
-    </View>
-    <Switch
-      value={value}
-      onValueChange={onValueChange}
-      trackColor={{ false: "#E0E0E0", true: "#D99E8E" }}
-      thumbColor="#FFFFFF"
-      ios_backgroundColor="#E0E0E0"
-    />
-  </View>
-);
-
-// Tab Bar Component
-const TabBar = () => {
-  const tabs = [
-    { name: "Home", icon: "home-outline", active: false },
-    { name: "Care Path", icon: "calendar-outline", active: false },
-    { name: "Documents", icon: "document-text-outline", active: false },
-    { name: "Community", icon: "people-outline", active: false },
-    { name: "Profile", icon: "person-outline", active: true },
-  ];
-
-  return (
-    <View style={styles.tabBar}>
-      {tabs.map((tab, index) => (
-        <TouchableOpacity key={index} style={styles.tab}>
-          <Ionicons
-            name={tab.icon as any}
-            size={24}
-            color={tab.active ? "#D99E8E" : "rgba(51,51,51,0.4)"}
-          />
-          <Text
-            style={[
-              styles.tabLabel,
-              tab.active && styles.tabLabelActive,
-            ]}
-          >
-            {tab.name}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
+// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+const colors = {
+  bgApp: "#F7F6F2",
+  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
+  primary: "#C89B8B",
+  text: "#2B2B2B", // Soft gray (dark brown/black)
+  textSecondary: "#6B6B6B", // Soft gray (lighter brown/gray)
+  textTertiary: "#8A8A8A", // Light to medium gray for placeholders
+  border: "rgba(0, 0, 0, 0.06)",
+  signOut: "#DC7633", // Reddish-orange for sign out
 };
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
-
-  // Fetch children data
-  const { data: children } = useQuery<Child[]>({
-    queryKey: ["children"],
-    queryFn: getChildren,
-  });
-
-  // Notification preferences state
-  const [weeklyReminders, setWeeklyReminders] = useState(true);
-  const [documentAlerts, setDocumentAlerts] = useState(true);
-  const [communityReplies, setCommunityReplies] = useState(false);
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Log Out",
-          style: "destructive",
-          onPress: () => {
-            logout();
-            router.replace("/(auth)/login");
-          },
-        },
-      ]
-    );
-  };
 
   // Get first child for display (or use placeholder)
   const firstChild = children && children.length > 0 ? children[0] : null;
@@ -175,159 +24,55 @@ export default function ProfileScreen() {
     : "A";
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Page Header */}
-        <Text style={styles.pageTitle}>Profile</Text>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <View style={styles.content}>
+        {/* Header - Bold, dark brown/black */}
+        <Text style={styles.title}>Profile</Text>
 
-        {/* User Profile Card */}
-        <Card style={styles.profileCard}>
-          <View style={styles.profileCardContent}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatar}>
-                <Ionicons name="person" size={32} color="#D99E8E" />
-              </View>
-            </View>
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>
-                {user?.name || "Sarah Al-Mansouri"}
-              </Text>
-              <Text style={styles.profileEmail}>
-                {user?.email || "sarah.almansouri@email.com"}
-              </Text>
-            </View>
+        {/* Description - Smaller, lighter font */}
+        <Text style={styles.description}>
+          Your account details and settings will appear here.
+        </Text>
+
+        {/* Input Fields - Three fields stacked vertically */}
+        <View style={styles.inputFieldsContainer}>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="NAME"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
           </View>
-
-          {/* Quote Box */}
-          <View style={styles.quoteBox}>
-            <View style={styles.quoteAccentBar} />
-            <View style={styles.quoteContent}>
-              <Text style={styles.quoteText}>
-                You're doing your best. Every small step forward matters.
-              </Text>
-              <Ionicons name="heart" size={16} color="#D99E8E" />
-            </View>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="EMAIL"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
           </View>
-        </Card>
-
-        {/* Manage Children Card */}
-        <Card>
-          <SectionHeaderRow
-            icon="people"
-            title="Manage Children"
-            subtitle="View and edit child profiles"
-            onPress={() => router.push("/(tabs)/profile/manage-children")}
-          />
-
-          {firstChild && (
-            <View style={styles.childRow}>
-              <View style={styles.childAvatar}>
-                <Text style={styles.childAvatarText}>{childInitial}</Text>
-              </View>
-              <Text style={styles.childText}>
-                {firstChild.name} (Age {firstChild.age})
-              </Text>
-              <TouchableOpacity>
-                <Text style={styles.editChildButton}>Edit</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <TouchableOpacity
-            style={styles.addChildButton}
-            onPress={() => router.push("/(tabs)/profile/manage-children")}
-          >
-            <Text style={styles.addChildButtonText}>+ Add another child</Text>
-          </TouchableOpacity>
-        </Card>
-
-        {/* Notifications & Reminders Card */}
-        <Card>
-          <View style={styles.sectionHeaderRow}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="notifications" size={20} color="#D99E8E" />
-            </View>
-            <View style={styles.sectionHeaderText}>
-              <Text style={styles.sectionHeaderTitle}>
-                Notifications & Reminders
-              </Text>
-              <Text style={styles.sectionHeaderSubtitle}>
-                Manage your notification preferences
-              </Text>
-            </View>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="PHONE"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
           </View>
+        </View>
 
-          <PreferenceRow
-            title="Weekly task reminders"
-            helper="Get notified about upcoming care path tasks"
-            value={weeklyReminders}
-            onValueChange={setWeeklyReminders}
-          />
-          <PreferenceRow
-            title="Document expiry alerts"
-            helper="Reminders when documents need renewal"
-            value={documentAlerts}
-            onValueChange={setDocumentAlerts}
-          />
-          <PreferenceRow
-            title="Community replies"
-            helper="When someone replies to your posts"
-            value={communityReplies}
-            onValueChange={setCommunityReplies}
-          />
-        </Card>
-
-        {/* Menu Items */}
-        <Card>
-          <MenuRow
-            icon="bookmark"
-            title="Saved Items"
-            subtitle="Your saved content and posts"
-            onPress={() => {}}
-          />
-        </Card>
-
-        <Card>
-          <MenuRow
-            icon="help-circle"
-            title="Help & Support"
-            subtitle="Get help and contact support"
-            onPress={() => {}}
-          />
-        </Card>
-
-        <Card>
-          <MenuRow
-            icon="document-text"
-            title="Community Guidelines"
-            subtitle="Review community rules and policies"
-            onPress={() => {}}
-          />
-        </Card>
-
-        {/* Logout Button Card */}
-        <Card>
-          <TouchableOpacity
-            style={styles.logoutButtonRow}
-            onPress={handleLogout}
-          >
-            <View style={styles.iconContainer}>
-              <Ionicons name="log-out-outline" size={20} color="#D99E8E" />
-            </View>
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
-        </Card>
-
-        {/* Bottom spacing for tab bar */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-
-      {/* Tab Bar */}
-      <TabBar />
+        {/* Sign Out Link - Centered, reddish-orange */}
+        <Pressable
+          onPress={() => router.push("/(auth)/login")}
+          style={({ pressed }) => [
+            styles.signOutContainer,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Text style={styles.signOutText}>Sign out</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
@@ -335,258 +80,67 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6E4DE",
+    backgroundColor: colors.bgApp, // Light beige/cream background
   },
-  scrollView: {
+  content: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingBottom: 140, // Clear spacing: 64px (tab bar) + safe area (up to 34px) + 24px (spacing) + 18px (extra safety)
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 16,
+  // Title - Bold, dark brown/black
+  title: {
+    fontSize: 22, // Large and prominent
+    fontWeight: "600", // Bold
+    color: colors.text, // Dark brown/black (#333333)
+    textAlign: "center",
+    marginBottom: 12, // Spacing below title
   },
-  pageTitle: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#333333",
-    marginBottom: 24,
+  // Description - Smaller, lighter font
+  description: {
+    fontSize: 15, // Standard readable size
+    color: colors.textSecondary, // Lighter brown/gray (#666666)
+    textAlign: "center",
+    marginBottom: 32, // Spacing below description
+    lineHeight: 22,
   },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 16,
+  // Input Fields Container
+  inputFieldsContainer: {
+    width: "100%",
+    maxWidth: 360,
+    gap: 16, // Spacing between fields
+    marginBottom: 28, // Spacing below fields
+  },
+  // Input Field - Rectangular with rounded corners, white background, subtle shadow
+  inputField: {
+    width: "100%",
+    height: 56, // Standard input field height
+    backgroundColor: "#FFFFFF", // White background
+    borderRadius: 16, // Significantly rounded corners
+    paddingHorizontal: 16,
+    justifyContent: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  profileCard: {
-    marginBottom: 16,
-  },
-  profileCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  avatarContainer: {
-    marginRight: 16,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#F6E4DE",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#333333",
-    marginBottom: 4,
-  },
-  profileEmail: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "rgba(51,51,51,0.55)",
-  },
-  quoteBox: {
-    flexDirection: "row",
-    backgroundColor: "#F6E4DE",
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-  },
-  quoteAccentBar: {
-    width: 4,
-    backgroundColor: "#4CAF50",
-    borderRadius: 2,
-    marginRight: 12,
-  },
-  quoteContent: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  quoteText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "400",
-    color: "#333333",
-    lineHeight: 20,
-    marginRight: 8,
-  },
-  sectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#F6E4DE",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  sectionHeaderText: {
-    flex: 1,
-  },
-  sectionHeaderTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333333",
-    marginBottom: 2,
-  },
-  sectionHeaderSubtitle: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "rgba(51,51,51,0.55)",
-  },
-  childRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(51,51,51,0.08)",
-    marginTop: 8,
-    marginBottom: 12,
-  },
-  childAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#D99E8E",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  childAvatarText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  childText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
-  },
-  editChildButton: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#D99E8E",
-  },
-  addChildButton: {
-    borderWidth: 1,
-    borderStyle: "dashed",
-    borderColor: "rgba(51,51,51,0.3)",
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  addChildButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
-  },
-  preferenceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(51,51,51,0.08)",
-    marginTop: 8,
-  },
-  preferenceRowText: {
-    flex: 1,
-    marginRight: 16,
-  },
-  preferenceRowTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
-    marginBottom: 4,
-  },
-  preferenceRowHelper: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "rgba(51,51,51,0.55)",
-  },
-  menuRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  menuRowText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  menuRowTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333333",
-    marginBottom: 2,
-  },
-  menuRowSubtitle: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "rgba(51,51,51,0.55)",
-  },
-  logoutButtonRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-  },
-  logoutButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#D99E8E",
-    marginLeft: 12,
-  },
-  bottomSpacing: {
-    height: 80,
-  },
-  tabBar: {
-    flexDirection: "row",
-    backgroundColor: "#FFFFFF",
-    borderTopWidth: 1,
-    borderTopColor: "rgba(51,51,51,0.08)",
-    paddingTop: 8,
-    paddingBottom: 8,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 2, // Subtle shadow for raised appearance
+    borderWidth: 1,
+    borderColor: colors.border, // Very light gray border
   },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  inputText: {
+    fontSize: 16,
+    color: colors.textTertiary, // Light to medium gray for placeholder/text
   },
-  tabLabel: {
-    fontSize: 10,
-    fontWeight: "500",
-    color: "rgba(51,51,51,0.4)",
-    marginTop: 4,
+  // Sign Out Container
+  signOutContainer: {
+    marginTop: 8,
   },
-  tabLabelActive: {
-    color: "#D99E8E",
+  // Sign Out Text - Reddish-orange, centered
+  signOutText: {
+    fontSize: 16,
+    color: colors.signOut, // Reddish-orange (#DC7633)
+    fontWeight: "600",
+    textAlign: "center",
   },
 });

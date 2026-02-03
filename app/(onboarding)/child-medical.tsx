@@ -1,6 +1,20 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../theme";
 
 export default function ChildMedicalScreen() {
   const router = useRouter();
@@ -15,68 +29,94 @@ export default function ChildMedicalScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Medical Information</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Medical History"
-        value={formData.medicalHistory}
-        onChangeText={(text) => setFormData({ ...formData, medicalHistory: text })}
-        multiline
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Current Medications"
-        value={formData.medications}
-        onChangeText={(text) => setFormData({ ...formData, medications: text })}
-        multiline
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Allergies"
-        value={formData.allergies}
-        onChangeText={(text) => setFormData({ ...formData, allergies: text })}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Medical Information</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Medical History"
+          placeholderTextColor={colors.textLight}
+          value={formData.medicalHistory}
+          onChangeText={(text) =>
+            setFormData({ ...formData, medicalHistory: text })
+          }
+          multiline
+        />
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Current Medications"
+          placeholderTextColor={colors.textLight}
+          value={formData.medications}
+          onChangeText={(text) =>
+            setFormData({ ...formData, medications: text })
+          }
+          multiline
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Allergies"
+          placeholderTextColor={colors.textLight}
+          value={formData.allergies}
+          onChangeText={(text) => setFormData({ ...formData, allergies: text })}
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleNext}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
+    padding: spacing.xxl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 32,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    fontSize: typography.body,
+    color: colors.text,
+    backgroundColor: colors.backgroundCard,
   },
   textArea: {
     height: 100,
     textAlignVertical: "top",
   },
   button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
-    marginTop: 16,
+    justifyContent: "center",
+    marginTop: spacing.lg,
+    minHeight: 52,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
   },
 });

@@ -8,6 +8,7 @@ export default function OnboardingLayout() {
         animation: "slide_from_right",
       }}
     >
+      <Stack.Screen name="landing" />
       <Stack.Screen name="parent-profile" />
       <Stack.Screen name="child-basic" />
       <Stack.Screen name="child-medical" />
