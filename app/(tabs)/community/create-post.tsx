@@ -1,8 +1,22 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { createPost } from "../../../api/community.api";
+import {
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../../theme";
 
 export default function CreatePostScreen() {
   const router = useRouter();
@@ -23,60 +37,75 @@ export default function CreatePostScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Post</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="What's on your mind?"
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={createPostMutation.isPending}
-      >
-        <Text style={styles.buttonText}>
-          {createPostMutation.isPending ? "Posting..." : "Post"}
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Create Post</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="What's on your mind?"
+          placeholderTextColor={colors.textLight}
+          value={content}
+          onChangeText={setContent}
+          multiline
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={createPostMutation.isPending}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.buttonText}>
+            {createPostMutation.isPending ? "Posting..." : "Post"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 24,
+    fontSize: typography.title,
+    lineHeight: typography.h1LineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    fontSize: typography.body,
+    color: colors.text,
+    backgroundColor: colors.backgroundCard,
   },
   textArea: {
     height: 200,
     textAlignVertical: "top",
   },
   button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 52,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
   },
 });

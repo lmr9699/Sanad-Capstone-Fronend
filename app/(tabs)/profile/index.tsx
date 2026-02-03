@@ -1,85 +1,140 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { useAuth } from "../../../context/AuthContext";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+const colors = {
+  bgApp: "#F7F6F2",
+  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
+  primary: "#C89B8B",
+  text: "#2B2B2B", // Soft gray (dark brown/black)
+  textSecondary: "#6B6B6B", // Soft gray (lighter brown/gray)
+  textTertiary: "#8A8A8A", // Light to medium gray for placeholders
+  border: "rgba(0, 0, 0, 0.06)",
+  signOut: "#DC7633", // Reddish-orange for sign out
+};
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, logout } = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    router.replace("/(auth)/login");
-  };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <View style={styles.profileSection}>
-        <Text style={styles.profileName}>{user?.name || "User"}</Text>
-        <Text style={styles.profileEmail}>{user?.email || ""}</Text>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <View style={styles.content}>
+        {/* Header - Bold, dark brown/black */}
+        <Text style={styles.title}>Profile</Text>
+
+        {/* Description - Smaller, lighter font */}
+        <Text style={styles.description}>
+          Your account details and settings will appear here.
+        </Text>
+
+        {/* Input Fields - Three fields stacked vertically */}
+        <View style={styles.inputFieldsContainer}>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="NAME"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
+          </View>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="EMAIL"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
+          </View>
+          <View style={styles.inputField}>
+            <TextInput
+              style={styles.inputText}
+              placeholder="PHONE"
+              placeholderTextColor={colors.textTertiary}
+              editable={false}
+            />
+          </View>
+        </View>
+
+        {/* Sign Out Link - Centered, reddish-orange */}
+        <Pressable
+          onPress={() => router.push("/(auth)/login")}
+          style={({ pressed }) => [
+            styles.signOutContainer,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Text style={styles.signOutText}>Sign out</Text>
+        </Pressable>
       </View>
-      <TouchableOpacity
-        style={styles.menuItem}
-        onPress={() => router.push("/(tabs)/profile/manage-children")}
-      >
-        <Text style={styles.menuItemText}>Manage Children</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.menuItem}
-        onPress={() => router.push("/(tabs)/profile/settings")}
-      >
-        <Text style={styles.menuItemText}>Settings</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.bgApp, // Light beige/cream background
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 24,
-  },
-  profileSection: {
-    marginBottom: 32,
-  },
-  profileName: {
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  profileEmail: {
-    fontSize: 16,
-    color: "#666",
-  },
-  menuItem: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-  },
-  menuItemText: {
-    fontSize: 16,
-    fontWeight: "500",
-  },
-  logoutButton: {
-    backgroundColor: "#FF3B30",
-    borderRadius: 8,
-    padding: 16,
+  content: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 140, // Clear spacing: 64px (tab bar) + safe area (up to 34px) + 24px (spacing) + 18px (extra safety)
   },
-  logoutButtonText: {
-    color: "#fff",
+  // Title - Bold, dark brown/black
+  title: {
+    fontSize: 22, // Large and prominent
+    fontWeight: "600", // Bold
+    color: colors.text, // Dark brown/black (#333333)
+    textAlign: "center",
+    marginBottom: 12, // Spacing below title
+  },
+  // Description - Smaller, lighter font
+  description: {
+    fontSize: 15, // Standard readable size
+    color: colors.textSecondary, // Lighter brown/gray (#666666)
+    textAlign: "center",
+    marginBottom: 32, // Spacing below description
+    lineHeight: 22,
+  },
+  // Input Fields Container
+  inputFieldsContainer: {
+    width: "100%",
+    maxWidth: 360,
+    gap: 16, // Spacing between fields
+    marginBottom: 28, // Spacing below fields
+  },
+  // Input Field - Rectangular with rounded corners, white background, subtle shadow
+  inputField: {
+    width: "100%",
+    height: 56, // Standard input field height
+    backgroundColor: "#FFFFFF", // White background
+    borderRadius: 16, // Significantly rounded corners
+    paddingHorizontal: 16,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2, // Subtle shadow for raised appearance
+    borderWidth: 1,
+    borderColor: colors.border, // Very light gray border
+  },
+  inputText: {
     fontSize: 16,
+    color: colors.textTertiary, // Light to medium gray for placeholder/text
+  },
+  // Sign Out Container
+  signOutContainer: {
+    marginTop: 8,
+  },
+  // Sign Out Text - Reddish-orange, centered
+  signOutText: {
+    fontSize: 16,
+    color: colors.signOut, // Reddish-orange (#DC7633)
     fontWeight: "600",
+    textAlign: "center",
   },
 });

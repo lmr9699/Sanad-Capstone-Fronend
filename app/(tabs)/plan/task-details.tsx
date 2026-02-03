@@ -1,7 +1,9 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getTaskDetails } from "../../../api/care-path.api";
+import { colors, sectionSpacing, spacing, typography } from "../../../theme";
 
 export default function TaskDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -19,47 +21,64 @@ export default function TaskDetailsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{task?.title}</Text>
-      <Text style={styles.description}>{task?.description}</Text>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Instructions</Text>
-        <Text style={styles.sectionContent}>{task?.instructions}</Text>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Expected Outcome</Text>
-        <Text style={styles.sectionContent}>{task?.expectedOutcome}</Text>
-      </View>
-    </ScrollView>
+    <SafeAreaView style={styles.safe} edges={["top"]}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <Text style={styles.title}>{task?.title}</Text>
+        <Text style={styles.description}>{task?.description}</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Instructions</Text>
+          <Text style={styles.sectionContent}>{task?.instructions}</Text>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Expected Outcome</Text>
+          <Text style={styles.sectionContent}>{task?.expectedOutcome}</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+  },
+  scrollContent: {
+    padding: spacing.xl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: spacing.lg,
   },
   description: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 24,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textMuted,
+    marginBottom: sectionSpacing.default,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: sectionSpacing.default,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: typography.h2,
+    lineHeight: typography.h2LineHeight,
+    fontWeight: typography.weightSemibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   sectionContent: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textSecondary,
   },
 });

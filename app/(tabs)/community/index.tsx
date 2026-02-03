@@ -1,83 +1,82 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
-import { getCommunityPosts } from "../../../api/community.api";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+const colors = {
+  bgApp: "#F7F6F2",
+  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
+  text: "#2B2B2B", // Soft gray (dark grey)
+  textSecondary: "#6B6B6B", // Soft gray (lighter grey)
+  border: "rgba(0, 0, 0, 0.06)",
+};
 
 export default function CommunityScreen() {
-  const router = useRouter();
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["communityPosts"],
-    queryFn: getCommunityPosts,
-  });
-
-  if (isLoading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading posts...</Text>
-      </View>
-    );
-  }
-
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Community</Text>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => router.push("/(tabs)/community/create-post")}
-        >
-          <Text style={styles.createButtonText}>+ Create Post</Text>
-        </TouchableOpacity>
-      </View>
-      {posts?.map((post: any, index: number) => (
-        <View key={index} style={styles.postCard}>
-          <Text style={styles.postAuthor}>{post.author}</Text>
-          <Text style={styles.postContent}>{post.content}</Text>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <View style={styles.content}>
+        {/* Icon Container - Square with rounded corners, white background */}
+        <View style={styles.iconContainer}>
+          <Text style={styles.iconText}>👥</Text>
         </View>
-      ))}
-    </ScrollView>
+
+        {/* Title - Bold, dark grey */}
+        <Text style={styles.title}>Community</Text>
+
+        {/* Description - Three-line text, centered, lighter grey */}
+        <Text style={styles.description}>
+          Connect with other families, share experiences, and find support.
+          You're part of a caring community.
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.bgApp, // Light beige/off-white background
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  content: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    marginBottom: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 140, // Clear spacing: 64px (tab bar) + safe area (up to 34px) + 24px (spacing) + 18px (extra safety)
   },
+  // Icon Container - Square with rounded corners, white background
+  iconContainer: {
+    width: 64, // Square container
+    height: 64,
+    borderRadius: 14, // Rounded corners
+    backgroundColor: "#FFFFFF", // White background
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20, // Ample vertical spacing between icon and title
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2, // Subtle shadow for depth
+  },
+  iconText: {
+    fontSize: 32, // Icon size - two human figures emoji
+  },
+  // Title - Bold, dark grey sans-serif
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 22, // Large and prominent
+    fontWeight: "600", // Bold or semi-bold
+    color: colors.text, // Dark grey
+    textAlign: "center",
+    marginBottom: 12, // Ample vertical spacing between title and description
   },
-  createButton: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 8,
+  // Description - Three-line text, lighter grey, centered
+  description: {
+    fontSize: 15, // Standard readable size
+    color: colors.textSecondary, // Lighter grey
+    textAlign: "center",
+    lineHeight: 22, // Comfortable line height for readability
+    maxWidth: 320, // Prevents full-width spanning, allows wrapping into three lines
     paddingHorizontal: 16,
-  },
-  createButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  postCard: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-  },
-  postAuthor: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  postContent: {
-    fontSize: 14,
-    color: "#333",
   },
 });
