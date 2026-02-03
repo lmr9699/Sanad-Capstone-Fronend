@@ -1,7 +1,11 @@
+import { Redirect } from "expo-router";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Root index: redirect to Home tab
+ */
 export default function Index() {
   const router = useRouter();
   const { user, loading } = useAuth();

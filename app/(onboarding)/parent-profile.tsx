@@ -1,6 +1,20 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../theme";
 
 export default function ParentProfileScreen() {
   const router = useRouter();
@@ -11,75 +25,97 @@ export default function ParentProfileScreen() {
   });
 
   const handleNext = () => {
-    // Save parent profile data
     router.push("/(onboarding)/child-basic");
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Parent Profile</Text>
-      <Text style={styles.subtitle}>Tell us about yourself</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={formData.name}
-        onChangeText={(text) => setFormData({ ...formData, name: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Phone Number"
-        value={formData.phone}
-        onChangeText={(text) => setFormData({ ...formData, phone: text })}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        value={formData.address}
-        onChangeText={(text) => setFormData({ ...formData, address: text })}
-        multiline
-      />
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Parent Profile</Text>
+        <Text style={styles.subtitle}>Tell us about yourself</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          placeholderTextColor={colors.textLight}
+          value={formData.name}
+          onChangeText={(text) => setFormData({ ...formData, name: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Phone Number"
+          placeholderTextColor={colors.textLight}
+          value={formData.phone}
+          onChangeText={(text) => setFormData({ ...formData, phone: text })}
+          keyboardType="phone-pad"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          placeholderTextColor={colors.textLight}
+          value={formData.address}
+          onChangeText={(text) => setFormData({ ...formData, address: text })}
+          multiline
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleNext}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
+    padding: spacing.xxl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 8,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 32,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textMuted,
+    marginBottom: sectionSpacing.default,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    fontSize: typography.body,
+    color: colors.text,
+    backgroundColor: colors.backgroundCard,
   },
   button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
-    marginTop: 16,
+    justifyContent: "center",
+    marginTop: spacing.lg,
+    minHeight: 52,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
   },
 });

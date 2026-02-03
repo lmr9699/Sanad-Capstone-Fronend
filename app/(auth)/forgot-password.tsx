@@ -1,8 +1,26 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { useRouter } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { forgotPassword } from "../../api/auth.api";
+import {
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../theme";
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -11,94 +29,149 @@ export default function ForgotPasswordScreen() {
   const forgotPasswordMutation = useMutation({
     mutationFn: forgotPassword,
     onSuccess: () => {
-      Alert.alert("Success", "Password reset link sent to your email");
       router.back();
     },
-    onError: (error: any) => {
-      Alert.alert("Error", error.message || "Failed to send reset link");
+    onError: (error: { message?: string }) => {
+      alert(error?.message ?? "Failed to send reset link");
     },
   });
 
   const handleSubmit = () => {
-    if (!email) {
-      Alert.alert("Error", "Please enter your email");
+    if (!email?.trim()) {
+      alert("Please enter your email");
       return;
     }
-    forgotPasswordMutation.mutate({ email });
+    forgotPasswordMutation.mutate({ email: email.trim() });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Forgot Password</Text>
-      <Text style={styles.subtitle}>
-        Enter your email address and we'll send you a link to reset your password.
-      </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={forgotPasswordMutation.isPending}
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboard}
       >
-        <Text style={styles.buttonText}>
-          {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.link}>Back to Login</Text>
-      </TouchableOpacity>
-    </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>Forgot Password</Text>
+          <Text style={styles.subtitle}>
+            Enter your email address and we'll send you a link to reset your
+            password.
+          </Text>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Email Address</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              placeholderTextColor={colors.textLight}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              forgotPasswordMutation.isPending && styles.buttonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={forgotPasswordMutation.isPending}
+          >
+            {forgotPasswordMutation.isPending ? (
+              <ActivityIndicator color={colors.backgroundCard} />
+            ) : (
+              <Text style={styles.buttonText}>Send Reset Link</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.linkWrap}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.link}>Back to Login</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  keyboard: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.xxl,
+    paddingTop: spacing.xxxl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 16,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: spacing.sm,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 32,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textMuted,
+    marginBottom: sectionSpacing.default,
     textAlign: "center",
+  },
+  formGroup: {
+    marginBottom: spacing.xl,
+  },
+  label: {
+    fontSize: typography.bodySmall,
+    lineHeight: typography.bodySmallLineHeight,
+    fontWeight: typography.weightMedium,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   input: {
+    backgroundColor: colors.backgroundCard,
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.text,
   },
   button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
-    marginTop: 8,
+    justifyContent: "center",
+    minHeight: 52,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
+  },
+  linkWrap: {
+    marginTop: sectionSpacing.default,
+    alignItems: "center",
   },
   link: {
-    color: "#007AFF",
-    textAlign: "center",
-    marginTop: 16,
+    fontSize: typography.bodySmall,
+    lineHeight: typography.bodySmallLineHeight,
+    color: colors.primary,
+    fontWeight: typography.weightMedium,
   },
 });

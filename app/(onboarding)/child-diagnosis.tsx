@@ -1,6 +1,20 @@
-import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../theme";
 
 export default function ChildDiagnosisScreen() {
   const router = useRouter();
@@ -15,62 +29,86 @@ export default function ChildDiagnosisScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Diagnosis Information</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Primary Diagnosis"
-        value={formData.diagnosis}
-        onChangeText={(text) => setFormData({ ...formData, diagnosis: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Date of Diagnosis"
-        value={formData.diagnosisDate}
-        onChangeText={(text) => setFormData({ ...formData, diagnosisDate: text })}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Severity Level"
-        value={formData.severity}
-        onChangeText={(text) => setFormData({ ...formData, severity: text })}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleNext}>
-        <Text style={styles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Diagnosis Information</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Primary Diagnosis"
+          placeholderTextColor={colors.textLight}
+          value={formData.diagnosis}
+          onChangeText={(text) => setFormData({ ...formData, diagnosis: text })}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Date of Diagnosis"
+          placeholderTextColor={colors.textLight}
+          value={formData.diagnosisDate}
+          onChangeText={(text) =>
+            setFormData({ ...formData, diagnosisDate: text })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Severity Level"
+          placeholderTextColor={colors.textLight}
+          value={formData.severity}
+          onChangeText={(text) => setFormData({ ...formData, severity: text })}
+        />
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleNext}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.buttonText}>Next</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 24,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
+    padding: spacing.xxl,
+    paddingBottom: spacing.pageBottom,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginBottom: 32,
+    fontSize: typography.display,
+    lineHeight: typography.displayLineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-    fontSize: 16,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+    fontSize: typography.body,
+    color: colors.text,
+    backgroundColor: colors.backgroundCard,
   },
   button: {
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: colors.primary,
+    borderRadius: radius.md,
+    paddingVertical: spacing.lg,
     alignItems: "center",
-    marginTop: 16,
+    justifyContent: "center",
+    marginTop: spacing.lg,
+    minHeight: 52,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.backgroundCard,
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
   },
 });

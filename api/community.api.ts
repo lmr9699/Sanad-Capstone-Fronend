@@ -1,16 +1,17 @@
+import { Event, Post } from "../types/community.types";
 import instance from "./axios";
 
-export const getCommunityPosts = async () => {
+export const getCommunityPosts = async (): Promise<Post[]> => {
   const response = await instance.get("/community/posts");
-  return response;
+  return response.data;
 };
 
-export const createPost = async (data: { content: string }) => {
+export const createPost = async (data: { content: string }): Promise<Post> => {
   const response = await instance.post("/community/posts", data);
-  return response;
+  return response.data;
 };
 
-export const getEvents = async () => {
+export const getEvents = async (): Promise<Event[]> => {
   const response = await instance.get("/community/events");
-  return response;
+  return response.data;
 };

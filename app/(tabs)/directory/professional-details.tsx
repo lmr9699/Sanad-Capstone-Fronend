@@ -1,7 +1,9 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getProfessionalDetails } from "../../../api/directory.api";
+import { colors, spacing, typography } from "../../../theme";
 
 export default function ProfessionalDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -12,40 +14,61 @@ export default function ProfessionalDetailsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>{professional?.name}</Text>
-      <Text style={styles.specialty}>{professional?.specialty}</Text>
-      <Text style={styles.description}>{professional?.description}</Text>
-    </ScrollView>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+      >
+        <Text style={styles.title}>{professional?.name}</Text>
+        <Text style={styles.specialty}>{professional?.specialty}</Text>
+        <Text style={styles.description}>{professional?.description}</Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.pageBottom,
+  },
+  loadingText: {
+    fontSize: typography.body,
+    color: colors.textMuted,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 8,
+    fontSize: typography.title,
+    lineHeight: typography.h1LineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   specialty: {
-    fontSize: 18,
-    color: "#666",
-    marginBottom: 16,
+    fontSize: typography.h3,
+    lineHeight: typography.h3LineHeight,
+    color: colors.textMuted,
+    marginBottom: spacing.lg,
   },
   description: {
-    fontSize: 16,
-    color: "#333",
-    lineHeight: 24,
+    fontSize: typography.body,
+    lineHeight: typography.bodyLineHeight,
+    color: colors.textSecondary,
   },
 });

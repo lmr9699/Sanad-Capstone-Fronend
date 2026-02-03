@@ -1,7 +1,23 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { getProfessionals } from "../../../api/directory.api";
+import {
+  cardShadow,
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../../theme";
+import { Professional } from "../../../types/directory.types";
 
 export default function ProfessionalsScreen() {
   const router = useRouter();
@@ -12,55 +28,83 @@ export default function ProfessionalsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading professionals...</Text>
-      </View>
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Loading professionals...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Healthcare Professionals</Text>
-      {professionals?.map((professional: any, index: number) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.professionalCard}
-          onPress={() =>
-            router.push(`/(tabs)/directory/professional-details?id=${professional.id}`)
-          }
-        >
-          <Text style={styles.professionalName}>{professional.name}</Text>
-          <Text style={styles.professionalSpecialty}>{professional.specialty}</Text>
-        </TouchableOpacity>
-      ))}
-    </ScrollView>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.container}
+      >
+        <Text style={styles.title}>Healthcare Professionals</Text>
+        {professionals?.map((professional: Professional) => (
+          <TouchableOpacity
+            key={professional.id}
+            style={[styles.professionalCard, cardShadow]}
+            onPress={() =>
+              router.push(
+                `/(tabs)/directory/professional-details?id=${professional.id}`
+              )
+            }
+            activeOpacity={0.85}
+          >
+            <Text style={styles.professionalName}>{professional.name}</Text>
+            <Text style={styles.professionalSpecialty}>
+              {professional.specialty}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  container: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.pageBottom,
+  },
+  loadingText: {
+    fontSize: typography.body,
+    color: colors.textMuted,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 24,
+    fontSize: typography.title,
+    lineHeight: typography.h1LineHeight,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: sectionSpacing.default,
   },
   professionalCard: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
   },
   professionalName: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 8,
+    fontSize: typography.h3,
+    lineHeight: typography.h3LineHeight,
+    fontWeight: typography.weightSemibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
   },
   professionalSpecialty: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: typography.caption,
+    lineHeight: typography.captionLineHeight,
+    color: colors.textMuted,
   },
 });

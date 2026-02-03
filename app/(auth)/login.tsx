@@ -1,25 +1,33 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { login } from "../../api/auth.api";
-import { useAuth } from "../../context/AuthContext";
+
+// Design requirements: #F7F6F2 background, semi-transparent cards, soft gray typography
+const colors = {
+  bgApp: "#F7F6F2",
+  bgCard: "rgba(255, 255, 255, 0.6)", // Light, semi-transparent
+  primary: "#C89B8B",
+  primaryHover: "#B88A7A",
+  primarySoft: "#F0E6E2",
+  text: "#2B2B2B", // Soft gray
+  textSecondary: "#6B6B6B", // Soft gray
+  textTertiary: "#8A8A8A", // Soft gray
+  border: "rgba(0, 0, 0, 0.06)",
+};
 
 export default function LoginScreen() {
   const router = useRouter();
+
   const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,144 +50,97 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
     onError: (error: any) => {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
     },
-  });
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
-    }
-    loginMutation.mutate({ email, password });
-  };
+  });
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
+        style={styles.keyboard}
       >
         <ScrollView
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => router.back()}
-            >
-              <Ionicons name="arrow-back" size={24} color="#333333" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Sign In</Text>
-            <View style={styles.placeholder} />
-          </View>
+          <Pressable
+            style={({ pressed }) => [
+              styles.authBack,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.authBackText}>←</Text>
+          </Pressable>
 
-          {/* Welcome Section */}
-          <View style={styles.welcomeSection}>
-            <Text style={styles.welcomeTitle}>Welcome Back</Text>
-            <Text style={styles.welcomeSubtitle}>
-              Let's take today one step at a time.
-            </Text>
-          </View>
+          <Text style={styles.authTitle}>Sign In</Text>
+          <Text style={styles.authWelcome}>Welcome back</Text>
+          <Text style={styles.authSub}>
+            Sign in to continue. We're here to support you every step of the
+            way.
+          </Text>
 
-          {/* Form Fields */}
-          <View style={styles.formSection}>
-            {/* Email Field */}
-            <View style={styles.inputContainer}>
+          <View style={styles.authForm}>
+            <View style={styles.authError} />
+            <View style={styles.formGroup}>
               <Text style={styles.label}>Email Address</Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your email"
-                  placeholderTextColor="#999999"
-                  value={email}
-                  onChangeText={setEmail}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor={colors.textTertiary}
+                value={formData.email}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, email: text })
+                }
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
             </View>
 
-            {/* Password Field */}
-            <View style={styles.inputContainer}>
+            <View style={styles.formGroup}>
               <Text style={styles.label}>Password</Text>
-              <View style={styles.inputWrapper}>
+              <View style={styles.inputWrap}>
                 <TextInput
-                  style={[styles.input, styles.passwordInput]}
+                  style={styles.inputInWrap}
                   placeholder="Enter your password"
-                  placeholderTextColor="#999999"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!isPasswordVisible}
-                  autoCapitalize="none"
-                  autoCorrect={false}
+                  placeholderTextColor={colors.textTertiary}
+                  value={formData.password}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, password: text })
+                  }
+                  secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.togglePassword,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                  onPress={() => setShowPassword((p) => !p)}
                 >
-                  <Ionicons
-                    name={isPasswordVisible ? "eye-off" : "eye"}
-                    size={20}
-                    color="#999999"
-                  />
-                </TouchableOpacity>
+                  <Text style={styles.togglePasswordText}>👁</Text>
+                </Pressable>
               </View>
             </View>
 
-            {/* Keep Signed In & Forgot Password */}
-            <View style={styles.optionsRow}>
-              <TouchableOpacity
-                style={styles.checkboxContainer}
-                onPress={() => setKeepSignedIn(!keepSignedIn)}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    keepSignedIn && styles.checkboxChecked,
-                  ]}
-                >
-                  {keepSignedIn && (
-                    <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel}>Keep me signed in</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.push("/(auth)/forgot-password")}
-              >
-                <Text style={styles.forgotPassword}>Forgot password?</Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Sign In Button */}
-            <TouchableOpacity
-              style={[
-                styles.signInButton,
-                loginMutation.isPending && styles.signInButtonDisabled,
+            <Pressable
+              style={({ pressed }) => [
+                styles.btnPrimary,
+                pressed && { opacity: 0.8 },
               ]}
-              onPress={handleLogin}
-              disabled={loginMutation.isPending}
             >
-              <Text style={styles.signInButtonText}>
-                {loginMutation.isPending ? "Signing In..." : "Sign In"}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Create Account Link */}
-            <TouchableOpacity
-              style={styles.createAccountContainer}
-              onPress={() => router.push("/(auth)/register")}
-            >
-              <Text style={styles.createAccountText}>Create an account</Text>
-            </TouchableOpacity>
-
-            {/* Footer Note */}
-            <Text style={styles.footerNote}>
-              Your data is always kept secure and private
-            </Text>
+              <Text style={styles.btnPrimaryText}>Sign In</Text>
+            </Pressable>
           </View>
+
+          <Pressable onPress={() => router.push("/(auth)/register")}>
+            {({ pressed }) => (
+              <Text style={[styles.authFooter, pressed && { opacity: 0.7 }]}>
+                Don't have an account?{" "}
+                <Text style={styles.authFooterLink}>Create account</Text>
+              </Text>
+            )}
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -189,132 +150,135 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6E4DE",
+    backgroundColor: colors.bgApp,
   },
-  keyboardView: {
+  keyboard: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    padding: 28,
     paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  header: {
-    flexDirection: "row",
+    paddingBottom: 48,
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingTop: 16,
-    paddingBottom: 32,
   },
-  backButton: {
-    width: 40,
-    height: 40,
+  authBack: {
+    alignSelf: "flex-start",
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1.5,
+    borderColor: colors.border,
     justifyContent: "center",
-    alignItems: "flex-start",
+    alignItems: "center",
+    marginBottom: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
   },
-  headerTitle: {
-    fontSize: 18,
+  authBackText: {
+    fontSize: 20,
+    color: colors.text,
+  },
+  authTitle: {
+    fontSize: 22.4, // 1.4rem
     fontWeight: "600",
-    color: "#333333",
-  },
-  placeholder: {
-    width: 40,
-  },
-  welcomeSection: {
-    marginBottom: 40,
-  },
-  welcomeTitle: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#333333",
-    marginBottom: 8,
-  },
-  welcomeSubtitle: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: "#666666",
-    lineHeight: 24,
-  },
-  formSection: {
-    flex: 1,
-  },
-  inputContainer: {
     marginBottom: 24,
+    textAlign: "center",
+    color: colors.text,
+    letterSpacing: -0.32,
+  },
+  authWelcome: {
+    fontSize: 24, // 1.5rem
+    fontWeight: "600",
+    marginBottom: 10,
+    textAlign: "center",
+    color: colors.text,
+    letterSpacing: -0.32,
+  },
+  authSub: {
+    fontSize: 15.2, // 0.95rem
+    color: colors.textSecondary,
+    textAlign: "center",
+    marginBottom: 32,
+    maxWidth: 320,
+    lineHeight: 22.8,
+  },
+  authForm: {
+    width: "100%",
+    maxWidth: 360,
+  },
+  authError: {
+    opacity: 0,
+    height: 0,
+    marginBottom: 0,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+  },
+  formGroup: {
+    marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
+    fontSize: 14.4, // 0.9rem
+    fontWeight: "600",
     marginBottom: 8,
-  },
-  inputWrapper: {
-    position: "relative",
-    flexDirection: "row",
-    alignItems: "center",
+    color: colors.text,
   },
   input: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    width: "100%",
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    borderRadius: 12, // Rounded inputs
+    borderWidth: 1,
+    borderColor: colors.border,
     fontSize: 16,
-    color: "#333333",
+    backgroundColor: colors.bgCard, // Semi-transparent
+    color: colors.text,
   },
-  passwordInput: {
+  inputWrap: {
+    position: "relative",
+  },
+  inputInWrap: {
+    width: "100%",
+    paddingVertical: 14,
     paddingRight: 48,
+    paddingLeft: 16,
+    borderRadius: 12, // Rounded inputs
+    borderWidth: 1,
+    borderColor: colors.border,
+    fontSize: 16,
+    backgroundColor: colors.bgCard, // Semi-transparent
+    color: colors.text,
   },
-  eyeIcon: {
+  togglePassword: {
     position: "absolute",
-    right: 16,
-    padding: 4,
+    right: 12,
+    top: "50%",
+    transform: [{ translateY: -11 }],
+    borderRadius: 6,
+    padding: 6,
   },
-  optionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 32,
+  togglePasswordText: {
+    fontSize: 17.6, // 1.1rem
+    color: colors.textTertiary,
   },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#D99E8E",
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  checkboxChecked: {
-    backgroundColor: "#D99E8E",
-  },
-  checkboxLabel: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "#333333",
-  },
-  forgotPassword: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#D99E8E",
-  },
-  signInButton: {
-    backgroundColor: "#D99E8E",
-    borderRadius: 12,
+  btnPrimary: {
+    width: "100%",
     paddingVertical: 16,
+    backgroundColor: colors.primary,
+    borderRadius: 24, // Rounded button
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
   },
-  signInButtonDisabled: {
-    opacity: 0.6,
-  },
-  signInButtonText: {
+  btnPrimaryText: {
+    color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
     color: "#FFFFFF",
@@ -328,10 +292,13 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333333",
   },
-  footerNote: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#999999",
+  authFooter: {
     textAlign: "center",
+    fontSize: 14.4,
+    color: colors.textSecondary,
+  },
+  authFooterLink: {
+    color: colors.primary,
+    fontWeight: "600",
   },
 });
