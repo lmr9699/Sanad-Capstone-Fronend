@@ -17,6 +17,12 @@ const colors = {
 export default function ProfileScreen() {
   const router = useRouter();
 
+  // Get first child for display (or use placeholder)
+  const firstChild = children && children.length > 0 ? children[0] : null;
+  const childInitial = firstChild
+    ? firstChild.name.charAt(0).toUpperCase()
+    : "A";
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.content}>

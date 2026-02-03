@@ -261,6 +261,16 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  createAccountContainer: {
+    alignItems: "center",
+    marginBottom: 32,
+  },
+  createAccountText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333333",
   },
   authFooter: {
     textAlign: "center",

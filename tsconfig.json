@@ -4,6 +4,7 @@
     "module": "ESNext",
     "jsx": "react-native",
     "strict": true,
+    "jsx": "react-jsx",
     "paths": {
       "@/*": [
         "./*"
