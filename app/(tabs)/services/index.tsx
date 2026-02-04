@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { getServices } from "../../../api/services.api";
 
 // Design system colors
 const colors = {
@@ -17,72 +19,15 @@ const colors = {
   border: "rgba(0, 0, 0, 0.06)",
 };
 
-// Services data with categories
-const SERVICES = [
-  {
-    id: "1",
-    name: "Speech Therapy",
-    description: "Improve communication and language skills through specialized therapy sessions",
-    icon: "chatbubble-outline",
-    category: "Therapy",
-    rating: 4.9,
-    providers: 12,
-    color: "#7FB77E",
-  },
-  {
-    id: "2",
-    name: "Occupational Therapy",
-    description: "Develop daily living skills and fine motor coordination",
-    icon: "hand-left-outline",
-    category: "Therapy",
-    rating: 4.8,
-    providers: 8,
-    color: "#5F8F8B",
-  },
-  {
-    id: "3",
-    name: "Behavioral Therapy",
-    description: "Address behavioral challenges with evidence-based techniques",
-    icon: "heart-outline",
-    category: "Therapy",
-    rating: 4.9,
-    providers: 15,
-    color: "#E8A838",
-  },
-  {
-    id: "4",
-    name: "Physical Therapy",
-    description: "Enhance movement, strength, and physical development",
-    icon: "fitness-outline",
-    category: "Therapy",
-    rating: 4.7,
-    providers: 10,
-    color: "#D9534F",
-  },
-  {
-    id: "5",
-    name: "Educational Support",
-    description: "Academic assistance and personalized learning strategies",
-    icon: "school-outline",
-    category: "Education",
-    rating: 4.8,
-    providers: 20,
-    color: "#7B68EE",
-  },
-  {
-    id: "6",
-    name: "Family Counseling",
-    description: "Professional support for the whole family's wellbeing",
-    icon: "people-outline",
-    category: "Counseling",
-    rating: 4.9,
-    providers: 6,
-    color: "#FF69B4",
-  },
-];
-
 export default function ServicesScreen() {
   const router = useRouter();
+
+  // Fetch services from API
+  const { data: services = [], isLoading, error } = useQuery({
+    queryKey: ["services"],
+    queryFn: getServices,
+    retry: false,
+  });
 
   const handleServicePress = (serviceId: string) => {
     router.push({
@@ -90,6 +35,12 @@ export default function ServicesScreen() {
       params: { id: serviceId },
     });
   };
+
+  // Calculate stats from services data
+  const totalProviders = services.reduce((acc, s) => acc + s.providers, 0);
+  const avgRating = services.length > 0
+    ? services.reduce((acc, s) => acc + s.rating, 0) / services.length
+    : 0;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -114,27 +65,50 @@ export default function ServicesScreen() {
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{SERVICES.length}</Text>
+            <Text style={styles.statNumber}>{services.length}</Text>
             <Text style={styles.statLabel}>Services</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>
-              {SERVICES.reduce((acc, s) => acc + s.providers, 0)}
-            </Text>
+            <Text style={styles.statNumber}>{totalProviders}</Text>
             <Text style={styles.statLabel}>Providers</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>4.8</Text>
+            <Text style={styles.statNumber}>{avgRating.toFixed(1)}</Text>
             <Text style={styles.statLabel}>Avg Rating</Text>
           </View>
         </View>
 
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>Loading services...</Text>
+          </View>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+            <Text style={styles.errorText}>Failed to load services</Text>
+            <Text style={styles.errorSubtext}>Please try again later</Text>
+          </View>
+        )}
+
         {/* Services List */}
-        <Text style={styles.sectionTitle}>All Services</Text>
-        <View style={styles.servicesList}>
-          {SERVICES.map((service, index) => (
+        {!isLoading && !error && (
+          <>
+            <Text style={styles.sectionTitle}>All Services</Text>
+            <View style={styles.servicesList}>
+              {services.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Ionicons name="grid-outline" size={48} color={colors.textMuted} />
+                  <Text style={styles.emptyText}>No services available</Text>
+                </View>
+              ) : (
+                services.map((service) => (
             <Pressable
               key={service.id}
               style={({ pressed }) => [
@@ -193,9 +167,12 @@ export default function ServicesScreen() {
                   color={colors.textMuted}
                 />
               </View>
-            </Pressable>
-          ))}
-        </View>
+                </Pressable>
+                ))
+              )}
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -372,5 +349,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 8,
+  },
+  // Loading & Error States
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  errorSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.textMuted,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textMuted,
   },
 });

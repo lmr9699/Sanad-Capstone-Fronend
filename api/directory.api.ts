@@ -49,8 +49,9 @@ export const getProfessionals = async (filters?: ProfessionalFilters): Promise<P
   if (filters?.city) params.city = filters.city;
   if (filters?.search) params.search = filters.search;
   
-  const response = await instance.get("/directory/professionals", { params });
-  return response.data;
+  const response = await instance.get<{ success: boolean; data: { professionals: Professional[]; count: number } }>("/directory/professionals", { params });
+  // axios interceptor returns response.data directly, so response is already the full response object
+  return response.data.professionals;
 };
 
 export const getProfessionalSpecialties = async (): Promise<string[]> => {
@@ -72,6 +73,7 @@ export const getCenterDetails = async (centerId: string): Promise<HealthCenter> 
 
 
 export const getProfessionalDetails = async (professionalId: string): Promise<Professional> => {
-  const response = await instance.get(`/directory/professionals/${professionalId}`);
-  return response.data;
+  const response = await instance.get<{ success: boolean; data: { professional: Professional } }>(`/directory/professionals/${professionalId}`);
+  // axios interceptor returns response.data directly, so response is already the full response object
+  return response.data.professional;
 };
