@@ -223,7 +223,23 @@ export default function ProfessionalsScreen() {
         </View>
       )}
 
-      {/* Display Tags */}
+      {/* Display Contact Information */}
+      <View style={styles.contactContainer}>
+        {professional.phone && (
+          <View style={styles.contactItem}>
+            <Text style={styles.contactIcon}>📞</Text>
+            <Text style={styles.contactText}>{professional.phone}</Text>
+          </View>
+        )}
+        {professional.email && (
+          <View style={styles.contactItem}>
+            <Text style={styles.contactIcon}>✉️</Text>
+            <Text style={styles.contactText}>{professional.email}</Text>
+          </View>
+        )}
+      </View>
+  
+      {/* Display Tags */}           
       {professional.tags && professional.tags.length > 0 && (
         <View style={styles.tagsContainer}>
           {professional.tags.map((tag, index) => (
@@ -232,8 +248,8 @@ export default function ProfessionalsScreen() {
             </View>
           ))}
         </View>
-      )}
-    </TouchableOpacity>
+      )} 
+      </TouchableOpacity>
   ))
 )}
       </ScrollView>
@@ -540,6 +556,24 @@ const styles = StyleSheet.create({
   centerText: {
     fontSize: typography.caption,
     color: colors.textMuted,
+  },
+  // Contact Information
+  contactContainer: {
+    marginTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  contactIcon: {
+    fontSize: 14,
+  },
+  contactText: {
+    fontSize: typography.caption,
+    color: colors.text,
+    fontWeight: "500",
   },
   tagsContainer: {
     flexDirection: "row",
