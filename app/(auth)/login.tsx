@@ -1,6 +1,11 @@
+import { login } from "@/api/auth.api";
+import { useAuth } from "@/context/AuthContext";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -33,7 +38,11 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(false);
-
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
 
 // test 
 console.log(email , password , keepSignedIn , isPasswordVisible );
@@ -45,7 +54,8 @@ console.log(email , password , keepSignedIn , isPasswordVisible );
         await SecureStore.setItemAsync("token", data.token);
       }
       setUser(data.user);
-      router.replace("/(tabs)/plan");
+      // Redirect to home - index.tsx will handle routing to /(tabs)/plan
+      router.replace("/");
     },
     onError: (error: any) => {
       Alert.alert("Login Failed", error.message || "Invalid credentials");
@@ -281,7 +291,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
   },
   createAccountContainer: {
     alignItems: "center",

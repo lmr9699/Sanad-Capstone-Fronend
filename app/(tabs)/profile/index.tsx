@@ -1,3 +1,6 @@
+import { getChildren } from "@/api/care-path.api";
+import { Child } from "@/types/child.types";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,6 +19,12 @@ const colors = {
 
 export default function ProfileScreen() {
   const router = useRouter();
+
+  
+  const { data: children } = useQuery<Child[]>({
+    queryKey: ["children"],
+    queryFn: getChildren,
+  });
 
   // Get first child for display (or use placeholder)
   const firstChild = children && children.length > 0 ? children[0] : null;
