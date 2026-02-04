@@ -60,7 +60,11 @@ export default function ProfileScreen() {
 
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>
-              <Ionicons name="person-outline" size={20} color={colors.primary} />
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color={colors.primary}
+              />
             </View>
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>Full Name</Text>
@@ -93,10 +97,18 @@ export default function ProfileScreen() {
             onPress={() => router.push("/(tabs)/profile/settings")}
           >
             <View style={styles.settingsIcon}>
-              <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+              <Ionicons
+                name="settings-outline"
+                size={20}
+                color={colors.textSecondary}
+              />
             </View>
             <Text style={styles.settingsText}>App Settings</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textMuted}
+            />
           </Pressable>
 
           <View style={styles.divider} />
@@ -109,10 +121,18 @@ export default function ProfileScreen() {
             onPress={() => router.push("/(tabs)/profile/manage-children")}
           >
             <View style={styles.settingsIcon}>
-              <Ionicons name="people-outline" size={20} color={colors.textSecondary} />
+              <Ionicons
+                name="people-outline"
+                size={20}
+                color={colors.textSecondary}
+              />
             </View>
             <Text style={styles.settingsText}>Manage Children</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.textMuted}
+            />
           </Pressable>
         </View>
 

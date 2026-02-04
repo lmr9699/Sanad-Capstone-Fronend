@@ -1,4 +1,3 @@
-import { Redirect } from "expo-router";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -13,9 +12,9 @@ export default function Index() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/(tabs)/directory/centers" as any);
+        router.replace("/(auth)/welcome" as any);
       } else {
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/index" as any);
       }
     }
   }, [user, loading, router]);

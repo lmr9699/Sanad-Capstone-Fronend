@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import {
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -268,7 +269,7 @@ export default function HomeScreen() {
   const greeting = getGreeting();
   // "Okay" is selected in the screenshot
   const [selectedResource, setSelectedResource] = React.useState<string | null>(
-    null
+    null,
   );
 
   return (
@@ -322,6 +323,15 @@ export default function HomeScreen() {
             </Text>
           </View>
           <Ionicons name="sparkles" size={28} color={colors.primary} />
+        </View>
+
+        {/* Child Photo Card */}
+        <View style={styles.childPhotoCard}>
+          <Image
+            source={require("../../assets/images/child-photo.png")}
+            style={styles.childPhoto}
+            resizeMode="cover"
+          />
         </View>
 
         {/* Resource Selection Card */}
@@ -417,7 +427,7 @@ export default function HomeScreen() {
               ]}
               onPress={() =>
                 setSelectedResource(
-                  selectedResource === "autism" ? null : "autism"
+                  selectedResource === "autism" ? null : "autism",
                 )
               }
             >
@@ -972,6 +982,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
     lineHeight: 18,
+  },
+  // Child Photo Card
+  childPhotoCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: 20,
+    marginBottom: 20,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  childPhoto: {
+    width: "100%",
+    height: 300,
+    borderRadius: 20,
   },
   // Resource Card - Professional design
   resourceCard: {
