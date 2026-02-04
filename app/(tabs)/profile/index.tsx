@@ -35,12 +35,6 @@ export default function ProfileScreen() {
     .toUpperCase()
     .slice(0, 2);
 
-  // Get first child for display (or use placeholder)
-  const firstChild = children && children.length > 0 ? children[0] : null;
-  const childInitial = firstChild
-    ? firstChild.name.charAt(0).toUpperCase()
-    : "A";
-
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <ScrollView
@@ -63,7 +57,7 @@ export default function ProfileScreen() {
         {/* Profile Info Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Account Information</Text>
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoIcon}>
               <Ionicons name="person-outline" size={20} color={colors.primary} />
@@ -90,7 +84,7 @@ export default function ProfileScreen() {
         {/* Settings Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Settings</Text>
-          
+
           <Pressable
             style={({ pressed }) => [
               styles.settingsRow,

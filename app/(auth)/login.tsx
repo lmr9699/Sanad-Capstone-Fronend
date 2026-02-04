@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
+import { Ionicons } from "@expo/vector-icons";
 import { login } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -72,16 +73,6 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Pressable
-            style={({ pressed }) => [
-              styles.authBack,
-              pressed && { opacity: 0.7 },
-            ]}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.authBackText}>←</Text>
-          </Pressable>
-
           <Text style={styles.authTitle}>Sign In</Text>
           <Text style={styles.authWelcome}>Welcome back</Text>
           <Text style={styles.authSub}>
@@ -122,7 +113,11 @@ export default function LoginScreen() {
                   ]}
                   onPress={() => setIsPasswordVisible((prev) => !prev)}
                 >
-                  <Text style={styles.togglePasswordText}>👁</Text>
+                  <Ionicons
+                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color={colors.textTertiary}
+                  />
                 </Pressable>
               </View>
             </View>
@@ -168,27 +163,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 48,
     alignItems: "center",
-  },
-  authBack: {
-    alignSelf: "flex-start",
-    width: 46,
-    height: 46,
-    borderRadius: 12,
-    backgroundColor: colors.bgCard,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 28,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  authBackText: {
-    fontSize: 20,
-    color: colors.text,
   },
   authTitle: {
     fontSize: 22.4, // 1.4rem
@@ -264,13 +238,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     top: "50%",
-    transform: [{ translateY: -11 }],
+    transform: [{ translateY: -10 }],
     borderRadius: 6,
     padding: 6,
-  },
-  togglePasswordText: {
-    fontSize: 17.6, // 1.1rem
-    color: colors.textTertiary,
   },
   btnPrimary: {
     width: "100%",
