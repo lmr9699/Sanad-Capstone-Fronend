@@ -1,21 +1,39 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../../context/AuthContext";
 
 // Design system colors
 const colors = {
   bgApp: "#FAF9F6",
-  bgCard: "rgba(255, 255, 255, 0.6)",
+  bgCard: "#FFFFFF",
   primary: "#7FB77E",
   text: "#2F2F2F",
   textSecondary: "#4A4A4A",
-  textTertiary: "#8A8A8A",
+  textMuted: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.06)",
   signOut: "#D9534F",
 };
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const handleSignOut = async () => {
+    await logout();
+    router.replace("/(auth)/login");
+  };
+
+  // Default user data if not logged in
+  const userName = user?.name || "Guest User";
+  const userEmail = user?.email || "Not signed in";
+  const userInitials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   // Get first child for display (or use placeholder)
   const firstChild = children && children.length > 0 ? children[0] : null;
@@ -24,55 +42,98 @@ export default function ProfileScreen() {
     : "A";
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <View style={styles.content}>
-        {/* Header - Bold, dark brown/black */}
-        <Text style={styles.title}>Profile</Text>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <Text style={styles.pageTitle}>Profile</Text>
 
-        {/* Description - Smaller, lighter font */}
-        <Text style={styles.description}>
-          Your account details and settings will appear here.
-        </Text>
+        {/* Avatar Section */}
+        <View style={styles.avatarSection}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{userInitials}</Text>
+          </View>
+          <Text style={styles.userName}>{userName}</Text>
+          <Text style={styles.userEmail}>{userEmail}</Text>
+        </View>
 
-        {/* Input Fields - Three fields stacked vertically */}
-        <View style={styles.inputFieldsContainer}>
-          <View style={styles.inputField}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="NAME"
-              placeholderTextColor={colors.textTertiary}
-              editable={false}
-            />
+        {/* Profile Info Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Account Information</Text>
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="person-outline" size={20} color={colors.primary} />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Full Name</Text>
+              <Text style={styles.infoValue}>{userName}</Text>
+            </View>
           </View>
-          <View style={styles.inputField}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="EMAIL"
-              placeholderTextColor={colors.textTertiary}
-              editable={false}
-            />
-          </View>
-          <View style={styles.inputField}>
-            <TextInput
-              style={styles.inputText}
-              placeholder="PHONE"
-              placeholderTextColor={colors.textTertiary}
-              editable={false}
-            />
+
+          <View style={styles.divider} />
+
+          <View style={styles.infoRow}>
+            <View style={styles.infoIcon}>
+              <Ionicons name="mail-outline" size={20} color={colors.primary} />
+            </View>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{userEmail}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Sign Out Link - Centered, reddish-orange */}
+        {/* Settings Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Settings</Text>
+          
+          <Pressable
+            style={({ pressed }) => [
+              styles.settingsRow,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.push("/(tabs)/profile/settings")}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.settingsText}>App Settings</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+
+          <View style={styles.divider} />
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.settingsRow,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.push("/(tabs)/profile/manage-children")}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name="people-outline" size={20} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.settingsText}>Manage Children</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+        </View>
+
+        {/* Sign Out Button */}
         <Pressable
-          onPress={() => router.push("/(auth)/login")}
+          onPress={handleSignOut}
           style={({ pressed }) => [
-            styles.signOutContainer,
-            pressed && { opacity: 0.7 },
+            styles.signOutButton,
+            pressed && { opacity: 0.8 },
           ]}
         >
-          <Text style={styles.signOutText}>Sign out</Text>
+          <Ionicons name="log-out-outline" size={20} color={colors.signOut} />
+          <Text style={styles.signOutText}>Sign Out</Text>
         </Pressable>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -80,67 +141,136 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bgApp, // Light beige/cream background
+    backgroundColor: colors.bgApp,
   },
-  content: {
+  scroll: {
     flex: 1,
-    justifyContent: "center",
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 120,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: colors.text,
+    marginBottom: 24,
+  },
+  // Avatar Section
+  avatarSection: {
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingBottom: 140, // Clear spacing: 64px (tab bar) + safe area (up to 34px) + 24px (spacing) + 18px (extra safety)
+    marginBottom: 32,
   },
-  // Title - Bold, dark brown/black
-  title: {
-    fontSize: 22, // Large and prominent
-    fontWeight: "600", // Bold
-    color: colors.text, // Dark brown/black (#333333)
-    textAlign: "center",
-    marginBottom: 12, // Spacing below title
-  },
-  // Description - Smaller, lighter font
-  description: {
-    fontSize: 15, // Standard readable size
-    color: colors.textSecondary, // Lighter brown/gray (#666666)
-    textAlign: "center",
-    marginBottom: 32, // Spacing below description
-    lineHeight: 22,
-  },
-  // Input Fields Container
-  inputFieldsContainer: {
-    width: "100%",
-    maxWidth: 360,
-    gap: 16, // Spacing between fields
-    marginBottom: 28, // Spacing below fields
-  },
-  // Input Field - Rectangular with rounded corners, white background, subtle shadow
-  inputField: {
-    width: "100%",
-    height: 56, // Standard input field height
-    backgroundColor: "#FFFFFF", // White background
-    borderRadius: 16, // Significantly rounded corners
-    paddingHorizontal: 16,
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: colors.primary,
+    alignItems: "center",
     justifyContent: "center",
+    marginBottom: 16,
+  },
+  avatarText: {
+    fontSize: 36,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  userName: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: colors.text,
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 15,
+    color: colors.textMuted,
+  },
+  // Card
+  card: {
+    backgroundColor: colors.bgCard,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2, // Subtle shadow for raised appearance
-    borderWidth: 1,
-    borderColor: colors.border, // Very light gray border
+    elevation: 2,
   },
-  inputText: {
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    marginBottom: 16,
+  },
+  // Info Row
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: `${colors.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginBottom: 2,
+  },
+  infoValue: {
     fontSize: 16,
-    color: colors.textTertiary, // Light to medium gray for placeholder/text
+    fontWeight: "500",
+    color: colors.text,
   },
-  // Sign Out Container
-  signOutContainer: {
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 14,
+  },
+  // Settings Row
+  settingsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  settingsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: colors.bgApp,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  settingsText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.text,
+  },
+  // Sign Out
+  signOutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: `${colors.signOut}10`,
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
     marginTop: 8,
   },
-  // Sign Out Text - Reddish-orange, centered
   signOutText: {
     fontSize: 16,
-    color: colors.signOut, // Reddish-orange (#DC7633)
     fontWeight: "600",
-    textAlign: "center",
+    color: colors.signOut,
   },
 });

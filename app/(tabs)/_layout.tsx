@@ -72,12 +72,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="care-path"
+        name="services"
         options={{
-          title: "Care Path",
+          title: "Services",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "map" : "map-outline"}
+              name={focused ? "grid" : "grid-outline"}
               size={24}
               color={color}
             />
@@ -85,12 +85,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="documents"
+        name="professionals"
         options={{
-          title: "Documents",
+          title: "Professionals",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "document-text" : "document-text-outline"}
+              name={focused ? "people" : "people-outline"}
               size={24}
               color={color}
             />
@@ -112,8 +112,10 @@ export default function TabsLayout() {
       />
 
       {/* Hidden routes - accessible via navigation but not visible in tab bar */}
+      <Tabs.Screen name="care-path" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="directory" options={{ href: null }} />
+      <Tabs.Screen name="documents" options={{ href: null }} />
       <Tabs.Screen name="plan" options={{ href: null }} />
       <Tabs.Screen name="resources" options={{ href: null }} />
     </Tabs>
