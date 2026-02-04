@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   ScrollView,
@@ -10,6 +11,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { getProfessionals } from "../../../api/directory.api";
+import { Professional } from "../../../types/directory.types";
 
 // Design system colors
 const colors = {
@@ -26,130 +30,43 @@ const colors = {
 
 // Specializations for filtering
 const SPECIALIZATIONS = [
-  { id: "all", label: "All", icon: "apps-outline", count: 8 },
-  { id: "speech", label: "Speech", icon: "chatbubble-outline", count: 2 },
-  { id: "behavioral", label: "Behavioral", icon: "heart-outline", count: 2 },
-  { id: "occupational", label: "Occupational", icon: "hand-left-outline", count: 2 },
-  { id: "physical", label: "Physical", icon: "fitness-outline", count: 1 },
-  { id: "educational", label: "Educational", icon: "school-outline", count: 1 },
-];
-
-// Mock professionals data with more details
-const PROFESSIONALS = [
-  {
-    id: "1",
-    name: "Dr. Sarah Ahmed",
-    specialty: "speech",
-    specialtyLabel: "Speech Therapist",
-    experience: "10 years",
-    rating: 4.9,
-    reviews: 127,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#7FB77E",
-  },
-  {
-    id: "2",
-    name: "Dr. Mohammed Ali",
-    specialty: "behavioral",
-    specialtyLabel: "Behavioral Specialist",
-    experience: "8 years",
-    rating: 4.8,
-    reviews: 98,
-    availability: "Next available: Tomorrow",
-    verified: true,
-    image: null,
-    color: "#E8A838",
-  },
-  {
-    id: "3",
-    name: "Dr. Fatima Hassan",
-    specialty: "occupational",
-    specialtyLabel: "Occupational Therapist",
-    experience: "12 years",
-    rating: 4.9,
-    reviews: 156,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#5F8F8B",
-  },
-  {
-    id: "4",
-    name: "Dr. Omar Khalid",
-    specialty: "educational",
-    specialtyLabel: "Educational Psychologist",
-    experience: "6 years",
-    rating: 4.7,
-    reviews: 67,
-    availability: "Next available: Wed",
-    verified: true,
-    image: null,
-    color: "#7B68EE",
-  },
-  {
-    id: "5",
-    name: "Dr. Layla Mansour",
-    specialty: "speech",
-    specialtyLabel: "Speech Therapist",
-    experience: "15 years",
-    rating: 5.0,
-    reviews: 203,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#7FB77E",
-  },
-  {
-    id: "6",
-    name: "Dr. Youssef Ibrahim",
-    specialty: "behavioral",
-    specialtyLabel: "Behavioral Analyst",
-    experience: "9 years",
-    rating: 4.8,
-    reviews: 112,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#E8A838",
-  },
-  {
-    id: "7",
-    name: "Dr. Nour Al-Rashid",
-    specialty: "occupational",
-    specialtyLabel: "Occupational Therapist",
-    experience: "7 years",
-    rating: 4.6,
-    reviews: 89,
-    availability: "Next available: Thu",
-    verified: false,
-    image: null,
-    color: "#5F8F8B",
-  },
-  {
-    id: "8",
-    name: "Dr. Ahmed Mahmoud",
-    specialty: "physical",
-    specialtyLabel: "Physical Therapist",
-    experience: "11 years",
-    rating: 4.9,
-    reviews: 145,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#D9534F",
-  },
+  { id: "all", label: "All", icon: "apps-outline" },
+  { id: "speech", label: "Speech", icon: "chatbubble-outline" },
+  { id: "behavioral", label: "Behavioral", icon: "heart-outline" },
+  { id: "occupational", label: "Occupational", icon: "hand-left-outline" },
+  { id: "physical", label: "Physical", icon: "fitness-outline" },
+  { id: "educational", label: "Educational", icon: "school-outline" },
 ];
 
 export default function ProfessionalsScreen() {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = React.useState("all");
 
-  const filteredProfessionals =
-    selectedFilter === "all"
-      ? PROFESSIONALS
-      : PROFESSIONALS.filter((p) => p.specialty === selectedFilter);
+  // Fetch professionals from API
+  const { data: professionals = [], isLoading, error } = useQuery({
+    queryKey: ["professionals", selectedFilter],
+    queryFn: () =>
+      getProfessionals({
+        specialty: selectedFilter === "all" ? undefined : selectedFilter,
+      }),
+    retry: false,
+  });
+
+  // Calculate counts for each specialty
+  const specialtyCounts = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    professionals.forEach((prof) => {
+      counts[prof.specialty] = (counts[prof.specialty] || 0) + 1;
+    });
+    return counts;
+  }, [professionals]);
+
+  const specializationsWithCounts = SPECIALIZATIONS.map((spec) => ({
+    ...spec,
+    count: spec.id === "all" ? professionals.length : specialtyCounts[spec.id] || 0,
+  }));
+
+  const filteredProfessionals = professionals;
 
   const handleProfessionalPress = (professionalId: string) => {
     router.push({
@@ -192,7 +109,7 @@ export default function ProfessionalsScreen() {
           style={styles.filterScroll}
           contentContainerStyle={styles.filterRow}
         >
-          {SPECIALIZATIONS.map((spec) => (
+          {specializationsWithCounts.map((spec) => (
             <Pressable
               key={spec.id}
               style={({ pressed }) => [
@@ -236,110 +153,130 @@ export default function ProfessionalsScreen() {
           ))}
         </ScrollView>
 
-        {/* Results Count */}
-        <View style={styles.resultsHeader}>
-          <Text style={styles.resultsCount}>
-            {filteredProfessionals.length} professional
-            {filteredProfessionals.length !== 1 ? "s" : ""} found
-          </Text>
-          <Pressable style={styles.sortButton}>
-            <Ionicons name="funnel-outline" size={16} color={colors.textSecondary} />
-            <Text style={styles.sortButtonText}>Sort</Text>
-          </Pressable>
-        </View>
-
-        {/* Professionals List */}
-        <View style={styles.professionalsList}>
-          {filteredProfessionals.map((professional) => (
-            <Pressable
-              key={professional.id}
-              style={({ pressed }) => [
-                styles.professionalCard,
-                pressed && { transform: [{ scale: 0.98 }] },
-              ]}
-              onPress={() => handleProfessionalPress(professional.id)}
-            >
-              {/* Avatar */}
-              <View
-                style={[
-                  styles.avatarContainer,
-                  { backgroundColor: `${professional.color}15` },
-                ]}
-              >
-                <Text style={[styles.avatarText, { color: professional.color }]}>
-                  {professional.name.split(" ").slice(1, 3).map(n => n[0]).join("")}
-                </Text>
-                {professional.verified && (
-                  <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
-                  </View>
-                )}
-              </View>
-
-              {/* Content */}
-              <View style={styles.professionalContent}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.professionalName}>{professional.name}</Text>
-                </View>
-                <Text style={[styles.specialtyLabel, { color: professional.color }]}>
-                  {professional.specialtyLabel}
-                </Text>
-                
-                {/* Meta Row */}
-                <View style={styles.metaRow}>
-                  <View style={styles.ratingWrap}>
-                    <Ionicons name="star" size={14} color="#F5A623" />
-                    <Text style={styles.ratingText}>{professional.rating}</Text>
-                    <Text style={styles.reviewsText}>({professional.reviews})</Text>
-                  </View>
-                  <View style={styles.metaDot} />
-                  <Text style={styles.experienceText}>{professional.experience}</Text>
-                </View>
-
-                {/* Availability */}
-                <View style={styles.availabilityRow}>
-                  <View
-                    style={[
-                      styles.availabilityDot,
-                      professional.availability.includes("today") && styles.availabilityDotActive,
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.availabilityText,
-                      professional.availability.includes("today") && styles.availabilityTextActive,
-                    ]}
-                  >
-                    {professional.availability}
-                  </Text>
-                </View>
-              </View>
-
-              {/* Arrow */}
-              <View style={styles.arrowWrap}>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </View>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Empty State */}
-        {filteredProfessionals.length === 0 && (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconWrap}>
-              <Ionicons name="search-outline" size={32} color={colors.primary} />
-            </View>
-            <Text style={styles.emptyTitle}>No professionals found</Text>
-            <Text style={styles.emptySubtitle}>
-              Try selecting a different specialization
-            </Text>
-            <Pressable
-              style={styles.resetButton}
-              onPress={() => setSelectedFilter("all")}
-            >
-              <Text style={styles.resetButtonText}>Show All</Text>
-            </Pressable>
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>Loading professionals...</Text>
           </View>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+            <Text style={styles.errorText}>Failed to load professionals</Text>
+            <Text style={styles.errorSubtext}>Please try again later</Text>
+          </View>
+        )}
+
+        {/* Results Count */}
+        {!isLoading && !error && (
+          <>
+            <View style={styles.resultsHeader}>
+              <Text style={styles.resultsCount}>
+                {filteredProfessionals.length} professional
+                {filteredProfessionals.length !== 1 ? "s" : ""} found
+              </Text>
+              <Pressable style={styles.sortButton}>
+                <Ionicons name="funnel-outline" size={16} color={colors.textSecondary} />
+                <Text style={styles.sortButtonText}>Sort</Text>
+              </Pressable>
+            </View>
+
+            {/* Professionals List */}
+            <View style={styles.professionalsList}>
+              {filteredProfessionals.length === 0 ? (
+                <View style={styles.emptyState}>
+                  <View style={styles.emptyIconWrap}>
+                    <Ionicons name="search-outline" size={32} color={colors.primary} />
+                  </View>
+                  <Text style={styles.emptyTitle}>No professionals found</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Try selecting a different specialization
+                  </Text>
+                  <Pressable
+                    style={styles.resetButton}
+                    onPress={() => setSelectedFilter("all")}
+                  >
+                    <Text style={styles.resetButtonText}>Show All</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                filteredProfessionals.map((professional) => (
+                  <Pressable
+                    key={professional.id}
+                    style={({ pressed }) => [
+                      styles.professionalCard,
+                      pressed && { transform: [{ scale: 0.98 }] },
+                    ]}
+                    onPress={() => handleProfessionalPress(professional.id)}
+                  >
+                    {/* Avatar */}
+                    <View
+                      style={[
+                        styles.avatarContainer,
+                        { backgroundColor: `${professional.color}15` },
+                      ]}
+                    >
+                      <Text style={[styles.avatarText, { color: professional.color }]}>
+                        {professional.name.split(" ").slice(1, 3).map(n => n[0]).join("")}
+                      </Text>
+                      {professional.verified && (
+                        <View style={styles.verifiedBadge}>
+                          <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Content */}
+                    <View style={styles.professionalContent}>
+                      <View style={styles.nameRow}>
+                        <Text style={styles.professionalName}>{professional.name}</Text>
+                      </View>
+                      <Text style={[styles.specialtyLabel, { color: professional.color }]}>
+                        {professional.specialtyLabel}
+                      </Text>
+                      
+                      {/* Meta Row */}
+                      <View style={styles.metaRow}>
+                        <View style={styles.ratingWrap}>
+                          <Ionicons name="star" size={14} color="#F5A623" />
+                          <Text style={styles.ratingText}>{professional.rating}</Text>
+                          <Text style={styles.reviewsText}>({professional.reviews})</Text>
+                        </View>
+                        <View style={styles.metaDot} />
+                        <Text style={styles.experienceText}>{professional.experience}</Text>
+                      </View>
+
+                      {/* Availability */}
+                      <View style={styles.availabilityRow}>
+                        <View
+                          style={[
+                            styles.availabilityDot,
+                            professional.availability.includes("today") && styles.availabilityDotActive,
+                          ]}
+                        />
+                        <Text
+                          style={[
+                            styles.availabilityText,
+                            professional.availability.includes("today") && styles.availabilityTextActive,
+                          ]}
+                        >
+                          {professional.availability}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Arrow */}
+                    <View style={styles.arrowWrap}>
+                      <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+                    </View>
+                  </Pressable>
+                ))
+              )}
+            </View>
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -649,5 +586,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  // Loading & Error States
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  errorSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.textMuted,
   },
 });

@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../../context/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUser } from "../../../api/users.api";
 
 // Design system colors
 const colors = {
@@ -20,20 +22,50 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout } = useAuth();
 
+  // Fetch current user profile from API
+  const { data: currentUser, isLoading, error } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getCurrentUser,
+    enabled: !!user, // Only fetch if user is logged in
+    retry: false,
+  });
+
   const handleSignOut = async () => {
     await logout();
     router.replace("/(auth)/login");
   };
 
-  // Default user data if not logged in
-  const userName = user?.name || "Guest User";
-  const userEmail = user?.email || "Not signed in";
+  // Use API data if available, fallback to context user, then defaults
+  const userName = currentUser?.name || user?.name || "Guest User";
+  const userEmail = currentUser?.email || user?.email || "Not signed in";
   const userInitials = userName
     .split(" ")
     .map((n) => n[0])
     .join("")
     .toUpperCase()
     .slice(0, 2);
+
+  // Loading State
+  if (isLoading && user) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.pageTitle}>Profile</Text>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>Loading profile...</Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // Note: If there's an error fetching fresh data, we'll still show the profile
+  // using cached data from AuthContext (user object)
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -266,5 +298,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: colors.signOut,
+  },
+  // Loading & Error States
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  errorSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.textMuted,
   },
 });
