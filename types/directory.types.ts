@@ -31,4 +31,9 @@ export interface Professional {
   description?: string;
   centerId?: string;
   centerName?: string;
+  email?: string;
+  phone?: number;
+  experience?: number;
+  languages?: string[];
+  rating?: number;
 }
