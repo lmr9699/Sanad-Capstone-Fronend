@@ -32,15 +32,44 @@ export const getSpecialties = async (): Promise<string[]> => {
   return response.data;
 };
 
+
+export interface ProfessionalFilters {
+  specialty?: string;
+  tags?: string[];
+  city?: string;
+  search?: string;
+}
+
+
+export const getProfessionals = async (filters?: ProfessionalFilters): Promise<Professional[]> => {
+  const params: Record<string, string> = {};
+  
+  if (filters?.specialty) params.specialty = filters.specialty;
+  if (filters?.tags?.length) params.tags = filters.tags.join(","); 
+  if (filters?.city) params.city = filters.city;
+  if (filters?.search) params.search = filters.search;
+  
+  const response = await instance.get("/directory/professionals", { params });
+  return response.data;
+};
+
+export const getProfessionalSpecialties = async (): Promise<string[]> => {
+  const response = await instance.get("/directory/professionals/specialties/list");
+  return response.data;
+};
+
+
+export const getProfessionalTags = async (): Promise<string[]> => {
+  const response = await instance.get("/directory/professionals/tags/list");
+  return response.data;
+};
+
 export const getCenterDetails = async (centerId: string): Promise<HealthCenter> => {
   const response = await instance.get(`/directory/centers/${centerId}`);
   return response.data;
 };
 
-export const getProfessionals = async (): Promise<Professional[]> => {
-  const response = await instance.get("/directory/professionals");
-  return response.data;
-};
+
 
 export const getProfessionalDetails = async (professionalId: string): Promise<Professional> => {
   const response = await instance.get(`/directory/professionals/${professionalId}`);

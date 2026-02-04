@@ -13,9 +13,9 @@ export default function Index() {
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.replace("/(auth)/welcome" as any);
+        router.replace("/(tabs)/directory/centers" as any);
       } else {
-        router.replace("/(tabs)/plan");
+        router.replace("/(tabs)");
       }
     }
   }, [user, loading, router]);
