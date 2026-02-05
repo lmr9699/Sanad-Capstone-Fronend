@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getProfessionalDetails } from "../../../api/directory.api";
-import { colors, spacing } from "../../../theme";
+import { colors, sectionSpacing, spacing, typography } from "../../../theme";
 
 export default function ProfessionalDetailsScreen() {
   const router = useRouter();
@@ -16,6 +16,37 @@ export default function ProfessionalDetailsScreen() {
     enabled: !!id,
     retry: false,
   });
+
+  const handleCall = () => {
+    if (professional?.phone) {
+      Linking.openURL(`tel:${professional.phone}`);
+    }
+  };
+
+  const handleEmail = () => {
+    if (professional?.email) {
+      Linking.openURL(`mailto:${professional.email}`);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    return (
+      <View style={styles.starsContainer}>
+        {[...Array(fullStars)].map((_, i) => (
+          <Text key={`full-${i}`} style={styles.starFilled}>★</Text>
+        ))}
+        {hasHalfStar && <Text style={styles.starHalf}>★</Text>}
+        {[...Array(emptyStars)].map((_, i) => (
+          <Text key={`empty-${i}`} style={styles.starEmpty}>☆</Text>
+        ))}
+        <Text style={styles.ratingNumber}>{rating.toFixed(1)}</Text>
+      </View>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -86,191 +117,69 @@ export default function ProfessionalDetailsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile Hero */}
-        <View style={styles.heroSection}>
-          <View
-            style={[
-              styles.heroAvatar,
-              { backgroundColor: `${professional.color}20` },
-            ]}
-          >
-            <Text style={[styles.heroAvatarText, { color: professional.color }]}>
-              {professional.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
-            </Text>
-            {professional.verified && (
-              <View style={styles.verifiedBadgeLarge}>
-                <Ionicons name="checkmark" size={14} color="#FFFFFF" />
-              </View>
-            )}
-          </View>
-
-          <Text style={styles.professionalName}>{professional.name}</Text>
-          <Text style={[styles.specialtyLabel, { color: professional.color }]}>
-            {professional.specialtyLabel || professional.specialty}
-          </Text>
-
-          {/* Stats Row */}
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="star" size={18} color="#F5A623" />
-              </View>
-              <Text style={styles.statValue}>{professional.rating?.toFixed(1) || "0.0"}</Text>
-              <Text style={styles.statLabel}>{professional.reviews || 0} reviews</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
-              </View>
-              <Text style={styles.statValue}>{professional.experience || "N/A"}</Text>
-              <Text style={styles.statLabel}>Experience</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="time-outline" size={18} color={colors.secondary} />
-              </View>
-              <Text style={styles.statValue}>{professional.availability || "N/A"}</Text>
-              <Text style={styles.statLabel}>Availability</Text>
-            </View>
+        <Text style={styles.title}>{professional?.name}</Text>
+        
+        {/* Specialty */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Specialty</Text>
+          <View style={styles.specialtyBadge}>
+            <Text style={styles.specialtyText}>{professional?.specialty}</Text>
           </View>
         </View>
 
-        {/* Quick Info Card */}
-        <View style={styles.quickInfoCard}>
-          {professional.nextAvailable && (
-            <>
-              <View style={styles.quickInfoRow}>
-                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-                <View style={styles.quickInfoContent}>
-                  <Text style={styles.quickInfoLabel}>Next Available</Text>
-                  <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
-                </View>
-              </View>
-              <View style={styles.quickInfoDivider} />
-            </>
-          )}
-          {professional.consultationFee && (
-            <>
-              <View style={styles.quickInfoRow}>
-                <Ionicons name="cash-outline" size={20} color={colors.primary} />
-                <View style={styles.quickInfoContent}>
-                  <Text style={styles.quickInfoLabel}>Consultation Fee</Text>
-                  <Text style={styles.quickInfoValue}>{professional.consultationFee}</Text>
-                </View>
-              </View>
-              <View style={styles.quickInfoDivider} />
-            </>
-          )}
-          {professional.location && (
-            <View style={styles.quickInfoRow}>
-              <Ionicons name="location-outline" size={20} color={colors.primary} />
-              <View style={styles.quickInfoContent}>
-                <Text style={styles.quickInfoLabel}>Location</Text>
-                <Text style={styles.quickInfoValue}>{professional.location}</Text>
-              </View>
-            </View>
-          )}
-          {professional.centerName && (
-            <>
-              <View style={styles.quickInfoDivider} />
-              <View style={styles.quickInfoRow}>
-                <Ionicons name="business-outline" size={20} color={colors.primary} />
-                <View style={styles.quickInfoContent}>
-                  <Text style={styles.quickInfoLabel}>Center</Text>
-                  <Text style={styles.quickInfoValue}>{professional.centerName}</Text>
-                </View>
-              </View>
-            </>
-          )}
-        </View>
-
-        {/* About Section */}
-        {professional.bio && (
+        {/* Rating */}
+        {professional?.rating !== undefined && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.bioText}>{professional.bio}</Text>
-          </View>
-        )}
-
-        {/* Services Section */}
-        {professional.services && professional.services.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Services Offered</Text>
-            <View style={styles.servicesList}>
-              {professional.services.map((service, index) => (
-                <View key={index} style={styles.serviceItem}>
-                  <View style={[styles.serviceDot, { backgroundColor: professional.color }]} />
-                  <Text style={styles.serviceText}>{service}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Education Section */}
-        {professional.education && professional.education.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
-            {professional.education.map((edu, index) => (
-              <View key={index} style={styles.educationItem}>
-                <Ionicons name="school-outline" size={18} color={colors.textMuted} />
-                <Text style={styles.educationText}>{edu}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Certifications Section */}
-        {professional.certifications && professional.certifications.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certifications</Text>
-            <View style={styles.certificationsList}>
-              {professional.certifications.map((cert, index) => (
-                <View key={index} style={styles.certificationBadge}>
-                  <Ionicons name="ribbon-outline" size={14} color={colors.primary} />
-                  <Text style={styles.certificationText}>{cert}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Languages Section */}
-        {professional.languages && professional.languages.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Languages</Text>
-            <View style={styles.languagesRow}>
-              {professional.languages.map((lang, index) => (
-                <View key={index} style={styles.languageBadge}>
-                  <Text style={styles.languageText}>{lang}</Text>
-                </View>
-              ))}
-            </View>
+            <Text style={styles.sectionTitle}>Rating</Text>
+            {renderStars(professional.rating)}
           </View>
         )}
 
         {/* Contact Information */}
-        {(professional.email || professional.phone) && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Contact</Text>
+          {professional?.phone && (
+            <TouchableOpacity style={styles.infoRow} onPress={handleCall}>
+              <Text style={styles.infoLabel}>Phone</Text>
+              <Text style={styles.infoLink}>📞 {professional.phone}</Text>
+            </TouchableOpacity>
+          )}
+          {professional?.email && (
+            <TouchableOpacity style={styles.infoRow} onPress={handleEmail}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoLink}>✉️ {professional.email}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Location */}
+        {(professional?.city || professional?.address) && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Contact Information</Text>
-            <View style={styles.contactList}>
-              {professional.email && (
-                <View style={styles.contactItem}>
-                  <Ionicons name="mail-outline" size={18} color={colors.primary} />
-                  <Text style={styles.contactText}>{professional.email}</Text>
-                </View>
-              )}
-              {professional.phone && (
-                <View style={styles.contactItem}>
-                  <Ionicons name="call-outline" size={18} color={colors.primary} />
-                  <Text style={styles.contactText}>{professional.phone}</Text>
-                </View>
-              )}
-            </View>
+            <Text style={styles.sectionTitle}>Location</Text>
+            {professional?.address && (
+              <Text style={styles.infoValue}>📍 {professional.address}</Text>
+            )}
+            {professional?.city && (
+              <Text style={styles.cityText}>{professional.city}</Text>
+            )}
           </View>
         )}
+
+        {/* Center */}
+        {professional?.centerName && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Center</Text>
+            <Text style={styles.infoValue}>🏥 {professional.centerName}</Text>
+          </View>
+        )}
+
+        {/* Description */}
+        {professional?.description && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About</Text>
+            <Text style={styles.description}>{professional.description}</Text>
+          </View>
+        )} 
       </ScrollView>
     </SafeAreaView>
   );
@@ -356,42 +265,76 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     color: colors.text,
-    marginBottom: 6,
+    marginBottom: sectionSpacing.default,
   },
-  specialtyLabel: {
-    fontSize: 15,
+  section: {
+    marginBottom: spacing.xl,
+    paddingBottom: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e5e7eb",
+  },
+  sectionTitle: {
+    fontSize: typography.h3,
+    fontWeight: typography.weightSemibold,
+    color: colors.text,
+    marginBottom: spacing.md,
+  },
+  specialtyBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#dbeafe",
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 12,
+  },
+  specialtyText: {
+    fontSize: typography.body,
+    color: "#1d4ed8",
     fontWeight: "600",
-    marginBottom: 20,
   },
-  // Stats Row
-  statsRow: {
+  starsContainer: {
     flexDirection: "row",
-    backgroundColor: colors.backgroundCard,
-    borderRadius: 18,
-    padding: 16,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statItem: {
-    flex: 1,
     alignItems: "center",
   },
-  statIconWrap: {
-    marginBottom: 6,
+  starFilled: {
+    fontSize: 18,
+    color: "#f59e0b",
   },
-  statValue: {
+  starHalf: {
+    fontSize: 18,
+    color: "#fcd34d",
+  },
+  starEmpty: {
+    fontSize: 18,
+    color: "#d1d5db",
+  },
+  ratingNumber: {
+    marginLeft: 6,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "600",
     color: colors.text,
-    marginBottom: 2,
   },
-  statLabel: {
-    fontSize: 11,
+  infoRow: {
+    marginBottom: spacing.md,
+  },
+  infoLabel: {
+    fontSize: typography.caption,
     color: colors.textMuted,
+    marginBottom: spacing.xs,
+  },
+  infoValue: {
+    fontSize: typography.body,
+    color: colors.text,
+    lineHeight: typography.bodyLineHeight,
+  },
+  infoLink: {
+    fontSize: typography.body,
+    color: "#2563eb",
+    textDecorationLine: "underline",
+  },
+  cityText: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
   statDivider: {
     width: 1,
