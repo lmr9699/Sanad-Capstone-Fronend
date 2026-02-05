@@ -8,9 +8,16 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { getCenters } from "../../api/directory.api";
+import { HealthCenter } from "../../types/directory.types";
+import { getCurrentUser } from "../../api/users.api";
+import { useAuth } from "../../context/AuthContext";
 
 // Organized resource data by category
 const RESOURCES = {
@@ -265,11 +272,51 @@ function getGreeting(): string {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const greeting = getGreeting();
-  // "Okay" is selected in the screenshot
+  // "ADHD" is selected by default
   const [selectedResource, setSelectedResource] = React.useState<string | null>(
-    null
+    "adhd"
   );
+
+  // Fetch current user profile from API
+  const { data: currentUser, isLoading: userLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: getCurrentUser,
+    enabled: !!user, // Only fetch if user is logged in
+    retry: false,
+  });
+
+  // Fetch centers for the home screen (limit to 3)
+  const { data: centersData, isLoading: centersLoading } = useQuery({
+    queryKey: ["centers", "home"],
+    queryFn: () => getCenters(),
+  });
+
+  // Extract centers array from response (handle both array and object responses)
+  const centers: HealthCenter[] = React.useMemo(() => {
+    if (!centersData) return [];
+    if (Array.isArray(centersData)) {
+      return centersData.slice(0, 3);
+    }
+    const centersResponse = centersData as { centers?: HealthCenter[] };
+    if (centersResponse?.centers && Array.isArray(centersResponse.centers)) {
+      return centersResponse.centers.slice(0, 3);
+    }
+    return [];
+  }, [centersData]);
+
+  // Get user information - use API data if available, fallback to context user, then defaults
+  const userName = currentUser?.name || user?.name || "User";
+  const userInitials = React.useMemo(() => {
+    if (!userName) return "U";
+    return userName
+      .split(" ")
+      .map((n: string) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [userName]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -284,13 +331,21 @@ export default function HomeScreen() {
           <View style={styles.headerLeft}>
             <View style={styles.avatarContainer}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>S</Text>
+                {userLoading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.avatarText}>{userInitials}</Text>
+                )}
               </View>
               <View style={styles.onlineIndicator} />
             </View>
             <View style={styles.headerText}>
               <Text style={styles.greetingSmall}>{greeting}</Text>
-              <Text style={styles.userName}>Sarah</Text>
+              {userLoading ? (
+                <ActivityIndicator size="small" color={colors.text} style={{ marginTop: 4 }} />
+              ) : (
+                <Text style={styles.userName}>{userName}</Text>
+              )}
             </View>
           </View>
           <Pressable
@@ -321,7 +376,12 @@ export default function HomeScreen() {
               Your trusted companion for special needs resources
             </Text>
           </View>
-          <Ionicons name="sparkles" size={28} color={colors.primary} />
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/directory/helpCenter")}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="sparkles" size={28} color={colors.primary} />
+          </TouchableOpacity>
         </View>
 
         {/* Resource Selection Card */}
@@ -401,7 +461,7 @@ export default function HomeScreen() {
                 style={[
                   styles.resourceButtonText,
                   selectedResource === "adhd" &&
-                    styles.resourceButtonTextActive,
+                  styles.resourceButtonTextActive,
                 ]}
               >
                 ADHD
@@ -425,7 +485,7 @@ export default function HomeScreen() {
                 style={[
                   styles.resourceIconWrap,
                   selectedResource === "autism" &&
-                    styles.resourceIconWrapActive,
+                  styles.resourceIconWrapActive,
                 ]}
               >
                 <Ionicons
@@ -440,7 +500,7 @@ export default function HomeScreen() {
                 style={[
                   styles.resourceButtonText,
                   selectedResource === "autism" &&
-                    styles.resourceButtonTextActive,
+                  styles.resourceButtonTextActive,
                 ]}
               >
                 Autism
@@ -462,8 +522,8 @@ export default function HomeScreen() {
                       selectedResource === "add"
                         ? "flash"
                         : selectedResource === "adhd"
-                        ? "pulse"
-                        : "heart"
+                          ? "pulse"
+                          : "heart"
                     }
                     size={18}
                     color="#FFFFFF"
@@ -474,8 +534,8 @@ export default function HomeScreen() {
                     {selectedResource === "add"
                       ? "ADD Resources"
                       : selectedResource === "adhd"
-                      ? "ADHD Resources"
-                      : "Autism Resources"}
+                        ? "ADHD Resources"
+                        : "Autism Resources"}
                   </Text>
                   <Text style={styles.resourcesSectionCount}>
                     Curated resources to help you
@@ -500,330 +560,330 @@ export default function HomeScreen() {
             {/* Videos Section */}
             {RESOURCES[selectedResource as keyof typeof RESOURCES]?.videos
               ?.length > 0 && (
-              <View style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
-                  <View
-                    style={[
-                      styles.categoryIconWrap,
-                      { backgroundColor: RESOURCE_CATEGORIES.videos.bgColor },
-                    ]}
-                  >
-                    <Ionicons
-                      name="play-circle"
-                      size={20}
-                      color={RESOURCE_CATEGORIES.videos.color}
-                    />
-                  </View>
-                  <Text style={styles.categoryTitle}>Videos</Text>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>
-                      {
-                        RESOURCES[selectedResource as keyof typeof RESOURCES]
-                          ?.videos?.length
-                      }
-                    </Text>
-                  </View>
-                </View>
-                {RESOURCES[
-                  selectedResource as keyof typeof RESOURCES
-                ]?.videos?.map((video) => (
-                  <Pressable
-                    key={video.id}
-                    style={({ pressed }) => [
-                      styles.resourceItem,
-                      pressed && { transform: [{ scale: 0.98 }] },
-                    ]}
-                    onPress={() => Linking.openURL(video.url)}
-                  >
+                <View style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
                     <View
                       style={[
-                        styles.resourceItemIcon,
+                        styles.categoryIconWrap,
                         { backgroundColor: RESOURCE_CATEGORIES.videos.bgColor },
                       ]}
                     >
-                      <Ionicons name="logo-youtube" size={22} color="#FF0000" />
+                      <Ionicons
+                        name="play-circle"
+                        size={20}
+                        color={RESOURCE_CATEGORIES.videos.color}
+                      />
                     </View>
-                    <View style={styles.resourceItemContent}>
-                      <Text style={styles.resourceItemTitle} numberOfLines={2}>
-                        {video.title}
+                    <Text style={styles.categoryTitle}>Videos</Text>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {
+                          RESOURCES[selectedResource as keyof typeof RESOURCES]
+                            ?.videos?.length
+                        }
                       </Text>
-                      <Text style={styles.resourceItemDesc} numberOfLines={1}>
-                        {video.description}
-                      </Text>
-                      <View style={styles.resourceItemMeta}>
-                        <Ionicons
-                          name="time-outline"
-                          size={12}
-                          color={colors.textTertiary}
-                        />
-                        <Text style={styles.resourceItemMetaText}>
-                          {video.duration}
-                        </Text>
-                        <View style={styles.resourceItemDot} />
-                        <Text style={styles.resourceItemSource}>
-                          {video.source}
-                        </Text>
+                    </View>
+                  </View>
+                  {RESOURCES[
+                    selectedResource as keyof typeof RESOURCES
+                  ]?.videos?.map((video) => (
+                    <Pressable
+                      key={video.id}
+                      style={({ pressed }) => [
+                        styles.resourceItem,
+                        pressed && { transform: [{ scale: 0.98 }] },
+                      ]}
+                      onPress={() => Linking.openURL(video.url)}
+                    >
+                      <View
+                        style={[
+                          styles.resourceItemIcon,
+                          { backgroundColor: RESOURCE_CATEGORIES.videos.bgColor },
+                        ]}
+                      >
+                        <Ionicons name="logo-youtube" size={22} color="#FF0000" />
                       </View>
-                    </View>
-                    <Ionicons
-                      name="open-outline"
-                      size={18}
-                      color={colors.textTertiary}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            )}
+                      <View style={styles.resourceItemContent}>
+                        <Text style={styles.resourceItemTitle} numberOfLines={2}>
+                          {video.title}
+                        </Text>
+                        <Text style={styles.resourceItemDesc} numberOfLines={1}>
+                          {video.description}
+                        </Text>
+                        <View style={styles.resourceItemMeta}>
+                          <Ionicons
+                            name="time-outline"
+                            size={12}
+                            color={colors.textTertiary}
+                          />
+                          <Text style={styles.resourceItemMetaText}>
+                            {video.duration}
+                          </Text>
+                          <View style={styles.resourceItemDot} />
+                          <Text style={styles.resourceItemSource}>
+                            {video.source}
+                          </Text>
+                        </View>
+                      </View>
+                      <Ionicons
+                        name="open-outline"
+                        size={18}
+                        color={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              )}
 
             {/* Articles Section */}
             {RESOURCES[selectedResource as keyof typeof RESOURCES]?.articles
               ?.length > 0 && (
-              <View style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
-                  <View
-                    style={[
-                      styles.categoryIconWrap,
-                      { backgroundColor: RESOURCE_CATEGORIES.articles.bgColor },
-                    ]}
-                  >
-                    <Ionicons
-                      name="document-text"
-                      size={20}
-                      color={RESOURCE_CATEGORIES.articles.color}
-                    />
-                  </View>
-                  <Text style={styles.categoryTitle}>Articles</Text>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>
-                      {
-                        RESOURCES[selectedResource as keyof typeof RESOURCES]
-                          ?.articles?.length
-                      }
-                    </Text>
-                  </View>
-                </View>
-                {RESOURCES[
-                  selectedResource as keyof typeof RESOURCES
-                ]?.articles?.map((article) => (
-                  <Pressable
-                    key={article.id}
-                    style={({ pressed }) => [
-                      styles.resourceItem,
-                      pressed && { transform: [{ scale: 0.98 }] },
-                    ]}
-                    onPress={() => Linking.openURL(article.url)}
-                  >
+                <View style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
                     <View
                       style={[
-                        styles.resourceItemIcon,
-                        {
-                          backgroundColor: RESOURCE_CATEGORIES.articles.bgColor,
-                        },
+                        styles.categoryIconWrap,
+                        { backgroundColor: RESOURCE_CATEGORIES.articles.bgColor },
                       ]}
                     >
                       <Ionicons
                         name="document-text"
-                        size={22}
+                        size={20}
                         color={RESOURCE_CATEGORIES.articles.color}
                       />
                     </View>
-                    <View style={styles.resourceItemContent}>
-                      <Text style={styles.resourceItemTitle} numberOfLines={2}>
-                        {article.title}
+                    <Text style={styles.categoryTitle}>Articles</Text>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {
+                          RESOURCES[selectedResource as keyof typeof RESOURCES]
+                            ?.articles?.length
+                        }
                       </Text>
-                      <Text style={styles.resourceItemDesc} numberOfLines={1}>
-                        {article.description}
-                      </Text>
-                      <View style={styles.resourceItemMeta}>
-                        <Ionicons
-                          name="book-outline"
-                          size={12}
-                          color={colors.textTertiary}
-                        />
-                        <Text style={styles.resourceItemMetaText}>
-                          {article.readTime}
-                        </Text>
-                        <View style={styles.resourceItemDot} />
-                        <Text style={styles.resourceItemSource}>
-                          {article.source}
-                        </Text>
-                      </View>
                     </View>
-                    <Ionicons
-                      name="open-outline"
-                      size={18}
-                      color={colors.textTertiary}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            )}
+                  </View>
+                  {RESOURCES[
+                    selectedResource as keyof typeof RESOURCES
+                  ]?.articles?.map((article) => (
+                    <Pressable
+                      key={article.id}
+                      style={({ pressed }) => [
+                        styles.resourceItem,
+                        pressed && { transform: [{ scale: 0.98 }] },
+                      ]}
+                      onPress={() => Linking.openURL(article.url)}
+                    >
+                      <View
+                        style={[
+                          styles.resourceItemIcon,
+                          {
+                            backgroundColor: RESOURCE_CATEGORIES.articles.bgColor,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="document-text"
+                          size={22}
+                          color={RESOURCE_CATEGORIES.articles.color}
+                        />
+                      </View>
+                      <View style={styles.resourceItemContent}>
+                        <Text style={styles.resourceItemTitle} numberOfLines={2}>
+                          {article.title}
+                        </Text>
+                        <Text style={styles.resourceItemDesc} numberOfLines={1}>
+                          {article.description}
+                        </Text>
+                        <View style={styles.resourceItemMeta}>
+                          <Ionicons
+                            name="book-outline"
+                            size={12}
+                            color={colors.textTertiary}
+                          />
+                          <Text style={styles.resourceItemMetaText}>
+                            {article.readTime}
+                          </Text>
+                          <View style={styles.resourceItemDot} />
+                          <Text style={styles.resourceItemSource}>
+                            {article.source}
+                          </Text>
+                        </View>
+                      </View>
+                      <Ionicons
+                        name="open-outline"
+                        size={18}
+                        color={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              )}
 
             {/* Guides Section */}
             {RESOURCES[selectedResource as keyof typeof RESOURCES]?.guides
               ?.length > 0 && (
-              <View style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
-                  <View
-                    style={[
-                      styles.categoryIconWrap,
-                      { backgroundColor: RESOURCE_CATEGORIES.guides.bgColor },
-                    ]}
-                  >
-                    <Ionicons
-                      name="book"
-                      size={20}
-                      color={RESOURCE_CATEGORIES.guides.color}
-                    />
-                  </View>
-                  <Text style={styles.categoryTitle}>Guides & Resources</Text>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>
-                      {
-                        RESOURCES[selectedResource as keyof typeof RESOURCES]
-                          ?.guides?.length
-                      }
-                    </Text>
-                  </View>
-                </View>
-                {RESOURCES[
-                  selectedResource as keyof typeof RESOURCES
-                ]?.guides?.map((guide) => (
-                  <Pressable
-                    key={guide.id}
-                    style={({ pressed }) => [
-                      styles.resourceItem,
-                      pressed && { transform: [{ scale: 0.98 }] },
-                    ]}
-                    onPress={() => Linking.openURL(guide.url)}
-                  >
+                <View style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
                     <View
                       style={[
-                        styles.resourceItemIcon,
+                        styles.categoryIconWrap,
                         { backgroundColor: RESOURCE_CATEGORIES.guides.bgColor },
                       ]}
                     >
                       <Ionicons
                         name="book"
-                        size={22}
+                        size={20}
                         color={RESOURCE_CATEGORIES.guides.color}
                       />
                     </View>
-                    <View style={styles.resourceItemContent}>
-                      <Text style={styles.resourceItemTitle} numberOfLines={2}>
-                        {guide.title}
+                    <Text style={styles.categoryTitle}>Guides & Resources</Text>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {
+                          RESOURCES[selectedResource as keyof typeof RESOURCES]
+                            ?.guides?.length
+                        }
                       </Text>
-                      <Text style={styles.resourceItemDesc} numberOfLines={1}>
-                        {guide.description}
-                      </Text>
-                      <View style={styles.resourceItemMeta}>
-                        <Ionicons
-                          name="document-outline"
-                          size={12}
-                          color={colors.textTertiary}
-                        />
-                        <Text style={styles.resourceItemMetaText}>
-                          {guide.pages}
-                        </Text>
-                        <View style={styles.resourceItemDot} />
-                        <Text style={styles.resourceItemSource}>
-                          {guide.source}
-                        </Text>
-                      </View>
                     </View>
-                    <Ionicons
-                      name="open-outline"
-                      size={18}
-                      color={colors.textTertiary}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            )}
+                  </View>
+                  {RESOURCES[
+                    selectedResource as keyof typeof RESOURCES
+                  ]?.guides?.map((guide) => (
+                    <Pressable
+                      key={guide.id}
+                      style={({ pressed }) => [
+                        styles.resourceItem,
+                        pressed && { transform: [{ scale: 0.98 }] },
+                      ]}
+                      onPress={() => Linking.openURL(guide.url)}
+                    >
+                      <View
+                        style={[
+                          styles.resourceItemIcon,
+                          { backgroundColor: RESOURCE_CATEGORIES.guides.bgColor },
+                        ]}
+                      >
+                        <Ionicons
+                          name="book"
+                          size={22}
+                          color={RESOURCE_CATEGORIES.guides.color}
+                        />
+                      </View>
+                      <View style={styles.resourceItemContent}>
+                        <Text style={styles.resourceItemTitle} numberOfLines={2}>
+                          {guide.title}
+                        </Text>
+                        <Text style={styles.resourceItemDesc} numberOfLines={1}>
+                          {guide.description}
+                        </Text>
+                        <View style={styles.resourceItemMeta}>
+                          <Ionicons
+                            name="document-outline"
+                            size={12}
+                            color={colors.textTertiary}
+                          />
+                          <Text style={styles.resourceItemMetaText}>
+                            {guide.pages}
+                          </Text>
+                          <View style={styles.resourceItemDot} />
+                          <Text style={styles.resourceItemSource}>
+                            {guide.source}
+                          </Text>
+                        </View>
+                      </View>
+                      <Ionicons
+                        name="open-outline"
+                        size={18}
+                        color={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              )}
 
             {/* Podcasts Section */}
             {RESOURCES[selectedResource as keyof typeof RESOURCES]?.podcasts
               ?.length > 0 && (
-              <View style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
-                  <View
-                    style={[
-                      styles.categoryIconWrap,
-                      { backgroundColor: RESOURCE_CATEGORIES.podcasts.bgColor },
-                    ]}
-                  >
-                    <Ionicons
-                      name="headset"
-                      size={20}
-                      color={RESOURCE_CATEGORIES.podcasts.color}
-                    />
-                  </View>
-                  <Text style={styles.categoryTitle}>Podcasts</Text>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>
-                      {
-                        RESOURCES[selectedResource as keyof typeof RESOURCES]
-                          ?.podcasts?.length
-                      }
-                    </Text>
-                  </View>
-                </View>
-                {RESOURCES[
-                  selectedResource as keyof typeof RESOURCES
-                ]?.podcasts?.map((podcast) => (
-                  <Pressable
-                    key={podcast.id}
-                    style={({ pressed }) => [
-                      styles.resourceItem,
-                      pressed && { transform: [{ scale: 0.98 }] },
-                    ]}
-                    onPress={() => Linking.openURL(podcast.url)}
-                  >
+                <View style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
                     <View
                       style={[
-                        styles.resourceItemIcon,
-                        {
-                          backgroundColor: RESOURCE_CATEGORIES.podcasts.bgColor,
-                        },
+                        styles.categoryIconWrap,
+                        { backgroundColor: RESOURCE_CATEGORIES.podcasts.bgColor },
                       ]}
                     >
                       <Ionicons
                         name="headset"
-                        size={22}
+                        size={20}
                         color={RESOURCE_CATEGORIES.podcasts.color}
                       />
                     </View>
-                    <View style={styles.resourceItemContent}>
-                      <Text style={styles.resourceItemTitle} numberOfLines={2}>
-                        {podcast.title}
+                    <Text style={styles.categoryTitle}>Podcasts</Text>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {
+                          RESOURCES[selectedResource as keyof typeof RESOURCES]
+                            ?.podcasts?.length
+                        }
                       </Text>
-                      <Text style={styles.resourceItemDesc} numberOfLines={1}>
-                        {podcast.description}
-                      </Text>
-                      <View style={styles.resourceItemMeta}>
-                        <Ionicons
-                          name="time-outline"
-                          size={12}
-                          color={colors.textTertiary}
-                        />
-                        <Text style={styles.resourceItemMetaText}>
-                          {podcast.duration}
-                        </Text>
-                        <View style={styles.resourceItemDot} />
-                        <Text style={styles.resourceItemSource}>
-                          {podcast.source}
-                        </Text>
-                      </View>
                     </View>
-                    <Ionicons
-                      name="open-outline"
-                      size={18}
-                      color={colors.textTertiary}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            )}
+                  </View>
+                  {RESOURCES[
+                    selectedResource as keyof typeof RESOURCES
+                  ]?.podcasts?.map((podcast) => (
+                    <Pressable
+                      key={podcast.id}
+                      style={({ pressed }) => [
+                        styles.resourceItem,
+                        pressed && { transform: [{ scale: 0.98 }] },
+                      ]}
+                      onPress={() => Linking.openURL(podcast.url)}
+                    >
+                      <View
+                        style={[
+                          styles.resourceItemIcon,
+                          {
+                            backgroundColor: RESOURCE_CATEGORIES.podcasts.bgColor,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="headset"
+                          size={22}
+                          color={RESOURCE_CATEGORIES.podcasts.color}
+                        />
+                      </View>
+                      <View style={styles.resourceItemContent}>
+                        <Text style={styles.resourceItemTitle} numberOfLines={2}>
+                          {podcast.title}
+                        </Text>
+                        <Text style={styles.resourceItemDesc} numberOfLines={1}>
+                          {podcast.description}
+                        </Text>
+                        <View style={styles.resourceItemMeta}>
+                          <Ionicons
+                            name="time-outline"
+                            size={12}
+                            color={colors.textTertiary}
+                          />
+                          <Text style={styles.resourceItemMetaText}>
+                            {podcast.duration}
+                          </Text>
+                          <View style={styles.resourceItemDot} />
+                          <Text style={styles.resourceItemSource}>
+                            {podcast.source}
+                          </Text>
+                        </View>
+                      </View>
+                      <Ionicons
+                        name="open-outline"
+                        size={18}
+                        color={colors.textTertiary}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              )}
           </View>
         ) : (
           <View style={styles.emptyStateCard}>
@@ -873,6 +933,112 @@ export default function HomeScreen() {
             </View>
           </View>
         )}
+
+        {/* Health Centers Card - Third from bottom */}
+        <View style={styles.centersCard}>
+          <View style={styles.centersCardHeader}>
+            <View style={styles.centersCardHeaderLeft}>
+              <View style={styles.centersCardIcon}>
+                <Ionicons name="medical" size={22} color={colors.primary} />
+              </View>
+              <View>
+                <Text style={styles.centersCardTitle}>Health Centers</Text>
+                <Text style={styles.centersCardSubtitle}>
+                  Find specialized care centers near you
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={() => router.push("/(tabs)/directory/centers")}
+              style={({ pressed }) => [
+                styles.centersViewAllBtn,
+                pressed && { opacity: 0.7 },
+              ]}
+            >
+              <Text style={styles.centersViewAllText}>View All</Text>
+              <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+            </Pressable>
+          </View>
+
+          {centersLoading ? (
+            <View style={styles.centersLoading}>
+              <ActivityIndicator size="small" color={colors.primary} />
+              <Text style={styles.centersLoadingText}>Loading centers...</Text>
+            </View>
+          ) : centers.length > 0 ? (
+            <View style={styles.centersList}>
+              {centers.map((center: HealthCenter) => (
+                <Pressable
+                  key={center.id}
+                  style={({ pressed }) => [
+                    styles.centerItem,
+                    pressed && { transform: [{ scale: 0.98 }] },
+                  ]}
+                  onPress={() =>
+                    router.push(`/(tabs)/directory/center-details?id=${center.id}`)
+                  }
+                >
+                  <View style={styles.centerItemContent}>
+                    <View style={styles.centerItemHeader}>
+                      <Text style={styles.centerItemName} numberOfLines={1}>
+                        {center.name || "Unnamed Center"}
+                      </Text>
+                      {center.type && (
+                        <View
+                          style={[
+                            styles.centerTypeBadge,
+                            center.type === "public"
+                              ? styles.centerTypeBadgePublic
+                              : styles.centerTypeBadgePrivate,
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.centerTypeText,
+                              center.type === "public"
+                                ? styles.centerTypeTextPublic
+                                : styles.centerTypeTextPrivate,
+                            ]}
+                          >
+                            {center.type === "public" ? "Public" : "Private"}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.centerItemAddress} numberOfLines={1}>
+                      {center.address || "Address not available"}
+                    </Text>
+                    {center.city && (
+                      <Text style={styles.centerItemCity}>{center.city}</Text>
+                    )}
+                    {(center.rating !== undefined && center.rating !== null && typeof center.rating === "number") && (
+                      <View style={styles.centerItemRating}>
+                        <Ionicons name="star" size={14} color="#F5A623" />
+                        <Text style={styles.centerItemRatingText}>
+                          {center.rating.toFixed(1)}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={colors.textTertiary}
+                  />
+                </Pressable>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.centersEmpty}>
+              <Ionicons
+                name="medical-outline"
+                size={32}
+                color={colors.textTertiary}
+              />
+              <Text style={styles.centersEmptyText}>No centers available</Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -1718,5 +1884,149 @@ const styles = StyleSheet.create({
   },
   chartBarBlue: {
     backgroundColor: colors.accentLearn, // #9B8BA6
+  },
+  // Health Centers Card
+  centersCard: {
+    backgroundColor: colors.bgCard,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  centersCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  centersCardHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  centersCardIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: `${colors.primary}15`,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  centersCardTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.text,
+    marginBottom: 2,
+  },
+  centersCardSubtitle: {
+    fontSize: 13,
+    color: colors.textTertiary,
+  },
+  centersViewAllBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  centersViewAllText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.primary,
+  },
+  centersList: {
+    gap: 12,
+  },
+  centerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.bgApp,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  centerItemContent: {
+    flex: 1,
+  },
+  centerItemHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  centerItemName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: colors.text,
+    flex: 1,
+    marginRight: 8,
+  },
+  centerTypeBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  centerTypeBadgePublic: {
+    backgroundColor: "#dcfce7",
+  },
+  centerTypeBadgePrivate: {
+    backgroundColor: "#fef3c7",
+  },
+  centerTypeText: {
+    fontSize: 11,
+    fontWeight: "600",
+    textTransform: "capitalize",
+  },
+  centerTypeTextPublic: {
+    color: "#15803d",
+  },
+  centerTypeTextPrivate: {
+    color: "#b45309",
+  },
+  centerItemAddress: {
+    fontSize: 13,
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  centerItemCity: {
+    fontSize: 12,
+    color: colors.textTertiary,
+    marginBottom: 6,
+  },
+  centerItemRating: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  centerItemRatingText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  centersLoading: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+    gap: 8,
+  },
+  centersLoadingText: {
+    fontSize: 14,
+    color: colors.textTertiary,
+  },
+  centersEmpty: {
+    alignItems: "center",
+    paddingVertical: 24,
+  },
+  centersEmptyText: {
+    fontSize: 14,
+    color: colors.textTertiary,
+    marginTop: 8,
   },
 });

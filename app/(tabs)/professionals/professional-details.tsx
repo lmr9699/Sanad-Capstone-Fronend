@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 140,
+    paddingBottom: 100,
   },
   // Hero Section
   heroSection: {

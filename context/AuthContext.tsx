@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { User } from "../types/auth.types";
+import { getCurrentUser } from "../api/users.api";
 
 interface AuthContextType {
   user: User | null;
@@ -29,9 +30,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = await SecureStore.getItemAsync("token");
       if (token) {
-        // Token exists, user data will be set via setUser after login
-        // For now, just set loading to false
-        // In production, you would fetch user data from API here
+        // Token exists, fetch user data from API
+        try {
+          const userData = await getCurrentUser();
+          setUserState(userData);
+        } catch (error) {
+          // If fetching user fails (e.g., token expired), clear token
+          await SecureStore.deleteItemAsync("token");
+          setUserState(null);
+        }
       }
     } catch (error) {
       // Silently handle error - user will need to login again

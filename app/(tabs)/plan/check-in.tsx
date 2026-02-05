@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: spacing.xl,
+    paddingBottom: 100,
     backgroundColor: colors.background,
   },
   title: {

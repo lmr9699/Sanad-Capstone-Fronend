@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { getChildren, Child } from "../../../api/children.api";
 
 // Design system colors
 const colors = {
@@ -18,47 +20,117 @@ const colors = {
   error: "#D9534F",
 };
 
-// Mock children data
-const MOCK_CHILDREN = [
-  {
-    id: "1",
-    name: "Omar Ahmed",
-    age: 7,
-    dateOfBirth: "2019-03-15",
-    gender: "Male",
-    diagnoses: ["ADHD", "Speech Delay"],
-    medications: [
-      { name: "Ritalin", dosage: "10mg", frequency: "Daily" },
-    ],
-    allergies: ["Peanuts", "Penicillin"],
-    color: "#7FB77E",
-  },
-  {
-    id: "2",
-    name: "Sara Ahmed",
-    age: 5,
-    dateOfBirth: "2021-07-22",
-    gender: "Female",
-    diagnoses: ["Autism"],
-    medications: [],
-    allergies: ["Milk"],
-    color: "#FF69B4",
-  },
+// Color palette for children avatars
+const CHILD_COLORS = [
+  "#7FB77E",
+  "#FF69B4",
+  "#5F8F8B",
+  "#E8A838",
+  "#7B68EE",
+  "#D9534F",
 ];
+
+// Helper function to calculate age from date of birth
+const calculateAge = (dateOfBirth?: string): number | undefined => {
+  if (!dateOfBirth) return undefined;
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
 
 export default function ManageChildrenScreen() {
   const router = useRouter();
-  const [children] = React.useState(MOCK_CHILDREN);
+
+  // Fetch children from API
+  const { data: children = [], isLoading, error, refetch } = useQuery({
+    queryKey: ["children"],
+    queryFn: getChildren,
+    retry: false,
+  });
+
+  // Map children data to include color and formatted data
+  const childrenWithColor = React.useMemo(() => {
+    return children.map((child, index) => {
+      // Handle diagnosis - backend now returns array, but handle both cases for safety
+      let diagnoses: string[] = [];
+      if (Array.isArray(child.diagnosis)) {
+        // Backend returns as array
+        diagnoses = child.diagnosis;
+      } else if (child.diagnoses && Array.isArray(child.diagnoses)) {
+        // Use diagnoses alias if available
+        diagnoses = child.diagnoses;
+      } else if (child.diagnosis && typeof child.diagnosis === "string") {
+        // Fallback: if it's a string, try to parse it as JSON array, otherwise split by comma
+        try {
+          const parsed = JSON.parse(child.diagnosis);
+          diagnoses = Array.isArray(parsed) ? parsed : [child.diagnosis];
+        } catch {
+          // If not JSON, split by comma or use as single item
+          diagnoses = child.diagnosis.split(",").map((d: string) => d.trim()).filter(Boolean);
+        }
+      }
+
+      // Handle medications - backend returns string, frontend expects array of objects
+      let medications: Array<{ name: string; dosage?: string; frequency?: string }> = [];
+      if (child.medications) {
+        if (typeof child.medications === "string") {
+          try {
+            const parsed = JSON.parse(child.medications);
+            medications = Array.isArray(parsed) ? parsed : [];
+          } catch {
+            // If not JSON, treat as single medication name
+            medications = [{ name: child.medications }];
+          }
+        } else if (Array.isArray(child.medications)) {
+          medications = child.medications;
+        }
+      }
+
+      // Handle allergies - backend now returns array, but handle both cases for safety
+      let allergies: string[] = [];
+      if (Array.isArray(child.allergies)) {
+        // Backend returns as array
+        allergies = child.allergies;
+      } else if (child.allergies && typeof child.allergies === "string") {
+        // Fallback: if it's a string, try to parse it as JSON array, otherwise split by comma
+        try {
+          const parsed = JSON.parse(child.allergies);
+          allergies = Array.isArray(parsed) ? parsed : [child.allergies];
+        } catch {
+          // If not JSON, split by comma or use as single item
+          allergies = child.allergies.split(",").map((a: string) => a.trim()).filter(Boolean);
+        }
+      }
+
+      const age = child.age || calculateAge(child.dateOfBirth);
+      const color = CHILD_COLORS[index % CHILD_COLORS.length];
+      
+      return {
+        ...child,
+        diagnoses,
+        age,
+        color,
+        dateOfBirth: child.dateOfBirth,
+        medications,
+        allergies,
+      };
+    });
+  }, [children]);
 
   const handleAddChild = () => {
     router.push("/(tabs)/profile/add-child" as any);
   };
 
-  const handleEditChild = (childId: string) => {
-    // Navigate to edit child (reuse add-child with params)
+  const handleViewChild = (childId: string) => {
+    // Navigate to view child details
     router.push({
-      pathname: "/(tabs)/profile/add-child" as any,
-      params: { id: childId, mode: "edit" },
+      pathname: "/(tabs)/profile/child-details" as any,
+      params: { id: childId },
     });
   };
 
@@ -85,27 +157,60 @@ export default function ManageChildrenScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <View>
+            {/* Pull to refresh will be handled by React Query */}
+          </View>
+        }
       >
         {/* Info Card */}
         <View style={styles.infoCard}>
           <Ionicons name="information-circle" size={20} color={colors.secondary} />
           <Text style={styles.infoText}>
-            Add your children's profiles to get personalized recommendations and
+            Add your children&apos;s profiles to get personalized recommendations and
             track their progress.
           </Text>
         </View>
 
+        {/* Loading State */}
+        {isLoading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.loadingText}>Loading children...</Text>
+          </View>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={48} color={colors.error} />
+            <Text style={styles.errorText}>Failed to load children</Text>
+            <Text style={styles.errorSubtext}>
+              {error instanceof Error ? error.message : "Please try again"}
+            </Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.retryButton,
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => refetch()}
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Children List */}
-        {children.length > 0 ? (
+        {!isLoading && !error && childrenWithColor.length > 0 ? (
           <View style={styles.childrenList}>
-            {children.map((child) => (
+            {childrenWithColor.map((child) => (
               <Pressable
                 key={child.id}
                 style={({ pressed }) => [
                   styles.childCard,
                   pressed && { transform: [{ scale: 0.98 }] },
                 ]}
-                onPress={() => handleEditChild(child.id)}
+                onPress={() => handleViewChild(child.id)}
               >
                 {/* Child Avatar */}
                 <View
@@ -129,10 +234,10 @@ export default function ManageChildrenScreen() {
                   </View>
 
                   {/* Diagnosis Tags */}
-                  {child.diagnoses.length > 0 && (
+                  {child.diagnoses && child.diagnoses.length > 0 && (
                     <View style={styles.diagnosisTags}>
-                      {child.diagnoses.map((diagnosis) => (
-                        <View key={diagnosis} style={styles.diagnosisTag}>
+                      {child.diagnoses.map((diagnosis, idx) => (
+                        <View key={`${diagnosis}-${idx}`} style={styles.diagnosisTag}>
                           <Text style={styles.diagnosisTagText}>{diagnosis}</Text>
                         </View>
                       ))}
@@ -141,7 +246,7 @@ export default function ManageChildrenScreen() {
 
                   {/* Medical Summary */}
                   <View style={styles.medicalSummary}>
-                    {child.medications.length > 0 && (
+                    {child.medications && child.medications.length > 0 && (
                       <View style={styles.medicalItem}>
                         <Ionicons
                           name="medkit-outline"
@@ -154,7 +259,7 @@ export default function ManageChildrenScreen() {
                         </Text>
                       </View>
                     )}
-                    {child.allergies.length > 0 && (
+                    {child.allergies && child.allergies.length > 0 && (
                       <View style={styles.medicalItem}>
                         <Ionicons
                           name="warning-outline"
@@ -179,18 +284,18 @@ export default function ManageChildrenScreen() {
               </Pressable>
             ))}
           </View>
-        ) : (
+        ) : !isLoading && !error ? (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconWrap}>
               <Ionicons name="people-outline" size={40} color={colors.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Children Added</Text>
             <Text style={styles.emptySubtitle}>
-              Add your child's profile to get started with personalized care
+              Add your child&apos;s profile to get started with personalized care
               recommendations.
             </Text>
           </View>
-        )}
+        ) : null}
 
         {/* Add Child Button */}
         <Pressable
@@ -276,7 +381,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   // Info Card
   infoCard: {
@@ -468,5 +573,45 @@ const styles = StyleSheet.create({
   mrInfoItemText: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  // Loading & Error States
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textSecondary,
+  },
+  errorContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 40,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  errorSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: colors.textMuted,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
 });
