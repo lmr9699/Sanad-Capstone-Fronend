@@ -37,11 +37,16 @@ export interface ServiceResponse {
 export const getServices = async (): Promise<Service[]> => {
   const response = await instance.get<ServicesResponse>("/services");
   // axios interceptor returns response.data directly, so response is already the full response object
-  return response.data.services;
+  const data = (response as unknown as ServicesResponse).data;
+  // Ensure we return an array
+  if (Array.isArray(data.services)) {
+    return data.services;
+  }
+  return [];
 };
 
 export const getServiceById = async (serviceId: string): Promise<Service> => {
   const response = await instance.get<ServiceResponse>(`/services/${serviceId}`);
   // axios interceptor returns response.data directly, so response is already the full response object
-  return response.data.service;
+  return (response as unknown as ServiceResponse).data.service;
 };

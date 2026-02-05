@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { getProfessionals } from "../../../api/directory.api";
-import { Professional } from "../../../types/directory.types";
+
 
 // Design system colors
 const colors = {
@@ -90,7 +90,7 @@ export default function ProfessionalsScreen() {
           <View style={styles.headerText}>
             <Text style={styles.title}>Professionals</Text>
             <Text style={styles.subtitle}>
-              Find specialists for your child's needs
+              Find specialists for your child&apos;s needs
             </Text>
           </View>
         </View>
@@ -237,7 +237,7 @@ export default function ProfessionalsScreen() {
                       <Text style={[styles.specialtyLabel, { color: professional.color }]}>
                         {professional.specialtyLabel}
                       </Text>
-                      
+
                       {/* Meta Row */}
                       <View style={styles.metaRow}>
                         <View style={styles.ratingWrap}>
@@ -254,16 +254,16 @@ export default function ProfessionalsScreen() {
                         <View
                           style={[
                             styles.availabilityDot,
-                            professional.availability.includes("today") && styles.availabilityDotActive,
+                            professional.availability && typeof professional.availability === "string" && professional.availability.includes("today") && styles.availabilityDotActive,
                           ]}
                         />
                         <Text
                           style={[
                             styles.availabilityText,
-                            professional.availability.includes("today") && styles.availabilityTextActive,
+                            professional.availability && typeof professional.availability === "string" && professional.availability.includes("today") && styles.availabilityTextActive,
                           ]}
                         >
-                          {professional.availability}
+                          {professional.availability || "Not available"}
                         </Text>
                       </View>
                     </View>
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120,
+    paddingBottom: 100,
   },
   // Header
   header: {

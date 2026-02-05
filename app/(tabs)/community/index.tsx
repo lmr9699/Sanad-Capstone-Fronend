@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 24,
-    paddingBottom: 140, // Clear spacing: 64px (tab bar) + safe area (up to 34px) + 24px (spacing) + 18px (extra safety)
+    paddingBottom: 100, // Clear spacing above tab bar
   },
   // Icon Container - Square with rounded corners, white background
   iconContainer: {

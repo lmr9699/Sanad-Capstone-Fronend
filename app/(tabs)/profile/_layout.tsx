@@ -6,6 +6,8 @@ export default function ProfileLayout() {
       <Stack.Screen name="index" />
       <Stack.Screen name="manage-children" />
       <Stack.Screen name="add-child" />
+      <Stack.Screen name="child-details" />
+      <Stack.Screen name="edit-child" />
       <Stack.Screen name="settings" />
     </Stack>
   );

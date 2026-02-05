@@ -8,8 +8,11 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
+import { getServiceById } from "../../../api/services.api";
 
 // Design system colors
 const colors = {
@@ -24,170 +27,65 @@ const colors = {
   border: "rgba(0, 0, 0, 0.06)",
 };
 
-// Services data (in real app, this would come from API)
-const SERVICES_DATA: Record<
-  string,
-  {
-    id: string;
-    name: string;
-    description: string;
-    longDescription: string;
-    icon: string;
-    category: string;
-    rating: number;
-    reviews: number;
-    providers: number;
-    color: string;
-    benefits: string[];
-    duration: string;
-    frequency: string;
-    ageRange: string;
-  }
-> = {
-  "1": {
-    id: "1",
-    name: "Speech Therapy",
-    description: "Improve communication and language skills",
-    longDescription:
-      "Speech therapy helps children develop their communication abilities through specialized exercises and techniques. Our certified speech-language pathologists work one-on-one with your child to address speech delays, articulation issues, language disorders, and social communication challenges.",
-    icon: "chatbubble-outline",
-    category: "Therapy",
-    rating: 4.9,
-    reviews: 127,
-    providers: 12,
-    color: "#7FB77E",
-    benefits: [
-      "Improved speech clarity and articulation",
-      "Enhanced language comprehension",
-      "Better social communication skills",
-      "Increased confidence in speaking",
-    ],
-    duration: "45-60 min",
-    frequency: "1-2x per week",
-    ageRange: "2-18 years",
-  },
-  "2": {
-    id: "2",
-    name: "Occupational Therapy",
-    description: "Develop daily living and motor skills",
-    longDescription:
-      "Occupational therapy focuses on helping children develop the skills they need for daily living and academic success. Our therapists use play-based activities to improve fine motor skills, sensory processing, and self-care abilities.",
-    icon: "hand-left-outline",
-    category: "Therapy",
-    rating: 4.8,
-    reviews: 98,
-    providers: 8,
-    color: "#5F8F8B",
-    benefits: [
-      "Improved fine motor coordination",
-      "Better sensory processing",
-      "Enhanced self-care skills",
-      "Increased independence",
-    ],
-    duration: "45-60 min",
-    frequency: "1-2x per week",
-    ageRange: "1-18 years",
-  },
-  "3": {
-    id: "3",
-    name: "Behavioral Therapy",
-    description: "Address behavioral challenges",
-    longDescription:
-      "Behavioral therapy uses evidence-based techniques to help children manage challenging behaviors and develop positive coping strategies. Our certified behavior analysts create individualized plans tailored to your child's specific needs.",
-    icon: "heart-outline",
-    category: "Therapy",
-    rating: 4.9,
-    reviews: 156,
-    providers: 15,
-    color: "#E8A838",
-    benefits: [
-      "Reduced challenging behaviors",
-      "Improved emotional regulation",
-      "Better social skills",
-      "Enhanced family dynamics",
-    ],
-    duration: "60-90 min",
-    frequency: "2-3x per week",
-    ageRange: "2-18 years",
-  },
-  "4": {
-    id: "4",
-    name: "Physical Therapy",
-    description: "Enhance movement and development",
-    longDescription:
-      "Physical therapy helps children improve their gross motor skills, strength, balance, and coordination. Our therapists use fun, engaging activities to help your child reach their physical development milestones.",
-    icon: "fitness-outline",
-    category: "Therapy",
-    rating: 4.7,
-    reviews: 84,
-    providers: 10,
-    color: "#D9534F",
-    benefits: [
-      "Improved mobility and balance",
-      "Increased strength and endurance",
-      "Better coordination",
-      "Pain management",
-    ],
-    duration: "45-60 min",
-    frequency: "1-2x per week",
-    ageRange: "0-18 years",
-  },
-  "5": {
-    id: "5",
-    name: "Educational Support",
-    description: "Academic assistance and learning strategies",
-    longDescription:
-      "Our educational support services provide personalized academic assistance for children with learning differences. Experienced educators work with your child to develop effective learning strategies and build academic confidence.",
-    icon: "school-outline",
-    category: "Education",
-    rating: 4.8,
-    reviews: 203,
-    providers: 20,
-    color: "#7B68EE",
-    benefits: [
-      "Personalized learning plans",
-      "Improved academic performance",
-      "Better study skills",
-      "Increased confidence",
-    ],
-    duration: "60 min",
-    frequency: "2-3x per week",
-    ageRange: "5-18 years",
-  },
-  "6": {
-    id: "6",
-    name: "Family Counseling",
-    description: "Support for the whole family",
-    longDescription:
-      "Family counseling provides a supportive environment for families to navigate challenges together. Our licensed counselors help improve family communication, resolve conflicts, and strengthen relationships.",
-    icon: "people-outline",
-    category: "Counseling",
-    rating: 4.9,
-    reviews: 67,
-    providers: 6,
-    color: "#FF69B4",
-    benefits: [
-      "Improved family communication",
-      "Better conflict resolution",
-      "Stronger family bonds",
-      "Reduced stress for all members",
-    ],
-    duration: "60-90 min",
-    frequency: "1x per week",
-    ageRange: "All ages",
-  },
-};
-
 export default function ServiceDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const service = SERVICES_DATA[id as string];
 
-  if (!service) {
+  // Fetch service details from API
+  const { data: service, isLoading, error } = useQuery({
+    queryKey: ["service", id],
+    queryFn: () => getServiceById(id as string),
+    enabled: !!id,
+    retry: false,
+  });
+
+  // Loading State
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
+        <View style={styles.header}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.backBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Service Details</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Loading service details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error State
+  if (error || !service) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <View style={styles.header}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.backBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
+          </Pressable>
+          <Text style={styles.headerTitle}>Service Details</Text>
+          <View style={styles.headerRight} />
+        </View>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Service not found</Text>
+          <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+          <Text style={styles.errorText}>
+            {error ? "Failed to load service" : "Service not found"}
+          </Text>
           <Pressable
             style={styles.backButton}
             onPress={() => router.back()}
@@ -400,7 +298,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 140,
+    paddingBottom: 100,
   },
   // Hero
   heroSection: {
@@ -616,5 +514,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: colors.textSecondary,
   },
 });

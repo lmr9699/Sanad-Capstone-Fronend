@@ -4,6 +4,7 @@ import React from "react";
 import {
   Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -11,8 +12,12 @@ import {
   Text,
   TextInput,
   View,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { useMutation } from "@tanstack/react-query";
+import { createChild } from "../../../api/children.api";
 
 // Design system colors
 const colors = {
@@ -65,6 +70,8 @@ const COMMON_ALLERGIES = [
 export default function AddChildScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = React.useState(1);
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+  const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
 
   // Form state
   const [formData, setFormData] = React.useState({
@@ -85,6 +92,81 @@ export default function AddChildScreen() {
     allergyNotes: "",
   });
 
+  // Format date to DD/MM/YYYY
+  const formatDate = (date: Date): string => {
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth: string): number | undefined => {
+    if (!dateOfBirth) return undefined;
+    const parts = dateOfBirth.split("/");
+    if (parts.length !== 3) return undefined;
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const year = parseInt(parts[2], 10);
+    const birthDate = new Date(year, month, day);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  // Handle date picker change
+  const handleDateChange = (event: any, date?: Date) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+      if (date) {
+        setSelectedDate(date);
+        setFormData((prev) => ({ ...prev, dateOfBirth: formatDate(date) }));
+      }
+    } else if (Platform.OS === "ios") {
+      // On iOS, update selected date in real-time as user scrolls
+      if (date) {
+        setSelectedDate(date);
+      }
+    }
+  };
+
+  // Open date picker
+  const openDatePicker = () => {
+    // Initialize with current date if no date is selected
+    if (!selectedDate) {
+      setSelectedDate(new Date());
+    }
+    setShowDatePicker(true);
+  };
+
+  // Confirm date on iOS
+  const confirmDate = () => {
+    if (selectedDate) {
+      setFormData((prev) => ({ ...prev, dateOfBirth: formatDate(selectedDate) }));
+    }
+    setShowDatePicker(false);
+  };
+
+  // Cancel date picker on iOS
+  const cancelDatePicker = () => {
+    // Reset to previous date if user cancels
+    if (formData.dateOfBirth) {
+      // Parse existing date if available
+      const parts = formData.dateOfBirth.split("/");
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        setSelectedDate(new Date(year, month, day));
+      }
+    }
+    setShowDatePicker(false);
+  };
+
   const handleNext = () => {
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
@@ -101,17 +183,88 @@ export default function AddChildScreen() {
     }
   };
 
+  const validateStep1 = (): boolean => {
+    if (!formData.firstName.trim()) {
+      Alert.alert("Validation Error", "Please enter the child's first name.");
+      return false;
+    }
+    if (!formData.lastName.trim()) {
+      Alert.alert("Validation Error", "Please enter the child's last name.");
+      return false;
+    }
+    if (!formData.dateOfBirth) {
+      Alert.alert("Validation Error", "Please select the child's date of birth.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleStep1Submit = () => {
+    if (validateStep1()) {
+      setCurrentStep(2);
+    }
+  };
+
+  const validateStep2 = (): boolean => {
+    if (formData.diagnoses.length === 0) {
+      Alert.alert("Validation Error", "Please select at least one diagnosis.");
+      return false;
+    }
+    return true;
+  };
+
+  const handleStep2Submit = () => {
+    if (validateStep2()) {
+      setCurrentStep(3);
+    }
+  };
+
+  const handleStep3Submit = () => {
+    // Medications step is optional, so no validation needed
+    setCurrentStep(4);
+  };
+
+  // Create child mutation
+  const createChildMutation = useMutation({
+    mutationFn: createChild,
+    onSuccess: (data) => {
+      Alert.alert(
+        "Child Added Successfully",
+        `${formData.firstName} ${formData.lastName} has been added to your profile.`,
+        [
+          {
+            text: "View Profile",
+            onPress: () => router.replace("/(tabs)/profile"),
+          },
+        ]
+      );
+    },
+    onError: (error: any) => {
+      Alert.alert(
+        "Error",
+        error?.message || "Failed to add child. Please try again."
+      );
+    },
+  });
+
   const handleSubmit = () => {
-    Alert.alert(
-      "Child Added Successfully",
-      `${formData.firstName} ${formData.lastName} has been added to your profile.`,
-      [
-        {
-          text: "View Profile",
-          onPress: () => router.back(),
-        },
-      ]
-    );
+    // Prepare data for API
+    const childData = {
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      age: calculateAge(formData.dateOfBirth),
+      gender: formData.gender || undefined,
+      dateOfBirth: formData.dateOfBirth || undefined,
+      diagnosis: formData.diagnoses.length > 0 ? formData.diagnoses : undefined,
+      medicalHistory: formData.diagnosisNotes
+        ? `${formData.diagnosisNotes}${formData.allergyNotes ? `\n\nAllergy Notes: ${formData.allergyNotes}` : ""}`
+        : formData.allergyNotes
+          ? `Allergy Notes: ${formData.allergyNotes}`
+          : undefined,
+      medications: formData.medications.length > 0 ? formData.medications : undefined,
+      allergies: formData.allergies.length > 0 ? formData.allergies : undefined,
+    };
+
+    createChildMutation.mutate(childData);
   };
 
   const toggleDiagnosis = (diagnosisId: string) => {
@@ -196,7 +349,7 @@ export default function AddChildScreen() {
         <View>
           <Text style={styles.sectionTitle}>Basic Information</Text>
           <Text style={styles.sectionSubtitle}>
-            Enter your child's basic details
+            Enter your child basic details
           </Text>
         </View>
       </View>
@@ -229,15 +382,59 @@ export default function AddChildScreen() {
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Date of Birth *</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="DD/MM/YYYY"
-          placeholderTextColor={colors.textMuted}
-          value={formData.dateOfBirth}
-          onChangeText={(text) =>
-            setFormData((prev) => ({ ...prev, dateOfBirth: text }))
-          }
-        />
+        <Pressable style={styles.dateInput} onPress={openDatePicker}>
+          <Text
+            style={[
+              styles.dateInputText,
+              !formData.dateOfBirth && styles.dateInputPlaceholder,
+            ]}
+          >
+            {formData.dateOfBirth || "DD/MM/YYYY"}
+          </Text>
+          <Ionicons name="calendar-outline" size={20} color={colors.textMuted} />
+        </Pressable>
+        {Platform.OS === "ios" && showDatePicker && (
+          <Modal
+            transparent
+            animationType="slide"
+            visible={showDatePicker}
+            onRequestClose={cancelDatePicker}
+          >
+            <View style={styles.datePickerModal}>
+              <View style={styles.datePickerContainer}>
+                <View style={styles.datePickerHeader}>
+                  <Pressable onPress={cancelDatePicker}>
+                    <Text style={styles.datePickerButton}>Cancel</Text>
+                  </Pressable>
+                  <Text style={styles.datePickerTitle}>Select Date</Text>
+                  <Pressable onPress={confirmDate}>
+                    <Text style={[styles.datePickerButton, styles.datePickerButtonConfirm]}>
+                      Done
+                    </Text>
+                  </Pressable>
+                </View>
+                <DateTimePicker
+                  value={selectedDate || new Date()}
+                  mode="date"
+                  display="spinner"
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                  minimumDate={new Date(1900, 0, 1)}
+                />
+              </View>
+            </View>
+          </Modal>
+        )}
+        {Platform.OS === "android" && showDatePicker && (
+          <DateTimePicker
+            value={selectedDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+            maximumDate={new Date()}
+            minimumDate={new Date(1900, 0, 1)}
+          />
+        )}
       </View>
 
       <View style={styles.inputGroup}>
@@ -269,6 +466,17 @@ export default function AddChildScreen() {
           ))}
         </View>
       </View>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.submitButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={handleStep1Submit}
+      >
+        <Text style={styles.submitButtonText}>Submit</Text>
+        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+      </Pressable>
     </View>
   );
 
@@ -281,7 +489,7 @@ export default function AddChildScreen() {
         <View>
           <Text style={styles.sectionTitle}>Diagnosis</Text>
           <Text style={styles.sectionSubtitle}>
-            Select all that apply (optional)
+            Select at least one diagnosis *
           </Text>
         </View>
       </View>
@@ -293,7 +501,7 @@ export default function AddChildScreen() {
             style={[
               styles.diagnosisCard,
               formData.diagnoses.includes(diagnosis.id) &&
-                styles.diagnosisCardActive,
+              styles.diagnosisCardActive,
             ]}
             onPress={() => toggleDiagnosis(diagnosis.id)}
           >
@@ -302,7 +510,7 @@ export default function AddChildScreen() {
                 style={[
                   styles.diagnosisLabel,
                   formData.diagnoses.includes(diagnosis.id) &&
-                    styles.diagnosisLabelActive,
+                  styles.diagnosisLabelActive,
                 ]}
               >
                 {diagnosis.label}
@@ -313,7 +521,7 @@ export default function AddChildScreen() {
               style={[
                 styles.checkbox,
                 formData.diagnoses.includes(diagnosis.id) &&
-                  styles.checkboxActive,
+                styles.checkboxActive,
               ]}
             >
               {formData.diagnoses.includes(diagnosis.id) && (
@@ -351,6 +559,17 @@ export default function AddChildScreen() {
           }
         />
       </View>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.submitButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={handleStep2Submit}
+      >
+        <Text style={styles.submitButtonText}>Submit</Text>
+        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+      </Pressable>
     </View>
   );
 
@@ -456,6 +675,17 @@ export default function AddChildScreen() {
           <Text style={styles.addButtonText}>Add Medication</Text>
         </Pressable>
       </View>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.submitButton,
+          pressed && { opacity: 0.8 },
+        ]}
+        onPress={handleStep3Submit}
+      >
+        <Text style={styles.submitButtonText}>Submit</Text>
+        <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+      </Pressable>
     </View>
   );
 
@@ -488,7 +718,7 @@ export default function AddChildScreen() {
               style={[
                 styles.allergyChipText,
                 formData.allergies.includes(allergy) &&
-                  styles.allergyChipTextActive,
+                styles.allergyChipTextActive,
               ]}
             >
               {allergy}
@@ -528,6 +758,25 @@ export default function AddChildScreen() {
           </View>
         </View>
       )}
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.doneButton,
+          pressed && { opacity: 0.8 },
+          createChildMutation.isPending && styles.doneButtonDisabled,
+        ]}
+        onPress={handleSubmit}
+        disabled={createChildMutation.isPending}
+      >
+        {createChildMutation.isPending ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <>
+            <Text style={styles.doneButtonText}>Done</Text>
+            <Ionicons name="checkmark" size={18} color="#FFFFFF" />
+          </>
+        )}
+      </Pressable>
     </View>
   );
 
@@ -704,7 +953,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   // Form Section
   formSection: {
@@ -761,6 +1010,59 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  dateInput: {
+    backgroundColor: colors.bgApp,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  dateInputText: {
+    fontSize: 15,
+    color: colors.text,
+  },
+  dateInputPlaceholder: {
+    color: colors.textMuted,
+  },
+  datePickerModal: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  datePickerContainer: {
+    backgroundColor: colors.bgCard,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 40,
+  },
+  datePickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  datePickerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  datePickerButton: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    fontWeight: "500",
+  },
+  datePickerButtonConfirm: {
+    color: colors.primary,
+    fontWeight: "600",
+  },
   textArea: {
     minHeight: 100,
     textAlignVertical: "top",
@@ -796,6 +1098,41 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   genderTextActive: {
+    color: "#FFFFFF",
+  },
+  // Submit Button
+  submitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  submitButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  // Done Button
+  doneButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  doneButtonDisabled: {
+    opacity: 0.6,
+  },
+  doneButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
     color: "#FFFFFF",
   },
   // Diagnosis

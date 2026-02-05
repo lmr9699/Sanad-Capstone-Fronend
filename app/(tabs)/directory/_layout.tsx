@@ -67,6 +67,12 @@ export default function DirectoryLayout() {
           },
         }}
       />
+      <Stack.Screen
+        name="helpCenter"
+        options={{
+          headerShown: false, // We have a custom header in the component
+        }}
+      />
     </Stack>
   );
 }

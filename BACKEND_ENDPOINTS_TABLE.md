@@ -42,38 +42,45 @@
 | GET | `/api/community/posts` | `/api/community/posts` | Get all community posts | Yes | Parent | ✅ Implemented |
 | POST | `/api/community/posts` | `/api/community/posts` | Create a new community post | Yes | Parent | ✅ Implemented |
 | POST | `/api/community/posts/:postId/report` | `/api/community/posts/:postId/report` | Report a harmful post | Yes | Parent | ✅ Implemented |
-| GET | `/api/community/events` | `/api/community/events` | Get all community events | Yes | Parent | ⚠️ Frontend Only |
+| GET | `/api/community/events` | `/api/community/events` | Get all community events | Yes | Parent | ❌ Not Implemented |
 
 ## Care Path (`/api/care-path`)
 
 | Method | Endpoint | Full URL | Description | Auth Required | Authorization | Status |
 |--------|----------|----------|-------------|---------------|---------------|--------|
-| GET | `/api/care-path/weekly-plan` | `/api/care-path/weekly-plan` | Get weekly care plan | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/care-path/tasks/:taskId` | `/api/care-path/tasks/:taskId` | Get task details by ID | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/care-path/progress` | `/api/care-path/progress` | Get care path progress | Yes | None | ⚠️ Frontend Only |
-| POST | `/api/care-path/check-in` | `/api/care-path/check-in` | Submit a check-in | Yes | None | ⚠️ Frontend Only |
-| POST | `/api/care-path/generate` | `/api/care-path/generate` | Generate a new care path | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/care-path/children` | `/api/care-path/children` | Get children (care-path endpoint) | Yes | None | ⚠️ Frontend Only |
+| GET | `/api/care-path/weekly-plan` | `/api/care-path/weekly-plan` | Get weekly care plan | Yes | None | ❌ Not Registered |
+| GET | `/api/care-path/tasks/:taskId` | `/api/care-path/tasks/:taskId` | Get task details by ID | Yes | None | ❌ Not Registered |
+| GET | `/api/care-path/progress` | `/api/care-path/progress` | Get care path progress | Yes | None | ❌ Not Registered |
+| POST | `/api/care-path/check-in` | `/api/care-path/check-in` | Submit a check-in | Yes | None | ❌ Not Registered |
+| POST | `/api/care-path/generate` | `/api/care-path/generate` | Generate a new care path | Yes | None | ❌ Not Registered |
+| GET | `/api/care-path/children` | `/api/care-path/children` | Get children (care-path endpoint) | Yes | None | ❌ Not Registered |
 
 ## Directory (`/api/directory`)
 
 | Method | Endpoint | Full URL | Description | Auth Required | Authorization | Status |
 |--------|----------|----------|-------------|---------------|---------------|--------|
-| GET | `/api/directory/centers` | `/api/directory/centers` | Get health centers (with filters) | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/centers/:centerId` | `/api/directory/centers/:centerId` | Get center details by ID | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/centers/cities` | `/api/directory/centers/cities` | Get list of available cities | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/centers/specialties` | `/api/directory/centers/specialties` | Get list of center specialties | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/professionals` | `/api/directory/professionals` | Get professionals (with filters) | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/professionals/:professionalId` | `/api/directory/professionals/:professionalId` | Get professional details by ID | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/professionals/specialties/list` | `/api/directory/professionals/specialties/list` | Get list of professional specialties | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/directory/professionals/tags/list` | `/api/directory/professionals/tags/list` | Get list of professional tags | Yes | None | ⚠️ Frontend Only |
+| GET | `/api/directory/centers` | `/api/directory/centers` | Get health centers (with filters) | Yes | None | ❌ Not Implemented |
+| GET | `/api/directory/centers/:centerId` | `/api/directory/centers/:centerId` | Get center details by ID | Yes | None | ❌ Not Implemented |
+| GET | `/api/directory/centers/cities` | `/api/directory/centers/cities` | Get list of available cities | Yes | None | ❌ Not Implemented |
+| GET | `/api/directory/centers/specialties` | `/api/directory/centers/specialties` | Get list of center specialties | Yes | None | ❌ Not Implemented |
+| GET | `/api/directory/professionals` | `/api/directory/professionals` | Get professionals (with filters) | Yes | None | ✅ Implemented |
+| GET | `/api/directory/professionals/:professionalId` | `/api/directory/professionals/:professionalId` | Get professional details by ID | Yes | None | ✅ Implemented |
+| GET | `/api/directory/professionals/specialties/list` | `/api/directory/professionals/specialties/list` | Get list of professional specialties | Yes | None | ✅ Implemented |
+| GET | `/api/directory/professionals/tags/list` | `/api/directory/professionals/tags/list` | Get list of professional tags | Yes | None | ❌ Not Implemented |
+
+## Services (`/api/services`)
+
+| Method | Endpoint | Full URL | Description | Auth Required | Authorization | Status |
+|--------|----------|----------|-------------|---------------|---------------|--------|
+| GET | `/api/services` | `/api/services` | Get all services | Yes | None | ✅ Implemented |
+| GET | `/api/services/:serviceId` | `/api/services/:serviceId` | Get service by ID | Yes | None | ✅ Implemented |
 
 ## Content (`/api/content`)
 
 | Method | Endpoint | Full URL | Description | Auth Required | Authorization | Status |
 |--------|----------|----------|-------------|---------------|---------------|--------|
-| GET | `/api/content/resources` | `/api/content/resources` | Get all content resources | Yes | None | ⚠️ Frontend Only |
-| GET | `/api/content/:contentId` | `/api/content/:contentId` | Get content details by ID | Yes | None | ⚠️ Frontend Only |
+| GET | `/api/content/resources` | `/api/content/resources` | Get all content resources | Yes | None | ❌ Not Implemented |
+| GET | `/api/content/:contentId` | `/api/content/:contentId` | Get content details by ID | Yes | None | ❌ Not Implemented |
 
 ## File Uploads
 
@@ -85,15 +92,20 @@
 
 ## Legend
 
-- ✅ **Implemented**: Endpoint exists in backend routes
-- ⚠️ **Frontend Only**: Endpoint is called by frontend but not yet implemented in backend
+- ✅ **Implemented**: Endpoint exists in backend routes and is registered in app.ts
+- ❌ **Not Implemented**: Endpoint is not implemented in backend
+- ❌ **Not Registered**: Route file exists but not registered in app.ts
 - **Auth Required**: Yes = Requires Bearer token, No = Public endpoint
 - **Authorization**: Role-based access (Parent, Professional, Admin, etc.)
 
 ## Notes
 
-1. All endpoints with "Frontend Only" status need to be implemented in the backend
-2. The `/api/care-path/children` endpoint seems redundant with `/api/children` - consider consolidating
-3. Community events endpoint (`/api/community/events`) is called by frontend but not in backend routes
-4. Directory and Content modules need route files and controllers created
-5. Base URL: `http://localhost:8000` (or configured via `EXPO_PUBLIC_API_URL`)
+1. **Services endpoints** are fully implemented and working ✅
+2. **Directory professionals endpoints** are fully implemented and working ✅
+3. **Directory centers endpoints** are NOT implemented - need to add to directory.controller.ts and directory.routes.ts
+4. **Care-path routes** exist but are NOT registered in app.ts - need to add `app.use("/api/care-path", carePathRoutes)`
+5. **Content endpoints** are NOT implemented - need to create content module
+6. **Community events endpoint** is NOT implemented
+7. **Directory professionals/tags/list** endpoint is NOT implemented
+8. The `/api/care-path/children` endpoint seems redundant with `/api/children` - consider consolidating
+9. Base URL: `http://localhost:8000` (or configured via `EXPO_PUBLIC_API_URL`)

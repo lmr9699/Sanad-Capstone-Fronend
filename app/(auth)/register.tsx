@@ -12,6 +12,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useMutation } from "@tanstack/react-query";
+import * as SecureStore from "expo-secure-store";
+import { register } from "../../api/auth.api";
+import { useAuth } from "../../context/AuthContext";
 
 // Design system colors
 const colors = {
@@ -28,14 +33,78 @@ const colors = {
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { setUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phone: "",
   });
+
+  const registerMutation = useMutation({
+    mutationFn: register,
+    onSuccess: async (data) => {
+      if (data.token) {
+        await SecureStore.setItemAsync("token", data.token);
+      }
+      if (data.user) {
+        setUser(data.user);
+      }
+      Alert.alert("Success", "Account created successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)"),
+        },
+      ]);
+    },
+    onError: (error: any) => {
+      Alert.alert("Registration Failed", error.message || "Failed to create account. Please try again.");
+    },
+  });
+
+  const handleCreateAccount = () => {
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.password) {
+      Alert.alert("Error", "Please fill in all required fields");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    // Validate terms agreement
+    if (!agreedToTerms) {
+      Alert.alert("Error", "Please agree to the terms and conditions");
+      return;
+    }
+
+    // Call register API
+    registerMutation.mutate({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -127,7 +196,41 @@ export default function RegisterScreen() {
                   ]}
                   onPress={() => setShowPassword((p) => !p)}
                 >
-                  <Text style={styles.togglePasswordText}>👁</Text>
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color={colors.textTertiary}
+                  />
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Confirm Password */}
+            <View style={styles.formGroup}>
+              <Text style={styles.label}>Confirm Password</Text>
+              <View style={styles.inputWrap}>
+                <TextInput
+                  style={styles.inputInWrap}
+                  placeholder="Confirm your password"
+                  placeholderTextColor={colors.textTertiary}
+                  value={formData.confirmPassword}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, confirmPassword: text })
+                  }
+                  secureTextEntry={!showConfirmPassword}
+                />
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.togglePassword,
+                    pressed && { opacity: 0.7 },
+                  ]}
+                  onPress={() => setShowConfirmPassword((p) => !p)}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color={colors.textTertiary}
+                  />
                 </Pressable>
               </View>
             </View>
@@ -162,7 +265,7 @@ export default function RegisterScreen() {
                 {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
               </Pressable>
               <View style={styles.checkboxLabelContainer}>
-                <Text style={styles.checkboxLabel}>I agree to SANAD's </Text>
+                <Text style={styles.checkboxLabel}>I agree to SANAD </Text>
                 <Pressable
                   onPress={() =>
                     Alert.alert("Community Guidelines", "Guidelines content")
@@ -186,13 +289,15 @@ export default function RegisterScreen() {
             <Pressable
               style={({ pressed }) => [
                 styles.btnPrimary,
+                (registerMutation.isPending || !agreedToTerms) && styles.btnPrimaryDisabled,
                 pressed && { opacity: 0.8 },
               ]}
-              onPress={() => {
-                Alert.alert("Create Account", "Account creation functionality");
-              }}
+              onPress={handleCreateAccount}
+              disabled={registerMutation.isPending || !agreedToTerms}
             >
-              <Text style={styles.btnPrimaryText}>Create Account</Text>
+              <Text style={styles.btnPrimaryText}>
+                {registerMutation.isPending ? "Creating Account..." : "Create Account"}
+              </Text>
             </Pressable>
           </View>
 
@@ -339,13 +444,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     top: "50%",
-    transform: [{ translateY: -11 }],
+    transform: [{ translateY: -10 }],
     borderRadius: 6,
     padding: 6,
-  },
-  togglePasswordText: {
-    fontSize: 17.6, // 1.1rem
-    color: colors.textTertiary,
   },
   // Checkbox row
   checkboxRow: {
@@ -406,6 +507,9 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16, // 1rem
     fontWeight: "600",
+  },
+  btnPrimaryDisabled: {
+    opacity: 0.6,
   },
   // Footer
   authFooter: {

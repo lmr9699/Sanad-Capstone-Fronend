@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.pageBottom,
+    paddingBottom: 100,
   },
   title: {
     fontSize: typography.title,

@@ -27,11 +27,18 @@ const FeatureRow = ({
 export default function WelcomeScreen() {
   const router = useRouter();
 
+  // Note: This screen is pre-authentication, so we can't fetch centers data
+  // The health center card will navigate to the centers screen after login
   const handleGetStarted = () => {
     router.replace("/(auth)/register");
   };
 
   const handleAlreadyHaveAccount = () => {
+    router.push("/(auth)/login");
+  };
+
+  const handleViewCenters = () => {
+    // Navigate to login first, then user can access centers
     router.push("/(auth)/login");
   };
 
@@ -65,6 +72,26 @@ export default function WelcomeScreen() {
             subtitle="Connect with parents who understand your journey"
           />
         </View>
+
+        {/* Health Centers Card */}
+        <TouchableOpacity
+          style={styles.healthCenterCard}
+          onPress={handleViewCenters}
+          activeOpacity={0.8}
+        >
+          <View style={styles.healthCenterCardContent}>
+            <View style={styles.healthCenterIconContainer}>
+              <Ionicons name="medical" size={28} color="#D99E8E" />
+            </View>
+            <View style={styles.healthCenterText}>
+              <Text style={styles.healthCenterTitle}>Find Health Centers</Text>
+              <Text style={styles.healthCenterSubtitle}>
+                Discover specialized centers near you
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="rgba(51,51,51,0.3)" />
+          </View>
+        </TouchableOpacity>
 
         {/* Actions */}
         <View style={styles.actionsSection}>
@@ -212,5 +239,50 @@ const styles = StyleSheet.create({
     color: "rgba(51,51,51,0.55)",
     textAlign: "center",
     lineHeight: 18,
+  },
+  // Health Center Card
+  healthCenterCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 32,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: "#D99E8E",
+  },
+  healthCenterCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  healthCenterIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#F6E4DE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  healthCenterText: {
+    flex: 1,
+  },
+  healthCenterTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333333",
+    marginBottom: 4,
+  },
+  healthCenterSubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "rgba(51,51,51,0.55)",
+    lineHeight: 20,
   },
 });

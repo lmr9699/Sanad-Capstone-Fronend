@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.xl,
-    paddingBottom: spacing.pageBottom,
+    paddingBottom: 100,
   },
   loadingText: {
     fontSize: typography.body,
