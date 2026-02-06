@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,6 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFavorites } from "../../../context/FavoritesContext";
+import { useLanguage } from "../../../context/LanguageContext";
 
 // Design system colors
 const colors = {
@@ -25,6 +27,7 @@ const colors = {
 };
 
 // Professional data (in real app, this would come from API)
+// Note: Location refers to the professional's WORKPLACE (clinic/center), not personal address
 const PROFESSIONALS_DATA: Record<
   string,
   {
@@ -43,14 +46,15 @@ const PROFESSIONALS_DATA: Record<
     certifications: string[];
     languages: string[];
     services: string[];
-    location: string;
+    workplace: string;
+    workplaceAddress: string;
     consultationFee: string;
     nextAvailable: string;
   }
 > = {
   "1": {
     id: "1",
-    name: "Dr. Sarah Ahmed",
+    name: "Dr. Sarah Al-Mutairi",
     specialty: "speech",
     specialtyLabel: "Speech Therapist",
     experience: "10 years",
@@ -59,10 +63,10 @@ const PROFESSIONALS_DATA: Record<
     availability: "Available today",
     verified: true,
     color: "#7FB77E",
-    bio: "Dr. Sarah Ahmed is a certified speech-language pathologist specializing in pediatric speech and language disorders. With over 10 years of experience, she has helped hundreds of children improve their communication skills through evidence-based therapy techniques.",
+    bio: "Dr. Sarah Al-Mutairi is a certified speech-language pathologist specializing in pediatric speech and language disorders. With over 10 years of experience in Kuwait, she has helped hundreds of children improve their communication skills through evidence-based therapy techniques.",
     education: [
-      "PhD in Speech-Language Pathology, King Saud University",
-      "MSc in Communication Disorders, American University",
+      "PhD in Speech-Language Pathology, Kuwait University",
+      "MSc in Communication Disorders, American University of Kuwait",
     ],
     certifications: [
       "Board Certified Specialist in Child Language",
@@ -76,13 +80,14 @@ const PROFESSIONALS_DATA: Record<
       "Language Development",
       "Fluency Disorders",
     ],
-    location: "Riyadh, Saudi Arabia",
-    consultationFee: "250 SAR",
+    workplace: "Kuwait Autism Center",
+    workplaceAddress: "Sharq, Capital Governorate, Kuwait",
+    consultationFee: "25 KWD",
     nextAvailable: "Today, 3:00 PM",
   },
   "2": {
     id: "2",
-    name: "Dr. Mohammed Ali",
+    name: "Dr. Mohammed Al-Sabah",
     specialty: "behavioral",
     specialtyLabel: "Behavioral Specialist",
     experience: "8 years",
@@ -91,10 +96,10 @@ const PROFESSIONALS_DATA: Record<
     availability: "Next available: Tomorrow",
     verified: true,
     color: "#E8A838",
-    bio: "Dr. Mohammed Ali is a board-certified behavior analyst (BCBA) specializing in Applied Behavior Analysis (ABA) for children with autism and developmental disorders. He focuses on creating individualized treatment plans that help children reach their full potential.",
+    bio: "Dr. Mohammed Al-Sabah is a board-certified behavior analyst (BCBA) specializing in Applied Behavior Analysis (ABA) for children with autism and developmental disorders. He focuses on creating individualized treatment plans that help children reach their full potential.",
     education: [
       "Master's in Applied Behavior Analysis, Florida Institute of Technology",
-      "Bachelor's in Psychology, King Fahd University",
+      "Bachelor's in Psychology, Kuwait University",
     ],
     certifications: [
       "Board Certified Behavior Analyst (BCBA)",
@@ -107,13 +112,14 @@ const PROFESSIONALS_DATA: Record<
       "Social Skills Training",
       "Parent Training",
     ],
-    location: "Jeddah, Saudi Arabia",
-    consultationFee: "300 SAR",
+    workplace: "Hope Therapy Clinic",
+    workplaceAddress: "Mirqab, Capital Governorate, Kuwait",
+    consultationFee: "30 KWD",
     nextAvailable: "Tomorrow, 10:00 AM",
   },
   "3": {
     id: "3",
-    name: "Dr. Fatima Hassan",
+    name: "Dr. Fatima Al-Kandari",
     specialty: "occupational",
     specialtyLabel: "Occupational Therapist",
     experience: "12 years",
@@ -122,7 +128,7 @@ const PROFESSIONALS_DATA: Record<
     availability: "Available today",
     verified: true,
     color: "#5F8F8B",
-    bio: "Dr. Fatima Hassan is an experienced occupational therapist who helps children develop the skills they need for daily living and academic success. She specializes in sensory integration therapy and fine motor skill development.",
+    bio: "Dr. Fatima Al-Kandari is an experienced occupational therapist who helps children develop the skills they need for daily living and academic success. She specializes in sensory integration therapy and fine motor skill development.",
     education: [
       "Doctorate in Occupational Therapy, University of Jordan",
       "BSc in Occupational Therapy, Cairo University",
@@ -138,13 +144,14 @@ const PROFESSIONALS_DATA: Record<
       "Self-Care Training",
       "School Readiness",
     ],
-    location: "Riyadh, Saudi Arabia",
-    consultationFee: "275 SAR",
+    workplace: "Al-Wafaa Rehabilitation Center",
+    workplaceAddress: "Salmiya, Hawalli Governorate, Kuwait",
+    consultationFee: "28 KWD",
     nextAvailable: "Today, 5:00 PM",
   },
   "4": {
     id: "4",
-    name: "Dr. Omar Khalid",
+    name: "Dr. Omar Al-Rashidi",
     specialty: "educational",
     specialtyLabel: "Educational Psychologist",
     experience: "6 years",
@@ -153,7 +160,7 @@ const PROFESSIONALS_DATA: Record<
     availability: "Next available: Wed",
     verified: true,
     color: "#7B68EE",
-    bio: "Dr. Omar Khalid is an educational psychologist dedicated to helping children with learning differences achieve academic success. He conducts comprehensive assessments and develops personalized learning strategies.",
+    bio: "Dr. Omar Al-Rashidi is an educational psychologist dedicated to helping children with learning differences achieve academic success. He conducts comprehensive assessments and develops personalized learning strategies aligned with Kuwait's educational system.",
     education: [
       "PhD in Educational Psychology, University of Edinburgh",
       "MA in Special Education, Lebanese American University",
@@ -169,13 +176,14 @@ const PROFESSIONALS_DATA: Record<
       "IEP Development",
       "Academic Counseling",
     ],
-    location: "Dammam, Saudi Arabia",
-    consultationFee: "350 SAR",
+    workplace: "Al-Amal Learning Center",
+    workplaceAddress: "Jahra City, Jahra Governorate, Kuwait",
+    consultationFee: "35 KWD",
     nextAvailable: "Wednesday, 11:00 AM",
   },
   "5": {
     id: "5",
-    name: "Dr. Layla Mansour",
+    name: "Dr. Layla Al-Enezi",
     specialty: "speech",
     specialtyLabel: "Speech Therapist",
     experience: "15 years",
@@ -184,7 +192,7 @@ const PROFESSIONALS_DATA: Record<
     availability: "Available today",
     verified: true,
     color: "#7FB77E",
-    bio: "Dr. Layla Mansour is one of the most experienced speech therapists in the region, with 15 years of expertise in treating children with complex communication disorders. She is known for her patient-centered approach and exceptional outcomes.",
+    bio: "Dr. Layla Al-Enezi is one of the most experienced speech therapists in Kuwait, with 15 years of expertise in treating children with complex communication disorders. She is known for her patient-centered approach and exceptional outcomes.",
     education: [
       "PhD in Communication Sciences, Boston University",
       "MSc in Speech-Language Pathology, McGill University",
@@ -201,13 +209,14 @@ const PROFESSIONALS_DATA: Record<
       "Childhood Apraxia of Speech",
       "Feeding and Swallowing",
     ],
-    location: "Riyadh, Saudi Arabia",
-    consultationFee: "400 SAR",
+    workplace: "Al-Noor Special Education School",
+    workplaceAddress: "Khaitan, Farwaniya Governorate, Kuwait",
+    consultationFee: "40 KWD",
     nextAvailable: "Today, 4:30 PM",
   },
   "6": {
     id: "6",
-    name: "Dr. Youssef Ibrahim",
+    name: "Dr. Youssef Al-Hajri",
     specialty: "behavioral",
     specialtyLabel: "Behavioral Analyst",
     experience: "9 years",
@@ -216,10 +225,10 @@ const PROFESSIONALS_DATA: Record<
     availability: "Available today",
     verified: true,
     color: "#E8A838",
-    bio: "Dr. Youssef Ibrahim specializes in behavioral interventions for children with autism spectrum disorder. His approach combines ABA principles with naturalistic teaching strategies to promote meaningful skill development.",
+    bio: "Dr. Youssef Al-Hajri specializes in behavioral interventions for children with autism spectrum disorder. His approach combines ABA principles with naturalistic teaching strategies to promote meaningful skill development.",
     education: [
       "Master's in Behavior Analysis, Western Michigan University",
-      "Bachelor's in Psychology, American University of Sharjah",
+      "Bachelor's in Psychology, American University of Kuwait",
     ],
     certifications: [
       "Board Certified Behavior Analyst (BCBA)",
@@ -232,13 +241,14 @@ const PROFESSIONALS_DATA: Record<
       "Naturalistic Teaching",
       "Behavior Support Plans",
     ],
-    location: "Jeddah, Saudi Arabia",
-    consultationFee: "280 SAR",
+    workplace: "Kuwait Autism Center",
+    workplaceAddress: "Sharq, Capital Governorate, Kuwait",
+    consultationFee: "28 KWD",
     nextAvailable: "Today, 2:00 PM",
   },
   "7": {
     id: "7",
-    name: "Dr. Nour Al-Rashid",
+    name: "Dr. Nour Al-Shammari",
     specialty: "occupational",
     specialtyLabel: "Occupational Therapist",
     experience: "7 years",
@@ -247,10 +257,10 @@ const PROFESSIONALS_DATA: Record<
     availability: "Next available: Thu",
     verified: false,
     color: "#5F8F8B",
-    bio: "Dr. Nour Al-Rashid is an occupational therapist focusing on helping children with developmental delays and sensory processing challenges. She creates fun, engaging therapy sessions that motivate children to learn new skills.",
+    bio: "Dr. Nour Al-Shammari is an occupational therapist focusing on helping children with developmental delays and sensory processing challenges. She creates fun, engaging therapy sessions that motivate children to learn new skills.",
     education: [
       "MSc in Occupational Therapy, University of Toronto",
-      "BSc in Rehabilitation Sciences, King Saud University",
+      "BSc in Rehabilitation Sciences, Kuwait University",
     ],
     certifications: [
       "Certified Autism Specialist",
@@ -263,13 +273,14 @@ const PROFESSIONALS_DATA: Record<
       "Play-Based Therapy",
       "Visual Motor Skills",
     ],
-    location: "Riyadh, Saudi Arabia",
-    consultationFee: "250 SAR",
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceAddress: "Abu Fatira, Mubarak Al-Kabeer Governorate, Kuwait",
+    consultationFee: "25 KWD",
     nextAvailable: "Thursday, 9:00 AM",
   },
   "8": {
     id: "8",
-    name: "Dr. Ahmed Mahmoud",
+    name: "Dr. Ahmad Al-Fadhli",
     specialty: "physical",
     specialtyLabel: "Physical Therapist",
     experience: "11 years",
@@ -278,7 +289,7 @@ const PROFESSIONALS_DATA: Record<
     availability: "Available today",
     verified: true,
     color: "#D9534F",
-    bio: "Dr. Ahmed Mahmoud is a pediatric physical therapist specializing in gross motor development and rehabilitation. He works with children of all ages to improve mobility, strength, and coordination through evidence-based interventions.",
+    bio: "Dr. Ahmad Al-Fadhli is a pediatric physical therapist specializing in gross motor development and rehabilitation. He works with children of all ages to improve mobility, strength, and coordination through evidence-based interventions.",
     education: [
       "Doctorate in Physical Therapy, University of Southern California",
       "BSc in Physical Therapy, Ain Shams University",
@@ -295,8 +306,9 @@ const PROFESSIONALS_DATA: Record<
       "Strength and Balance",
       "Post-Surgery Rehabilitation",
     ],
-    location: "Riyadh, Saudi Arabia",
-    consultationFee: "275 SAR",
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceAddress: "Abu Fatira, Mubarak Al-Kabeer Governorate, Kuwait",
+    consultationFee: "28 KWD",
     nextAvailable: "Today, 1:00 PM",
   },
 };
@@ -304,6 +316,7 @@ const PROFESSIONALS_DATA: Record<
 export default function ProfessionalDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { t } = useLanguage();
   const professional = PROFESSIONALS_DATA[id as string];
 
   if (!professional) {
@@ -319,20 +332,32 @@ export default function ProfessionalDetailsScreen() {
     );
   }
 
+  const { addFavorite, removeFavorite, isFavorite } = useFavorites();
+  const isFav = isFavorite(professional.id, "professional");
+
+  const handleToggleFavorite = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (isFav) {
+      await removeFavorite(professional.id, "professional");
+    } else {
+      await addFavorite({
+        id: professional.id,
+        type: "professional",
+        name: professional.name,
+        subtitle: professional.specialtyLabel,
+      });
+    }
+  };
+
   const handleBookAppointment = () => {
-    Alert.alert(
-      "Book Appointment",
-      `Would you like to book an appointment with ${professional.name}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Confirm Booking",
-          onPress: () => {
-            Alert.alert("Success", "Your appointment request has been sent!");
-          },
-        },
-      ]
-    );
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "/(tabs)/professionals/book-appointment",
+      params: {
+        professionalId: professional.id,
+        professionalName: professional.name,
+      },
+    } as any);
   };
 
   return (
@@ -345,9 +370,16 @@ export default function ProfessionalDetailsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Professional Profile</Text>
-        <Pressable style={styles.shareBtn}>
-          <Ionicons name="share-outline" size={22} color={colors.text} />
+        <Text style={styles.headerTitle}>{t("professionals.profile")}</Text>
+        <Pressable 
+          style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.7 }]}
+          onPress={handleToggleFavorite}
+        >
+          <Ionicons 
+            name={isFav ? "heart" : "heart-outline"} 
+            size={22} 
+            color={isFav ? "#FF6B6B" : colors.text} 
+          />
         </Pressable>
       </View>
 
@@ -386,7 +418,7 @@ export default function ProfessionalDetailsScreen() {
                 <Ionicons name="star" size={18} color="#F5A623" />
               </View>
               <Text style={styles.statValue}>{professional.rating}</Text>
-              <Text style={styles.statLabel}>{professional.reviews} reviews</Text>
+              <Text style={styles.statLabel}>{professional.reviews} {t("professionals.reviews")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -394,7 +426,7 @@ export default function ProfessionalDetailsScreen() {
                 <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
               </View>
               <Text style={styles.statValue}>{professional.experience}</Text>
-              <Text style={styles.statLabel}>Experience</Text>
+              <Text style={styles.statLabel}>{t("professionals.experience")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -412,7 +444,7 @@ export default function ProfessionalDetailsScreen() {
           <View style={styles.quickInfoRow}>
             <Ionicons name="calendar-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Next Available</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.nextAvailable")}</Text>
               <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
             </View>
           </View>
@@ -420,29 +452,30 @@ export default function ProfessionalDetailsScreen() {
           <View style={styles.quickInfoRow}>
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Consultation Fee</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.consultationFee")}</Text>
               <Text style={styles.quickInfoValue}>{professional.consultationFee}</Text>
             </View>
           </View>
           <View style={styles.quickInfoDivider} />
           <View style={styles.quickInfoRow}>
-            <Ionicons name="location-outline" size={20} color={colors.primary} />
+            <Ionicons name="business-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Location</Text>
-              <Text style={styles.quickInfoValue}>{professional.location}</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.worksAt")}</Text>
+              <Text style={styles.quickInfoValue}>{professional.workplace}</Text>
+              <Text style={styles.quickInfoSubValue}>{professional.workplaceAddress}</Text>
             </View>
           </View>
         </View>
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.about")}</Text>
           <Text style={styles.bioText}>{professional.bio}</Text>
         </View>
 
         {/* Services Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Services Offered</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.servicesOffered")}</Text>
           <View style={styles.servicesList}>
             {professional.services.map((service, index) => (
               <View key={index} style={styles.serviceItem}>
@@ -455,7 +488,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Education Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.education")}</Text>
           {professional.education.map((edu, index) => (
             <View key={index} style={styles.educationItem}>
               <Ionicons name="school-outline" size={18} color={colors.textMuted} />
@@ -466,7 +499,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Certifications Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Certifications</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.certifications")}</Text>
           <View style={styles.certificationsList}>
             {professional.certifications.map((cert, index) => (
               <View key={index} style={styles.certificationBadge}>
@@ -479,7 +512,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Languages Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Languages</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.languages")}</Text>
           <View style={styles.languagesRow}>
             {professional.languages.map((lang, index) => (
               <View key={index} style={styles.languageBadge}>
@@ -505,7 +538,7 @@ export default function ProfessionalDetailsScreen() {
           ]}
           onPress={handleBookAppointment}
         >
-          <Text style={styles.bookButtonText}>Book Appointment</Text>
+          <Text style={styles.bookButtonText}>{t("professionals.bookAppointment")}</Text>
           <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
         </Pressable>
       </View>
@@ -662,6 +695,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.text,
+  },
+  quickInfoSubValue: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   quickInfoDivider: {
     height: 1,

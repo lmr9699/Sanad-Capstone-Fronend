@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   ReactNode,
@@ -5,29 +6,61 @@ import {
   useEffect,
   useState,
 } from "react";
-import i18n, { setLocale } from "../i18n";
+import { I18nManager } from "react-native";
+import i18n, { Locale, setLocale } from "../i18n";
 
 interface LanguageContextType {
-  locale: "en";
-  setLocale: (locale: "en") => void;
+  locale: Locale;
+  setLanguage: (locale: Locale) => Promise<void>;
   t: (key: string, options?: object) => string;
+  isRTL: boolean;
 }
+
+const LANGUAGE_KEY = "@sanad_language";
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // English only
-  const [locale, setLocaleState] = useState<"en">("en");
+  const [locale, setLocaleState] = useState<Locale>("en");
+  const [isRTL, setIsRTL] = useState(false);
 
+  // Load saved language on mount
   useEffect(() => {
-    setLocale("en");
+    const loadLanguage = async () => {
+      try {
+        const savedLocale = await AsyncStorage.getItem(LANGUAGE_KEY);
+        if (savedLocale === "ar" || savedLocale === "en") {
+          setLocaleState(savedLocale);
+          setLocale(savedLocale);
+          setIsRTL(savedLocale === "ar");
+        }
+      } catch (error) {
+        console.log("Error loading language:", error);
+      }
+    };
+    loadLanguage();
   }, []);
 
-  const handleSetLocale = (newLocale: "en") => {
-    setLocaleState(newLocale);
-    setLocale(newLocale);
+  const setLanguage = async (newLocale: Locale) => {
+    try {
+      // Save to storage
+      await AsyncStorage.setItem(LANGUAGE_KEY, newLocale);
+      
+      // Update state
+      setLocaleState(newLocale);
+      setLocale(newLocale);
+      
+      // Update RTL
+      const shouldBeRTL = newLocale === "ar";
+      setIsRTL(shouldBeRTL);
+      
+      // Note: Full RTL support would require I18nManager.forceRTL(shouldBeRTL)
+      // and app restart, but for this demo we'll just update the locale
+    } catch (error) {
+      console.log("Error saving language:", error);
+    }
   };
 
   const t = (key: string, options?: object): string => {
@@ -36,7 +69,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   return (
     <LanguageContext.Provider
-      value={{ locale: "en", setLocale: handleSetLocale, t }}
+      value={{ locale, setLanguage, t, isRTL }}
     >
       {children}
     </LanguageContext.Provider>

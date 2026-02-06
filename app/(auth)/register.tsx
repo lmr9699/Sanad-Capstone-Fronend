@@ -1,6 +1,8 @@
-import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../../context/AuthContext";
 
 // Design system colors
 const colors = {
@@ -24,18 +27,88 @@ const colors = {
   textSecondary: "#4A4A4A",
   textTertiary: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.06)",
+  error: "#FF4B4B",
 };
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const { register } = useAuth();
+  const canGoBack = navigation.canGoBack();
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
   });
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    terms: "",
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { name: "", email: "", password: "", terms: "" };
+
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = "Full name is required";
+      isValid = false;
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+      isValid = false;
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+
+    // Terms validation
+    if (!agreedToTerms) {
+      newErrors.terms = "You must agree to the terms";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleRegister = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      const success = await register(formData.name.trim(), formData.email, formData.password);
+      if (success) {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Registration Failed", "Unable to create account. Please try again.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -49,23 +122,20 @@ export default function RegisterScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* Back button */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.authBack,
-              pressed && { opacity: 0.7 },
-            ]}
-            onPress={() => router.back()}
-          >
-            <Text style={styles.authBackText}>←</Text>
-          </Pressable>
+          {canGoBack && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.authBack,
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
+            </Pressable>
+          )}
 
-          {/* Title - smaller, bold */}
-          <Text style={styles.authTitle}>Create Account</Text>
-
-          {/* Welcome - LARGE and prominent */}
+          <Text style={[styles.authTitle, !canGoBack && { marginTop: 20 }]}>Create Account</Text>
           <Text style={styles.authWelcome}>Welcome to SANAD</Text>
-
-          {/* Subtext - smaller */}
           <Text style={styles.authSub}>
             Create your account and we'll support you step by step. You're not
             alone.
@@ -73,37 +143,44 @@ export default function RegisterScreen() {
 
           {/* Form */}
           <View style={styles.authForm}>
-            <View style={styles.authError} />
-
             {/* Full Name */}
             <View style={styles.formGroup}>
               <Text style={styles.label}>Full Name</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.name && styles.inputError]}
                 placeholder="Enter your full name"
                 placeholderTextColor={colors.textTertiary}
                 value={formData.name}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, name: text })
-                }
+                onChangeText={(text) => {
+                  setFormData({ ...formData, name: text });
+                  if (errors.name) setErrors({ ...errors, name: "" });
+                }}
                 autoCapitalize="words"
               />
+              {errors.name ? (
+                <Text style={styles.errorText}>{errors.name}</Text>
+              ) : null}
             </View>
 
             {/* Email */}
             <View style={styles.formGroup}>
               <Text style={styles.label}>Email Address</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.email && styles.inputError]}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.textTertiary}
                 value={formData.email}
-                onChangeText={(text) =>
-                  setFormData({ ...formData, email: text })
-                }
+                onChangeText={(text) => {
+                  setFormData({ ...formData, email: text });
+                  if (errors.email) setErrors({ ...errors, email: "" });
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
               />
+              {errors.email ? (
+                <Text style={styles.errorText}>{errors.email}</Text>
+              ) : null}
             </View>
 
             {/* Password */}
@@ -111,13 +188,14 @@ export default function RegisterScreen() {
               <Text style={styles.label}>Password</Text>
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={styles.inputInWrap}
+                  style={[styles.inputInWrap, errors.password && styles.inputError]}
                   placeholder="Create a secure password"
                   placeholderTextColor={colors.textTertiary}
                   value={formData.password}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, password: text })
-                  }
+                  onChangeText={(text) => {
+                    setFormData({ ...formData, password: text });
+                    if (errors.password) setErrors({ ...errors, password: "" });
+                  }}
                   secureTextEntry={!showPassword}
                 />
                 <Pressable
@@ -127,9 +205,16 @@ export default function RegisterScreen() {
                   ]}
                   onPress={() => setShowPassword((p) => !p)}
                 >
-                  <Text style={styles.togglePasswordText}>👁</Text>
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color={colors.textTertiary}
+                  />
                 </Pressable>
               </View>
+              {errors.password ? (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              ) : null}
             </View>
 
             {/* Phone */}
@@ -139,7 +224,7 @@ export default function RegisterScreen() {
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="For helpful reminders"
+                placeholder="+965 XXXX XXXX"
                 placeholderTextColor={colors.textTertiary}
                 value={formData.phone}
                 onChangeText={(text) =>
@@ -155,17 +240,23 @@ export default function RegisterScreen() {
                 style={({ pressed }) => [
                   styles.checkbox,
                   agreedToTerms && styles.checkboxChecked,
+                  errors.terms && !agreedToTerms && styles.checkboxError,
                   pressed && { opacity: 0.8 },
                 ]}
-                onPress={() => setAgreedToTerms((v) => !v)}
+                onPress={() => {
+                  setAgreedToTerms((v) => !v);
+                  if (errors.terms) setErrors({ ...errors, terms: "" });
+                }}
               >
-                {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
+                {agreedToTerms && (
+                  <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                )}
               </Pressable>
               <View style={styles.checkboxLabelContainer}>
                 <Text style={styles.checkboxLabel}>I agree to SANAD's </Text>
                 <Pressable
                   onPress={() =>
-                    Alert.alert("Community Guidelines", "Guidelines content")
+                    Alert.alert("Community Guidelines", "Community guidelines for SANAD users.\n\n• Be respectful\n• Share helpful information\n• Support each other\n• Protect privacy")
                   }
                 >
                   <Text style={styles.checkboxLink}>community guidelines</Text>
@@ -173,7 +264,7 @@ export default function RegisterScreen() {
                 <Text style={styles.checkboxLabel}> and </Text>
                 <Pressable
                   onPress={() =>
-                    Alert.alert("Privacy Policy", "Privacy policy content")
+                    Alert.alert("Privacy Policy", "SANAD Privacy Policy\n\n• Your data is secure\n• We don't share personal info\n• You control your data\n• GDPR compliant")
                   }
                 >
                   <Text style={styles.checkboxLink}>privacy policy</Text>
@@ -181,18 +272,27 @@ export default function RegisterScreen() {
                 <Text style={styles.checkboxLabel}>.</Text>
               </View>
             </View>
+            {errors.terms ? (
+              <Text style={[styles.errorText, { marginTop: -16, marginBottom: 16 }]}>
+                {errors.terms}
+              </Text>
+            ) : null}
 
             {/* Create Account Button */}
             <Pressable
               style={({ pressed }) => [
                 styles.btnPrimary,
                 pressed && { opacity: 0.8 },
+                isLoading && { opacity: 0.7 },
               ]}
-              onPress={() => {
-                Alert.alert("Create Account", "Account creation functionality");
-              }}
+              onPress={handleRegister}
+              disabled={isLoading}
             >
-              <Text style={styles.btnPrimaryText}>Create Account</Text>
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.btnPrimaryText}>Create Account</Text>
+              )}
             </Pressable>
           </View>
 
@@ -231,7 +331,6 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     alignItems: "center",
   },
-  // Back button
   authBack: {
     alignSelf: "flex-start",
     width: 46,
@@ -249,55 +348,39 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
   },
-  authBackText: {
-    fontSize: 20,
-    color: colors.text,
-  },
-  // Title - smaller than welcome
   authTitle: {
-    fontSize: 22.4, // 1.4rem
+    fontSize: 22,
     fontWeight: "600",
     marginBottom: 24,
     textAlign: "center",
     color: colors.text,
-    letterSpacing: -0.448, // -0.02em
+    letterSpacing: -0.32,
   },
-  // Welcome - LARGE and prominent
   authWelcome: {
-    fontSize: 24, // 1.5rem - LARGE
+    fontSize: 24,
     fontWeight: "600",
     marginBottom: 10,
     textAlign: "center",
     color: colors.text,
-    letterSpacing: -0.48, // -0.02em
+    letterSpacing: -0.32,
   },
-  // Subtext - smaller
   authSub: {
-    fontSize: 15.2, // 0.95rem
+    fontSize: 15,
     color: colors.textSecondary,
     textAlign: "center",
     marginBottom: 32,
     maxWidth: 320,
-    lineHeight: 22.8, // 1.5 line-height
+    lineHeight: 22,
   },
-  // Form container
   authForm: {
     width: "100%",
     maxWidth: 360,
   },
-  // Error (hidden)
-  authError: {
-    opacity: 0,
-    height: 0,
-    marginBottom: 0,
-  },
-  // Form group
   formGroup: {
-    marginBottom: 20, // Clear spacing between fields
+    marginBottom: 20,
   },
-  // Label - bold, larger than body text
   label: {
-    fontSize: 14.4, // 0.9rem
+    fontSize: 14,
     fontWeight: "600",
     marginBottom: 8,
     color: colors.text,
@@ -306,19 +389,25 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: colors.textTertiary,
   },
-  // Input - rounded corners
   input: {
     width: "100%",
     paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 12, // Rounded inputs
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
-    fontSize: 16, // 1rem
-    backgroundColor: colors.bgCard, // Semi-transparent
+    fontSize: 16,
+    backgroundColor: colors.bgCard,
     color: colors.text,
   },
-  // Input wrap for password
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 12,
+    marginTop: 6,
+  },
   inputWrap: {
     position: "relative",
   },
@@ -327,14 +416,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingRight: 48,
     paddingLeft: 16,
-    borderRadius: 12, // Rounded inputs
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
-    fontSize: 16, // 1rem
-    backgroundColor: colors.bgCard, // Semi-transparent
+    fontSize: 16,
+    backgroundColor: colors.bgCard,
     color: colors.text,
   },
-  // Password toggle
   togglePassword: {
     position: "absolute",
     right: 12,
@@ -343,22 +431,17 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 6,
   },
-  togglePasswordText: {
-    fontSize: 17.6, // 1.1rem
-    color: colors.textTertiary,
-  },
-  // Checkbox row
   checkboxRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 12,
-    marginBottom: 26, // Clear spacing above button
+    marginBottom: 26,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     marginTop: 2,
-    borderRadius: 4,
+    borderRadius: 6,
     borderWidth: 2,
     borderColor: colors.primary,
     justifyContent: "center",
@@ -368,10 +451,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderColor: colors.primary,
   },
-  checkmark: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "600",
+  checkboxError: {
+    borderColor: colors.error,
   },
   checkboxLabelContainer: {
     flex: 1,
@@ -380,46 +461,45 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   checkboxLabel: {
-    fontSize: 14.4, // 0.9rem
+    fontSize: 14,
     color: colors.text,
-    lineHeight: 20.88, // 1.45 line-height
+    lineHeight: 21,
   },
   checkboxLink: {
     color: colors.primary,
     textDecorationLine: "underline",
   },
-  // Button - rounded, pill-like
   btnPrimary: {
     width: "100%",
     paddingVertical: 16,
     backgroundColor: colors.primary,
-    borderRadius: 24, // Rounded button
+    borderRadius: 24,
     alignItems: "center",
-    marginBottom: 20, // Clear spacing below
+    justifyContent: "center",
+    marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
+    minHeight: 52,
   },
   btnPrimaryText: {
     color: "#FFFFFF",
-    fontSize: 16, // 1rem
+    fontSize: 16,
     fontWeight: "600",
   },
-  // Footer
   authFooter: {
     textAlign: "center",
-    fontSize: 14.4, // 0.9rem
+    fontSize: 14,
     color: colors.textSecondary,
   },
   authFooterLink: {
     color: colors.primary,
     fontWeight: "600",
   },
-  // Note
   authNote: {
-    fontSize: 12.8, // 0.8rem
+    fontSize: 13,
     color: colors.textTertiary,
     marginTop: 12,
     textAlign: "center",

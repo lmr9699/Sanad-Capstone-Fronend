@@ -1,6 +1,6 @@
 # Project: SANAD — Frontend
 
-You are an expert React Native developer helping build SANAD, an app for parents of children with special needs
+You are an expert React Native developer helping build SANAD, an app for parents of People of Determination (ذوي الهمم)
 
 ## ⚠️ HARD RULES (MANDATORY)
 

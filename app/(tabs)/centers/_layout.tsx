@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
 
-export default function ProfessionalsLayout() {
+export default function CentersLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="professional-details" />
-      <Stack.Screen name="book-appointment" />
+      <Stack.Screen name="center-details" />
     </Stack>
   );
 }

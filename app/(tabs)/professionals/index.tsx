@@ -2,14 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLanguage } from "../../../context/LanguageContext";
 
 // Design system colors
 const colors = {
@@ -34,11 +35,18 @@ const SPECIALIZATIONS = [
   { id: "educational", label: "Educational", icon: "school-outline", count: 1 },
 ];
 
-// Mock professionals data with more details
+// Gender filter options
+const GENDERS = [
+  { id: "all", label: "All", icon: "people-outline" },
+  { id: "male", label: "Male", icon: "man-outline" },
+  { id: "female", label: "Female", icon: "woman-outline" },
+];
+
+// Mock professionals data with Kuwait workplace locations
 const PROFESSIONALS = [
   {
     id: "1",
-    name: "Dr. Sarah Ahmed",
+    name: "Dr. Sarah Al-Mutairi",
     specialty: "speech",
     specialtyLabel: "Speech Therapist",
     experience: "10 years",
@@ -48,10 +56,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#7FB77E",
+    gender: "female",
+    workplace: "Kuwait Autism Center",
+    workplaceArea: "Sharq, Capital",
   },
   {
     id: "2",
-    name: "Dr. Mohammed Ali",
+    name: "Dr. Mohammed Al-Sabah",
     specialty: "behavioral",
     specialtyLabel: "Behavioral Specialist",
     experience: "8 years",
@@ -61,10 +72,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#E8A838",
+    gender: "male",
+    workplace: "Hope Therapy Clinic",
+    workplaceArea: "Mirqab, Capital",
   },
   {
     id: "3",
-    name: "Dr. Fatima Hassan",
+    name: "Dr. Fatima Al-Kandari",
     specialty: "occupational",
     specialtyLabel: "Occupational Therapist",
     experience: "12 years",
@@ -74,10 +88,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#5F8F8B",
+    gender: "female",
+    workplace: "Al-Wafaa Rehabilitation Center",
+    workplaceArea: "Salmiya, Hawalli",
   },
   {
     id: "4",
-    name: "Dr. Omar Khalid",
+    name: "Dr. Omar Al-Rashidi",
     specialty: "educational",
     specialtyLabel: "Educational Psychologist",
     experience: "6 years",
@@ -87,10 +104,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#7B68EE",
+    gender: "male",
+    workplace: "Al-Amal Learning Center",
+    workplaceArea: "Jahra City, Jahra",
   },
   {
     id: "5",
-    name: "Dr. Layla Mansour",
+    name: "Dr. Layla Al-Enezi",
     specialty: "speech",
     specialtyLabel: "Speech Therapist",
     experience: "15 years",
@@ -100,10 +120,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#7FB77E",
+    gender: "female",
+    workplace: "Al-Noor Special Education School",
+    workplaceArea: "Khaitan, Farwaniya",
   },
   {
     id: "6",
-    name: "Dr. Youssef Ibrahim",
+    name: "Dr. Youssef Al-Hajri",
     specialty: "behavioral",
     specialtyLabel: "Behavioral Analyst",
     experience: "9 years",
@@ -113,10 +136,13 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#E8A838",
+    gender: "male",
+    workplace: "Kuwait Autism Center",
+    workplaceArea: "Sharq, Capital",
   },
   {
     id: "7",
-    name: "Dr. Nour Al-Rashid",
+    name: "Dr. Nour Al-Shammari",
     specialty: "occupational",
     specialtyLabel: "Occupational Therapist",
     experience: "7 years",
@@ -126,10 +152,13 @@ const PROFESSIONALS = [
     verified: false,
     image: null,
     color: "#5F8F8B",
+    gender: "female",
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceArea: "Abu Fatira, Mubarak Al-Kabeer",
   },
   {
     id: "8",
-    name: "Dr. Ahmed Mahmoud",
+    name: "Dr. Ahmad Al-Fadhli",
     specialty: "physical",
     specialtyLabel: "Physical Therapist",
     experience: "11 years",
@@ -139,17 +168,33 @@ const PROFESSIONALS = [
     verified: true,
     image: null,
     color: "#D9534F",
+    gender: "male",
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceArea: "Abu Fatira, Mubarak Al-Kabeer",
   },
 ];
 
 export default function ProfessionalsScreen() {
   const router = useRouter();
-  const [selectedFilter, setSelectedFilter] = React.useState("all");
+  const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [selectedSpecialization, setSelectedSpecialization] = React.useState("all");
+  const [selectedGender, setSelectedGender] = React.useState("all");
 
-  const filteredProfessionals =
-    selectedFilter === "all"
-      ? PROFESSIONALS
-      : PROFESSIONALS.filter((p) => p.specialty === selectedFilter);
+  const filteredProfessionals = PROFESSIONALS.filter((p) => {
+    const matchesSpecialization = selectedSpecialization === "all" || p.specialty === selectedSpecialization;
+    const matchesGender = selectedGender === "all" || p.gender === selectedGender;
+    
+    // Search filter - matches name, specialty, or workplace
+    const searchLower = searchQuery.toLowerCase().trim();
+    const matchesSearch = searchQuery === "" ||
+      p.name.toLowerCase().includes(searchLower) ||
+      p.specialtyLabel.toLowerCase().includes(searchLower) ||
+      p.workplace.toLowerCase().includes(searchLower) ||
+      p.workplaceArea.toLowerCase().includes(searchLower);
+    
+    return matchesSpecialization && matchesGender && matchesSearch;
+  });
 
   const handleProfessionalPress = (professionalId: string) => {
     router.push({
@@ -171,21 +216,71 @@ export default function ProfessionalsScreen() {
             <Ionicons name="people" size={24} color="#FFFFFF" />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.title}>Professionals</Text>
+            <Text style={styles.title}>{t("professionals.title")}</Text>
             <Text style={styles.subtitle}>
-              Find specialists for your child's needs
+              {t("directory.healthcareProfessionals")}
             </Text>
           </View>
         </View>
 
-        {/* Search Bar Placeholder */}
-        <Pressable style={styles.searchBar}>
+        {/* Search Bar */}
+        <View style={styles.searchBar}>
           <Ionicons name="search-outline" size={20} color={colors.textMuted} />
-          <Text style={styles.searchPlaceholder}>Search professionals...</Text>
-        </Pressable>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by name, specialty, or workplace..."
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <Pressable
+              onPress={() => setSearchQuery("")}
+              style={({ pressed }) => [
+                styles.clearButton,
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+            </Pressable>
+          )}
+        </View>
 
-        {/* Filter Section */}
-        <Text style={styles.sectionLabel}>Filter by Specialization</Text>
+        {/* Gender Filter Section */}
+        <Text style={styles.sectionLabel}>{t("professionals.filterByGender")}</Text>
+        <View style={styles.genderFilterRow}>
+          {GENDERS.map((gender) => (
+            <Pressable
+              key={gender.id}
+              style={({ pressed }) => [
+                styles.genderChip,
+                selectedGender === gender.id && styles.genderChipActive,
+                pressed && { transform: [{ scale: 0.96 }] },
+              ]}
+              onPress={() => setSelectedGender(gender.id)}
+            >
+              <Ionicons
+                name={gender.icon as any}
+                size={18}
+                color={selectedGender === gender.id ? "#FFFFFF" : colors.textSecondary}
+              />
+              <Text
+                style={[
+                  styles.genderChipText,
+                  selectedGender === gender.id && styles.genderChipTextActive,
+                ]}
+              >
+                {gender.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Specialization Filter Section */}
+        <Text style={styles.sectionLabel}>{t("professionals.filterBySpecialization")}</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -197,20 +292,20 @@ export default function ProfessionalsScreen() {
               key={spec.id}
               style={({ pressed }) => [
                 styles.filterChip,
-                selectedFilter === spec.id && styles.filterChipActive,
+                selectedSpecialization === spec.id && styles.filterChipActive,
                 pressed && { transform: [{ scale: 0.96 }] },
               ]}
-              onPress={() => setSelectedFilter(spec.id)}
+              onPress={() => setSelectedSpecialization(spec.id)}
             >
               <Ionicons
                 name={spec.icon as any}
                 size={18}
-                color={selectedFilter === spec.id ? "#FFFFFF" : colors.textSecondary}
+                color={selectedSpecialization === spec.id ? "#FFFFFF" : colors.textSecondary}
               />
               <Text
                 style={[
                   styles.filterChipText,
-                  selectedFilter === spec.id && styles.filterChipTextActive,
+                  selectedSpecialization === spec.id && styles.filterChipTextActive,
                 ]}
               >
                 {spec.label}
@@ -219,13 +314,13 @@ export default function ProfessionalsScreen() {
                 <View
                   style={[
                     styles.filterCount,
-                    selectedFilter === spec.id && styles.filterCountActive,
+                    selectedSpecialization === spec.id && styles.filterCountActive,
                   ]}
                 >
                   <Text
                     style={[
                       styles.filterCountText,
-                      selectedFilter === spec.id && styles.filterCountTextActive,
+                      selectedSpecialization === spec.id && styles.filterCountTextActive,
                     ]}
                   >
                     {spec.count}
@@ -285,6 +380,18 @@ export default function ProfessionalsScreen() {
                   {professional.specialtyLabel}
                 </Text>
                 
+                {/* Workplace Location */}
+                <View style={styles.workplaceRow}>
+                  <Ionicons name="business-outline" size={12} color={colors.textMuted} />
+                  <Text style={styles.workplaceText} numberOfLines={1}>
+                    {professional.workplace}
+                  </Text>
+                  <View style={styles.metaDot} />
+                  <Text style={styles.workplaceArea} numberOfLines={1}>
+                    {professional.workplaceArea}
+                  </Text>
+                </View>
+
                 {/* Meta Row */}
                 <View style={styles.metaRow}>
                   <View style={styles.ratingWrap}>
@@ -331,13 +438,17 @@ export default function ProfessionalsScreen() {
             </View>
             <Text style={styles.emptyTitle}>No professionals found</Text>
             <Text style={styles.emptySubtitle}>
-              Try selecting a different specialization
+              {searchQuery ? `No results for "${searchQuery}"` : "Try selecting different filters"}
             </Text>
             <Pressable
               style={styles.resetButton}
-              onPress={() => setSelectedFilter("all")}
+              onPress={() => {
+                setSearchQuery("");
+                setSelectedSpecialization("all");
+                setSelectedGender("all");
+              }}
             >
-              <Text style={styles.resetButtonText}>Show All</Text>
+              <Text style={styles.resetButtonText}>Reset All</Text>
             </Pressable>
           </View>
         )}
@@ -395,15 +506,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard,
     borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 4,
     marginBottom: 20,
     gap: 10,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  searchPlaceholder: {
+  searchInput: {
+    flex: 1,
     fontSize: 15,
-    color: colors.textMuted,
+    color: colors.text,
+    paddingVertical: 10,
+  },
+  clearButton: {
+    padding: 4,
   },
   // Filter Section
   sectionLabel: {
@@ -413,6 +529,36 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 0.5,
+  },
+  // Gender Filter
+  genderFilterRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+  genderChip: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+  },
+  genderChipActive: {
+    backgroundColor: colors.secondary,
+    borderColor: colors.secondary,
+  },
+  genderChipText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textSecondary,
+  },
+  genderChipTextActive: {
+    color: "#FFFFFF",
   },
   filterScroll: {
     marginHorizontal: -20,
@@ -549,7 +695,23 @@ const styles = StyleSheet.create({
   specialtyLabel: {
     fontSize: 13,
     fontWeight: "500",
+    marginBottom: 4,
+  },
+  workplaceRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 6,
+    gap: 4,
+  },
+  workplaceText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: "500",
+    flex: 1,
+  },
+  workplaceArea: {
+    fontSize: 11,
+    color: colors.textMuted,
   },
   metaRow: {
     flexDirection: "row",

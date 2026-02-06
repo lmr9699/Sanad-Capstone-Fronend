@@ -3,7 +3,9 @@ import { Stack } from "expo-router";
 import { I18nManager } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "../context/AuthContext";
+import { FavoritesProvider } from "../context/FavoritesContext";
 import { LanguageProvider } from "../context/LanguageContext";
+import { ThemeProvider } from "../context/ThemeContext";
 
 // Force LTR layout - English only (MUST be set before any components render)
 if (I18nManager.isRTL) {
@@ -19,13 +21,17 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <LanguageProvider>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <Stack screenOptions={{ headerShown: false }} />
-          </AuthProvider>
-        </QueryClientProvider>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <FavoritesProvider>
+                <Stack screenOptions={{ headerShown: false }} />
+              </FavoritesProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
