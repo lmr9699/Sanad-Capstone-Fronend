@@ -1,43 +1,49 @@
-import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
-import { useAuth } from "../context/AuthContext";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-/**
- * Root index: redirect based on token presence
- */
+const ONBOARDING_KEY = "@sanad_onboarding_complete";
+
 export default function Index() {
-  const router = useRouter();
-  const { loading } = useAuth();
-  const [tokenChecked, setTokenChecked] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await SecureStore.getItemAsync("token");
-        if (token) {
-          // Token exists, redirect to home screen
-          router.replace("/(tabs)");
-        } else {
-          // No token, redirect to login
-          router.replace("/(auth)/login");
-        }
-      } catch {
-        // Error reading token, redirect to login
-        router.replace("/(auth)/login");
-      } finally {
-        setTokenChecked(true);
-      }
-    };
+    checkOnboarding();
+  }, []);
 
-    if (!loading) {
-      checkToken();
+  const checkOnboarding = async () => {
+    try {
+      const onboardingComplete = await AsyncStorage.getItem(ONBOARDING_KEY);
+      setShowOnboarding(onboardingComplete !== "true");
+    } catch (error) {
+      setShowOnboarding(false);
+    } finally {
+      setIsLoading(false);
     }
-  }, [loading, router]);
+  };
 
-  if (loading || !tokenChecked) {
-    return null; // Show nothing while checking token
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#7FB77E" />
+      </View>
+    );
   }
 
-  return null;
+  if (showOnboarding) {
+    return <Redirect href="/(onboarding)/welcome" />;
+  }
+
+  return <Redirect href="/(tabs)" />;
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#FAF9F6",
+  },
+});

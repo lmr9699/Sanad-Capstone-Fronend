@@ -1,9 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
-  ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,8 +10,8 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useQuery } from "@tanstack/react-query";
-import { getProfessionalDetails } from "../../../api/directory.api";
+import { useFavorites } from "../../../context/FavoritesContext";
+import { useLanguage } from "../../../context/LanguageContext";
 
 // Design system colors
 const colors = {
@@ -27,77 +26,304 @@ const colors = {
   border: "rgba(0, 0, 0, 0.06)",
 };
 
+// Professional data (in real app, this would come from API)
+// Note: Location refers to the professional's WORKPLACE (clinic/center), not personal address
+const PROFESSIONALS_DATA: Record<
+  string,
+  {
+    id: string;
+    name: string;
+    specialty: string;
+    specialtyLabel: string;
+    experience: string;
+    rating: number;
+    reviews: number;
+    availability: string;
+    verified: boolean;
+    color: string;
+    bio: string;
+    education: string[];
+    certifications: string[];
+    languages: string[];
+    services: string[];
+    workplace: string;
+    workplaceAddress: string;
+    consultationFee: string;
+    nextAvailable: string;
+  }
+> = {
+  "1": {
+    id: "1",
+    name: "Dr. Sarah Al-Mutairi",
+    specialty: "speech",
+    specialtyLabel: "Speech Therapist",
+    experience: "10 years",
+    rating: 4.9,
+    reviews: 127,
+    availability: "Available today",
+    verified: true,
+    color: "#7FB77E",
+    bio: "Dr. Sarah Al-Mutairi is a certified speech-language pathologist specializing in pediatric speech and language disorders. With over 10 years of experience in Kuwait, she has helped hundreds of children improve their communication skills through evidence-based therapy techniques.",
+    education: [
+      "PhD in Speech-Language Pathology, Kuwait University",
+      "MSc in Communication Disorders, American University of Kuwait",
+    ],
+    certifications: [
+      "Board Certified Specialist in Child Language",
+      "PROMPT Certified",
+      "Hanen Certified",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "Speech Delay Therapy",
+      "Articulation Therapy",
+      "Language Development",
+      "Fluency Disorders",
+    ],
+    workplace: "Kuwait Autism Center",
+    workplaceAddress: "Sharq, Capital Governorate, Kuwait",
+    consultationFee: "25 KWD",
+    nextAvailable: "Today, 3:00 PM",
+  },
+  "2": {
+    id: "2",
+    name: "Dr. Mohammed Al-Sabah",
+    specialty: "behavioral",
+    specialtyLabel: "Behavioral Specialist",
+    experience: "8 years",
+    rating: 4.8,
+    reviews: 98,
+    availability: "Next available: Tomorrow",
+    verified: true,
+    color: "#E8A838",
+    bio: "Dr. Mohammed Al-Sabah is a board-certified behavior analyst (BCBA) specializing in Applied Behavior Analysis (ABA) for children with autism and developmental disorders. He focuses on creating individualized treatment plans that help children reach their full potential.",
+    education: [
+      "Master's in Applied Behavior Analysis, Florida Institute of Technology",
+      "Bachelor's in Psychology, Kuwait University",
+    ],
+    certifications: [
+      "Board Certified Behavior Analyst (BCBA)",
+      "Registered Behavior Technician Supervisor",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "ABA Therapy",
+      "Behavior Modification",
+      "Social Skills Training",
+      "Parent Training",
+    ],
+    workplace: "Hope Therapy Clinic",
+    workplaceAddress: "Mirqab, Capital Governorate, Kuwait",
+    consultationFee: "30 KWD",
+    nextAvailable: "Tomorrow, 10:00 AM",
+  },
+  "3": {
+    id: "3",
+    name: "Dr. Fatima Al-Kandari",
+    specialty: "occupational",
+    specialtyLabel: "Occupational Therapist",
+    experience: "12 years",
+    rating: 4.9,
+    reviews: 156,
+    availability: "Available today",
+    verified: true,
+    color: "#5F8F8B",
+    bio: "Dr. Fatima Al-Kandari is an experienced occupational therapist who helps children develop the skills they need for daily living and academic success. She specializes in sensory integration therapy and fine motor skill development.",
+    education: [
+      "Doctorate in Occupational Therapy, University of Jordan",
+      "BSc in Occupational Therapy, Cairo University",
+    ],
+    certifications: [
+      "Sensory Integration and Praxis Tests (SIPT) Certified",
+      "Handwriting Without Tears Certified",
+    ],
+    languages: ["Arabic", "English", "French"],
+    services: [
+      "Sensory Integration Therapy",
+      "Fine Motor Skills Development",
+      "Self-Care Training",
+      "School Readiness",
+    ],
+    workplace: "Al-Wafaa Rehabilitation Center",
+    workplaceAddress: "Salmiya, Hawalli Governorate, Kuwait",
+    consultationFee: "28 KWD",
+    nextAvailable: "Today, 5:00 PM",
+  },
+  "4": {
+    id: "4",
+    name: "Dr. Omar Al-Rashidi",
+    specialty: "educational",
+    specialtyLabel: "Educational Psychologist",
+    experience: "6 years",
+    rating: 4.7,
+    reviews: 67,
+    availability: "Next available: Wed",
+    verified: true,
+    color: "#7B68EE",
+    bio: "Dr. Omar Al-Rashidi is an educational psychologist dedicated to helping children with learning differences achieve academic success. He conducts comprehensive assessments and develops personalized learning strategies aligned with Kuwait's educational system.",
+    education: [
+      "PhD in Educational Psychology, University of Edinburgh",
+      "MA in Special Education, Lebanese American University",
+    ],
+    certifications: [
+      "Licensed Educational Psychologist",
+      "Certified Learning Disabilities Specialist",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "Psychological Assessment",
+      "Learning Disability Evaluation",
+      "IEP Development",
+      "Academic Counseling",
+    ],
+    workplace: "Al-Amal Learning Center",
+    workplaceAddress: "Jahra City, Jahra Governorate, Kuwait",
+    consultationFee: "35 KWD",
+    nextAvailable: "Wednesday, 11:00 AM",
+  },
+  "5": {
+    id: "5",
+    name: "Dr. Layla Al-Enezi",
+    specialty: "speech",
+    specialtyLabel: "Speech Therapist",
+    experience: "15 years",
+    rating: 5.0,
+    reviews: 203,
+    availability: "Available today",
+    verified: true,
+    color: "#7FB77E",
+    bio: "Dr. Layla Al-Enezi is one of the most experienced speech therapists in Kuwait, with 15 years of expertise in treating children with complex communication disorders. She is known for her patient-centered approach and exceptional outcomes.",
+    education: [
+      "PhD in Communication Sciences, Boston University",
+      "MSc in Speech-Language Pathology, McGill University",
+    ],
+    certifications: [
+      "ASHA Certified",
+      "PROMPT Level 3 Instructor",
+      "AAC Specialist",
+    ],
+    languages: ["Arabic", "English", "French"],
+    services: [
+      "Complex Communication Disorders",
+      "Augmentative Communication (AAC)",
+      "Childhood Apraxia of Speech",
+      "Feeding and Swallowing",
+    ],
+    workplace: "Al-Noor Special Education School",
+    workplaceAddress: "Khaitan, Farwaniya Governorate, Kuwait",
+    consultationFee: "40 KWD",
+    nextAvailable: "Today, 4:30 PM",
+  },
+  "6": {
+    id: "6",
+    name: "Dr. Youssef Al-Hajri",
+    specialty: "behavioral",
+    specialtyLabel: "Behavioral Analyst",
+    experience: "9 years",
+    rating: 4.8,
+    reviews: 112,
+    availability: "Available today",
+    verified: true,
+    color: "#E8A838",
+    bio: "Dr. Youssef Al-Hajri specializes in behavioral interventions for children with autism spectrum disorder. His approach combines ABA principles with naturalistic teaching strategies to promote meaningful skill development.",
+    education: [
+      "Master's in Behavior Analysis, Western Michigan University",
+      "Bachelor's in Psychology, American University of Kuwait",
+    ],
+    certifications: [
+      "Board Certified Behavior Analyst (BCBA)",
+      "Early Start Denver Model (ESDM) Certified",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "Early Intervention",
+      "Verbal Behavior Therapy",
+      "Naturalistic Teaching",
+      "Behavior Support Plans",
+    ],
+    workplace: "Kuwait Autism Center",
+    workplaceAddress: "Sharq, Capital Governorate, Kuwait",
+    consultationFee: "28 KWD",
+    nextAvailable: "Today, 2:00 PM",
+  },
+  "7": {
+    id: "7",
+    name: "Dr. Nour Al-Shammari",
+    specialty: "occupational",
+    specialtyLabel: "Occupational Therapist",
+    experience: "7 years",
+    rating: 4.6,
+    reviews: 89,
+    availability: "Next available: Thu",
+    verified: false,
+    color: "#5F8F8B",
+    bio: "Dr. Nour Al-Shammari is an occupational therapist focusing on helping children with developmental delays and sensory processing challenges. She creates fun, engaging therapy sessions that motivate children to learn new skills.",
+    education: [
+      "MSc in Occupational Therapy, University of Toronto",
+      "BSc in Rehabilitation Sciences, Kuwait University",
+    ],
+    certifications: [
+      "Certified Autism Specialist",
+      "DIR/Floortime Trained",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "Developmental Delay Therapy",
+      "Sensory Processing",
+      "Play-Based Therapy",
+      "Visual Motor Skills",
+    ],
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceAddress: "Abu Fatira, Mubarak Al-Kabeer Governorate, Kuwait",
+    consultationFee: "25 KWD",
+    nextAvailable: "Thursday, 9:00 AM",
+  },
+  "8": {
+    id: "8",
+    name: "Dr. Ahmad Al-Fadhli",
+    specialty: "physical",
+    specialtyLabel: "Physical Therapist",
+    experience: "11 years",
+    rating: 4.9,
+    reviews: 145,
+    availability: "Available today",
+    verified: true,
+    color: "#D9534F",
+    bio: "Dr. Ahmad Al-Fadhli is a pediatric physical therapist specializing in gross motor development and rehabilitation. He works with children of all ages to improve mobility, strength, and coordination through evidence-based interventions.",
+    education: [
+      "Doctorate in Physical Therapy, University of Southern California",
+      "BSc in Physical Therapy, Ain Shams University",
+    ],
+    certifications: [
+      "Pediatric Clinical Specialist (PCS)",
+      "NDT Certified",
+      "Kinesio Taping Certified",
+    ],
+    languages: ["Arabic", "English"],
+    services: [
+      "Gross Motor Development",
+      "Gait Training",
+      "Strength and Balance",
+      "Post-Surgery Rehabilitation",
+    ],
+    workplace: "Kuwait Physical Therapy Center",
+    workplaceAddress: "Abu Fatira, Mubarak Al-Kabeer Governorate, Kuwait",
+    consultationFee: "28 KWD",
+    nextAvailable: "Today, 1:00 PM",
+  },
+};
+
 export default function ProfessionalDetailsScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const { t } = useLanguage();
+  const professional = PROFESSIONALS_DATA[id as string];
 
-  // Fetch professional details from API
-  const { data: professional, isLoading, error } = useQuery({
-    queryKey: ["professional", id],
-    queryFn: () => getProfessionalDetails(id as string),
-    enabled: !!id,
-    retry: false,
-  });
-
-  const handleBookAppointment = () => {
-    if (!professional) return;
-    Alert.alert(
-      "Book Appointment",
-      `Would you like to book an appointment with ${professional.name}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Confirm Booking",
-          onPress: () => {
-            Alert.alert("Success", "Your appointment request has been sent!");
-          },
-        },
-      ]
-    );
-  };
-
-  // Loading State
-  if (isLoading) {
+  if (!professional) {
     return (
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={styles.header}>
-          <Pressable
-            style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Professional Profile</Text>
-          <View style={styles.headerRight} />
-        </View>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading professional details...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Error State
-  if (error || !professional) {
-    return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
-        <View style={styles.header}>
-          <Pressable
-            style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </Pressable>
-          <Text style={styles.headerTitle}>Professional Profile</Text>
-          <View style={styles.headerRight} />
-        </View>
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
           <Text style={styles.errorText}>Professional not found</Text>
-          <Text style={styles.errorSubtext}>
-            {error ? "Failed to load professional details" : "The professional you're looking for doesn't exist"}
-          </Text>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>Go Back</Text>
           </Pressable>
@@ -105,6 +331,34 @@ export default function ProfessionalDetailsScreen() {
       </SafeAreaView>
     );
   }
+
+  const { addFavorite, removeFavorite, isFavorite } = useFavorites();
+  const isFav = isFavorite(professional.id, "professional");
+
+  const handleToggleFavorite = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (isFav) {
+      await removeFavorite(professional.id, "professional");
+    } else {
+      await addFavorite({
+        id: professional.id,
+        type: "professional",
+        name: professional.name,
+        subtitle: professional.specialtyLabel,
+      });
+    }
+  };
+
+  const handleBookAppointment = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    router.push({
+      pathname: "/(tabs)/professionals/book-appointment",
+      params: {
+        professionalId: professional.id,
+        professionalName: professional.name,
+      },
+    } as any);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -116,9 +370,16 @@ export default function ProfessionalDetailsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
-        <Text style={styles.headerTitle}>Professional Profile</Text>
-        <Pressable style={styles.shareBtn}>
-          <Ionicons name="share-outline" size={22} color={colors.text} />
+        <Text style={styles.headerTitle}>{t("professionals.profile")}</Text>
+        <Pressable 
+          style={({ pressed }) => [styles.shareBtn, pressed && { opacity: 0.7 }]}
+          onPress={handleToggleFavorite}
+        >
+          <Ionicons 
+            name={isFav ? "heart" : "heart-outline"} 
+            size={22} 
+            color={isFav ? "#FF6B6B" : colors.text} 
+          />
         </Pressable>
       </View>
 
@@ -157,7 +418,7 @@ export default function ProfessionalDetailsScreen() {
                 <Ionicons name="star" size={18} color="#F5A623" />
               </View>
               <Text style={styles.statValue}>{professional.rating}</Text>
-              <Text style={styles.statLabel}>{professional.reviews} reviews</Text>
+              <Text style={styles.statLabel}>{professional.reviews} {t("professionals.reviews")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -165,7 +426,7 @@ export default function ProfessionalDetailsScreen() {
                 <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
               </View>
               <Text style={styles.statValue}>{professional.experience}</Text>
-              <Text style={styles.statLabel}>Experience</Text>
+              <Text style={styles.statLabel}>{t("professionals.experience")}</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
@@ -183,7 +444,7 @@ export default function ProfessionalDetailsScreen() {
           <View style={styles.quickInfoRow}>
             <Ionicons name="calendar-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Next Available</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.nextAvailable")}</Text>
               <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
             </View>
           </View>
@@ -191,29 +452,30 @@ export default function ProfessionalDetailsScreen() {
           <View style={styles.quickInfoRow}>
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Consultation Fee</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.consultationFee")}</Text>
               <Text style={styles.quickInfoValue}>{professional.consultationFee}</Text>
             </View>
           </View>
           <View style={styles.quickInfoDivider} />
           <View style={styles.quickInfoRow}>
-            <Ionicons name="location-outline" size={20} color={colors.primary} />
+            <Ionicons name="business-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Location</Text>
-              <Text style={styles.quickInfoValue}>{professional.location}</Text>
+              <Text style={styles.quickInfoLabel}>{t("professionals.worksAt")}</Text>
+              <Text style={styles.quickInfoValue}>{professional.workplace}</Text>
+              <Text style={styles.quickInfoSubValue}>{professional.workplaceAddress}</Text>
             </View>
           </View>
         </View>
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.about")}</Text>
           <Text style={styles.bioText}>{professional.bio}</Text>
         </View>
 
         {/* Services Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Services Offered</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.servicesOffered")}</Text>
           <View style={styles.servicesList}>
             {professional.services.map((service, index) => (
               <View key={index} style={styles.serviceItem}>
@@ -226,7 +488,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Education Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.education")}</Text>
           {professional.education.map((edu, index) => (
             <View key={index} style={styles.educationItem}>
               <Ionicons name="school-outline" size={18} color={colors.textMuted} />
@@ -237,7 +499,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Certifications Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Certifications</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.certifications")}</Text>
           <View style={styles.certificationsList}>
             {professional.certifications.map((cert, index) => (
               <View key={index} style={styles.certificationBadge}>
@@ -250,7 +512,7 @@ export default function ProfessionalDetailsScreen() {
 
         {/* Languages Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Languages</Text>
+          <Text style={styles.sectionTitle}>{t("professionals.languages")}</Text>
           <View style={styles.languagesRow}>
             {professional.languages.map((lang, index) => (
               <View key={index} style={styles.languageBadge}>
@@ -276,7 +538,7 @@ export default function ProfessionalDetailsScreen() {
           ]}
           onPress={handleBookAppointment}
         >
-          <Text style={styles.bookButtonText}>Book Appointment</Text>
+          <Text style={styles.bookButtonText}>{t("professionals.bookAppointment")}</Text>
           <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
         </Pressable>
       </View>
@@ -324,7 +586,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   // Hero Section
   heroSection: {
@@ -433,6 +695,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.text,
+  },
+  quickInfoSubValue: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   quickInfoDivider: {
     height: 1,
@@ -587,27 +854,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#FFFFFF",
-  },
-  headerRight: {
-    width: 40,
-  },
-  // Loading & Error States
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  errorSubtext: {
-    marginTop: 8,
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: "center",
-    marginBottom: 20,
   },
 });

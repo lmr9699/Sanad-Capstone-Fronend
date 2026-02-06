@@ -57,7 +57,7 @@ export default function TabsLayout() {
         },
       }}
     >
-      {/* Main tabs - 4 tabs evenly distributed */}
+      {/* Main tabs - 5 tabs evenly distributed */}
       <Tabs.Screen
         name="index"
         options={{
@@ -65,7 +65,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -78,7 +78,20 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}
-              size={24}
+              size={22}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="centers"
+        options={{
+          title: "Centers",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "business" : "business-outline"}
+              size={22}
               color={color}
             />
           ),
@@ -91,7 +104,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "people" : "people-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -104,7 +117,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "person" : "person-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
