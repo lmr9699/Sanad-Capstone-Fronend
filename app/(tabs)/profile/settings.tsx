@@ -92,7 +92,7 @@ export default function SettingsScreen() {
       backgroundColor: colors.backgroundCard,
       borderRadius: 20,
       padding: 20,
-      width: "100%",
+      width: "100%" as const,
       maxWidth: 340,
     },
     modalOption: {

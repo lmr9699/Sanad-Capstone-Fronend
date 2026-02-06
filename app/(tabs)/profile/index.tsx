@@ -9,6 +9,7 @@ const colors = {
   bgApp: "#FAF9F6",
   bgCard: "#FFFFFF",
   primary: "#7FB77E",
+  secondary: "#5F8F8B",
   text: "#2F2F2F",
   textSecondary: "#4A4A4A",
   textMuted: "#8A8A8A",
