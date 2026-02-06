@@ -89,9 +89,9 @@ export default function WelcomeScreen() {
   const completeOnboarding = async () => {
     try {
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-      router.replace("/(auth)/login");
+      router.replace("/(tabs)");
     } catch (error) {
-      router.replace("/(auth)/login");
+      router.replace("/(tabs)");
     }
   };
 

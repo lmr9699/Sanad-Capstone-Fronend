@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,6 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLanguage } from "../../../context/LanguageContext";
 import { ThemeMode, useTheme } from "../../../context/ThemeContext";
 import { Locale } from "../../../i18n";
+
+const ONBOARDING_KEY = "@sanad_onboarding_complete";
 
 const LANGUAGES = [
   { id: "en" as Locale, label: "English", nativeLabel: "English", icon: "🇺🇸" },
@@ -53,6 +56,30 @@ export default function SettingsScreen() {
     router.push({
       pathname: "/(tabs)/profile/privacy",
     } as any);
+  };
+
+  const handleResetOnboarding = () => {
+    Alert.alert(
+      isArabic ? "إعادة تعيين الترحيب" : "Reset Onboarding",
+      isArabic 
+        ? "سيظهر الترحيب عند إعادة تشغيل التطبيق. هل تريد المتابعة؟" 
+        : "The welcome screens will show on next app restart. Continue?",
+      [
+        { text: isArabic ? "إلغاء" : "Cancel", style: "cancel" },
+        {
+          text: isArabic ? "إعادة تعيين" : "Reset",
+          onPress: async () => {
+            await AsyncStorage.removeItem(ONBOARDING_KEY);
+            Alert.alert(
+              isArabic ? "تم" : "Done",
+              isArabic 
+                ? "أعد تشغيل التطبيق لرؤية شاشات الترحيب" 
+                : "Restart the app to see the welcome screens"
+            );
+          },
+        },
+      ]
+    );
   };
 
   // Dynamic styles based on theme
@@ -232,6 +259,26 @@ export default function SettingsScreen() {
               </View>
               <Text style={[styles.settingLabel, dynamicStyles.text]}>
                 {isArabic ? "حول التطبيق" : "About"}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+
+          {/* Reset Onboarding - For Testing */}
+          <Pressable
+            style={({ pressed }) => [
+              dynamicStyles.settingItem,
+              pressed && { opacity: 0.7 },
+              { marginTop: 12 },
+            ]}
+            onPress={handleResetOnboarding}
+          >
+            <View style={styles.settingLeft}>
+              <View style={[styles.settingIcon, { backgroundColor: "#E8783020" }]}>
+                <Ionicons name="refresh" size={20} color="#E87830" />
+              </View>
+              <Text style={[styles.settingLabel, dynamicStyles.text]}>
+                {isArabic ? "إعادة عرض الترحيب" : "Show Welcome Again"}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
