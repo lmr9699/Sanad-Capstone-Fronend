@@ -36,7 +36,7 @@ const FAQS: FAQ[] = [
     id: "1",
     question: "How do I book an appointment?",
     questionAr: "كيف أحجز موعداً؟",
-    answer: "Navigate to the Experts tab, select a professional, and tap 'Book Appointment'. Choose your preferred date and time from the available slots.",
+    answer: "Navigate to the Professionals tab, select a professional, and tap 'Book Appointment'. Choose your preferred date and time from the available slots.",
     answerAr: "انتقل إلى تبويب الخبراء، اختر متخصصاً، ثم اضغط على 'حجز موعد'. اختر التاريخ والوقت المناسب من الأوقات المتاحة.",
   },
   {

@@ -100,7 +100,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="professionals"
         options={{
-          title: "Experts",
+          title: "Professionals",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "people" : "people-outline"}

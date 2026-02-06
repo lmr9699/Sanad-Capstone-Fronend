@@ -73,7 +73,7 @@ export default function FavoritesScreen() {
           <View style={styles.statCard}>
             <Ionicons name="people" size={24} color={colors.primary} />
             <Text style={styles.statNumber}>{professionals.length}</Text>
-            <Text style={styles.statLabel}>{isArabic ? "خبراء" : "Experts"}</Text>
+            <Text style={styles.statLabel}>{isArabic ? "متخصصون" : "Professionals"}</Text>
           </View>
           <View style={styles.statCard}>
             <Ionicons name="business" size={24} color={colors.secondary} />
@@ -86,7 +86,7 @@ export default function FavoritesScreen() {
         {professionals.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>
-              {isArabic ? "الخبراء المفضلون" : "Favorite Experts"}
+              {isArabic ? "المتخصصون المفضلون" : "Favorite Professionals"}
             </Text>
             {professionals.map((item) => (
               <Pressable
@@ -154,7 +154,7 @@ export default function FavoritesScreen() {
             <Text style={styles.emptySubtitle}>
               {isArabic
                 ? "احفظ الخبراء والمراكز المفضلة لديك هنا"
-                : "Save your favorite experts and centers here"}
+                : "Save your favorite professionals and centers here"}
             </Text>
             <View style={styles.emptyButtons}>
               <Pressable
@@ -163,7 +163,7 @@ export default function FavoritesScreen() {
               >
                 <Ionicons name="people" size={18} color="#FFFFFF" />
                 <Text style={styles.emptyButtonText}>
-                  {isArabic ? "تصفح الخبراء" : "Browse Experts"}
+                  {isArabic ? "تصفح المتخصصين" : "Browse Professionals"}
                 </Text>
               </Pressable>
               <Pressable
