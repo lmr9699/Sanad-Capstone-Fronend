@@ -232,7 +232,10 @@ export default function ServiceDetailsScreen() {
               pressed && { opacity: 0.8 },
             ]}
             onPress={() => {
-              Alert.alert("Coming Soon", "Provider directory will be available soon!");
+              router.push({
+                pathname: "/(tabs)/services/service-providers",
+                params: { serviceName: service.name },
+              } as any);
             }}
           >
             <Text style={styles.viewProvidersBtnText}>View All</Text>

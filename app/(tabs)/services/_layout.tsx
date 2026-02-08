@@ -5,6 +5,7 @@ export default function ServicesLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="service-details" />
+      <Stack.Screen name="service-providers" />
     </Stack>
   );
 }
