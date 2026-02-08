@@ -57,28 +57,6 @@ export default function ProfileScreen() {
           <Text style={styles.userEmail}>{userEmail}</Text>
         </View>
 
-        {/* Setup Profile Card - Show if no user info */}
-        {!hasUserInfo && (
-          <Pressable
-            style={({ pressed }) => [
-              styles.setupCard,
-              pressed && { opacity: 0.9 },
-            ]}
-            onPress={() => router.push("/(tabs)/profile/edit-profile" as any)}
-          >
-            <View style={styles.setupIcon}>
-              <Ionicons name="person-add" size={24} color={colors.primary} />
-            </View>
-            <View style={styles.setupContent}>
-              <Text style={styles.setupTitle}>Complete Your Profile</Text>
-              <Text style={styles.setupSubtitle}>
-                Add your name and email to personalize your experience
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.primary} />
-          </Pressable>
-        )}
-
         {/* Profile Info Card */}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Account Information</Text>
@@ -91,12 +69,6 @@ export default function ProfileScreen() {
               <Text style={styles.infoLabel}>Full Name</Text>
               <Text style={styles.infoValue}>{userName}</Text>
             </View>
-            <Pressable
-              style={styles.editIconButton}
-              onPress={() => router.push("/(tabs)/profile/edit-profile" as any)}
-            >
-              <Ionicons name="pencil-outline" size={18} color={colors.textMuted} />
-            </Pressable>
           </View>
 
           <View style={styles.divider} />
@@ -109,12 +81,6 @@ export default function ProfileScreen() {
               <Text style={styles.infoLabel}>Email</Text>
               <Text style={styles.infoValue}>{userEmail}</Text>
             </View>
-            <Pressable
-              style={styles.editIconButton}
-              onPress={() => router.push("/(tabs)/profile/edit-profile" as any)}
-            >
-              <Ionicons name="pencil-outline" size={18} color={colors.textMuted} />
-            </Pressable>
           </View>
         </View>
 
