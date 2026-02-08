@@ -380,36 +380,12 @@ export default function ProfessionalsScreen() {
                   {professional.specialtyLabel}
                 </Text>
                 
-                {/* Workplace Location */}
-                <View style={styles.workplaceRow}>
-                  <Ionicons name="business-outline" size={12} color={colors.textMuted} />
-                  <Text style={styles.workplaceText} numberOfLines={1}>
-                    {professional.workplace}
-                  </Text>
-                  <View style={styles.metaDot} />
-                  <Text style={styles.workplaceArea} numberOfLines={1}>
-                    {professional.workplaceArea}
-                  </Text>
-                </View>
-
-                {/* Meta Row */}
-                <View style={styles.metaRow}>
-                  <View style={styles.ratingWrap}>
-                    <Ionicons name="star" size={14} color="#F5A623" />
-                    <Text style={styles.ratingText}>{professional.rating}</Text>
-                    <Text style={styles.reviewsText}>({professional.reviews})</Text>
-                  </View>
-                  <View style={styles.metaDot} />
-                  <Text style={styles.experienceText}>{professional.experience}</Text>
-                </View>
-
-                {/* Availability */}
+                {/* Next Session Availability */}
                 <View style={styles.availabilityRow}>
-                  <View
-                    style={[
-                      styles.availabilityDot,
-                      professional.availability.includes("today") && styles.availabilityDotActive,
-                    ]}
+                  <Ionicons 
+                    name="calendar" 
+                    size={14} 
+                    color={professional.availability.includes("today") ? colors.primary : colors.secondary} 
                   />
                   <Text
                     style={[
@@ -417,8 +393,13 @@ export default function ProfessionalsScreen() {
                       professional.availability.includes("today") && styles.availabilityTextActive,
                     ]}
                   >
-                    {professional.availability}
+                    Next Session: {professional.availability.replace("Available ", "").replace("Next available: ", "")}
                   </Text>
+                </View>
+
+                {/* Meta Row */}
+                <View style={styles.metaRow}>
+                  <Text style={styles.experienceText}>{professional.experience} experience</Text>
                 </View>
               </View>
 
@@ -758,11 +739,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50",
   },
   availabilityText: {
-    fontSize: 12,
-    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.secondary,
+    marginLeft: 6,
   },
   availabilityTextActive: {
-    color: "#4CAF50",
+    color: colors.primary,
     fontWeight: "500",
   },
   arrowWrap: {
