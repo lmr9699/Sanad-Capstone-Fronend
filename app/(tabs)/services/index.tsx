@@ -73,11 +73,6 @@ export default function ServicesScreen() {
             <Text style={styles.statNumber}>{totalProviders}</Text>
             <Text style={styles.statLabel}>Providers</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{avgRating.toFixed(1)}</Text>
-            <Text style={styles.statLabel}>Avg Rating</Text>
-          </View>
         </View>
 
         {/* Loading State */}
@@ -143,18 +138,13 @@ export default function ServicesScreen() {
                   {service.description}
                 </Text>
                 <View style={styles.serviceMeta}>
-                  <View style={styles.ratingWrap}>
-                    <Ionicons name="star" size={14} color="#F5A623" />
-                    <Text style={styles.ratingText}>{service.rating}</Text>
-                  </View>
-                  <View style={styles.metaDot} />
                   <Ionicons
-                    name="person-outline"
-                    size={14}
-                    color={colors.textMuted}
+                    name="people"
+                    size={16}
+                    color={colors.primary}
                   />
                   <Text style={styles.providersText}>
-                    {service.providers} providers
+                    {service.providers} Providers
                   </Text>
                 </View>
               </View>
@@ -338,8 +328,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   providersText: {
-    fontSize: 12,
-    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.text,
   },
   arrowWrap: {
     width: 32,
