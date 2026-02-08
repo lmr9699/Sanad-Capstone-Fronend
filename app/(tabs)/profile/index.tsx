@@ -139,22 +139,6 @@ export default function ProfileScreen() {
               styles.settingsRow,
               pressed && { opacity: 0.7 },
             ]}
-            onPress={() => router.push("/(tabs)/profile/appointments" as any)}
-          >
-            <View style={[styles.settingsIcon, { backgroundColor: `${colors.primary}15` }]}>
-              <Ionicons name="calendar" size={20} color={colors.primary} />
-            </View>
-            <Text style={styles.settingsText}>My Appointments</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-          </Pressable>
-
-          <View style={styles.divider} />
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.settingsRow,
-              pressed && { opacity: 0.7 },
-            ]}
             onPress={() => router.push("/(tabs)/profile/favorites" as any)}
           >
             <View style={[styles.settingsIcon, { backgroundColor: "#FF6B6B15" }]}>
