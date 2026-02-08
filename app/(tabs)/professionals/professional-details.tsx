@@ -431,10 +431,12 @@ export default function ProfessionalDetailsScreen() {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <View style={styles.statIconWrap}>
-                <Ionicons name="location-outline" size={18} color={colors.secondary} />
+                <Ionicons name="calendar" size={18} color={professional.availability.includes("today") ? colors.primary : colors.secondary} />
               </View>
-              <Text style={styles.statValue}>2.5 km</Text>
-              <Text style={styles.statLabel}>Away</Text>
+              <Text style={[styles.statValue, professional.availability.includes("today") && { color: colors.primary }]}>
+                {professional.availability.includes("today") ? "Today" : professional.availability.replace("Next available: ", "")}
+              </Text>
+              <Text style={styles.statLabel}>Next Session</Text>
             </View>
           </View>
         </View>
