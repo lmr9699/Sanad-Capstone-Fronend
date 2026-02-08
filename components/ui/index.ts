@@ -18,4 +18,4 @@ export { Input } from "./Input";
 export { LanguageSwitcher } from "./LanguageSwitcher";
 export { SectionHeader } from "./SectionHeader";
 export { Toggle } from "./Toggle";
-
+export { StarRating } from "./StarRating";  

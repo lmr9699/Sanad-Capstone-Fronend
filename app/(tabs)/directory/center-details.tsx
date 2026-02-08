@@ -1,19 +1,34 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getCenterDetails } from "../../../api/directory.api";
+import { getCenterDetails, submitCenterReview } from "../../../api/directory.api";
+import { ReviewModal } from "../../../components/directory/ReviewModal";
+import { Button } from "../../../components/ui/Button";
+import { StarRating } from "../../../components/ui/StarRating";
 import { colors, sectionSpacing, spacing, typography } from "../../../theme";
 import { useRouter } from "expo-router";
 import { Linking, Platform } from "react-native";
+import { Review } from "../../../types/directory.types";
+
 
 export default function CenterDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const { data: center, isLoading, isError } = useQuery({
     queryKey: ["center", id],
     queryFn: () => getCenterDetails(id as string),
+  });
+  const submitReviewMutation = useMutation({
+    mutationFn: ({ rating, comment }: { rating: number; comment: string }) =>
+      submitCenterReview(id as string, { rating, comment }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["center", id] });
+    },
   });
   
   const handleCall = () => {
@@ -40,30 +55,34 @@ export default function CenterDetailsScreen() {
       Linking.openURL(mapUrl);
     }
   };
-  const renderStars = (rating: number) => {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
-    
-    return (
-      <View style={styles.starsContainer}>
-        {[...Array(fullStars)].map((_, i) => (
-          <Text key={`full-${i}`} style={styles.starFilled}>★</Text>
-        ))}
-        {hasHalfStar && <Text style={styles.starHalf}>★</Text>}
-        {[...Array(emptyStars)].map((_, i) => (
-          <Text key={`empty-${i}`} style={styles.starEmpty}>☆</Text>
-        ))}
-        <Text style={styles.ratingNumber}>{rating.toFixed(1)}</Text>
-      </View>
-    );
+  const handleSubmitReview = async (rating: number, comment: string) => {
+    await submitReviewMutation.mutateAsync({ rating, comment });
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+  
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.wrapper} edges={["top"]}>
         <View style={styles.container}>
           <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (isError || !center) {
+    return (
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.errorText}>Failed to load center details</Text>
         </View>
       </SafeAreaView>
     );
@@ -75,11 +94,64 @@ export default function CenterDetailsScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.container}
       >
-        <Text style={styles.title}>{center?.name}</Text>
-        <Text style={styles.address}>{center?.address}</Text>
-        <Text style={styles.phone}>{center?.phone}</Text>
-        <Text style={styles.description}>{center?.description}</Text>
+               <Text style={styles.title}>{center.name}</Text>
+        
+        {center.rating !== undefined && (
+          <View style={styles.ratingSection}>
+            <StarRating
+              rating={center.rating}
+              readonly={true}
+              size={20}
+              showRatingNumber={true}
+            />
+            {center.reviews && center.reviews.length > 0 && (
+              <Text style={styles.reviewCount}>
+                ({center.reviews.length} {center.reviews.length === 1 ? "review" : "reviews"})
+              </Text>
+            )}
+          </View>
+        )}
+
+        <Text style={styles.address}>{center.address}</Text>
+        <Text style={styles.phone}>{center.phone}</Text>
+        <Text style={styles.description}>{center.description}</Text>
+
+        <View style={styles.reviewButtonContainer}>
+          <Button
+            title="Rate & Review"
+            onPress={() => setShowReviewModal(true)}
+            fullWidth
+          />
+        </View>
+
+        {center.reviews && center.reviews.length > 0 && (
+          <View style={styles.reviewsSection}>
+            <Text style={styles.sectionTitle}>Reviews</Text>
+            {center.reviews.map((review: Review) => (
+              <View key={review.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewerInfo}>
+                    <Text style={styles.reviewerName}>{review.userName}</Text>
+                    <StarRating
+                      rating={review.rating}
+                      readonly={true}
+                      size={16}
+                    />
+                  </View>
+                  <Text style={styles.reviewDate}>{formatDate(review.createdAt)}</Text>
+                </View>
+                <Text style={styles.reviewComment}>{review.comment}</Text>
+              </View>
+            ))}
+          </View>
+        )} 
       </ScrollView>
+      <ReviewModal
+        visible={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        onSubmit={handleSubmitReview}
+        isLoading={submitReviewMutation.isPending}
+      />
     </SafeAreaView>
   );
 }
@@ -120,6 +192,35 @@ const styles = StyleSheet.create({
     lineHeight: typography.bodyLineHeight,
     color: colors.textMuted,
     marginBottom: spacing.lg,
+  },
+  errorText: {
+    fontSize: typography.body,
+    color: colors.error,
+  },
+  ratingSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  reviewCount: {
+    fontSize: typography.bodySmall,
+    color: colors.textMuted,
+  },
+  reviewButtonContainer: {
+    marginBottom: spacing.xl,
+  },
+  reviewsSection: {
+    marginTop: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: typography.h3,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+    marginBottom: spacing.lg,
+  },
+  reviewerInfo: {
+    flex: 1,
   },
   backButton: {
     paddingVertical: 10,
@@ -170,12 +271,6 @@ const styles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#1f2937",
-    marginBottom: 12,
   },
   description: {
     fontSize: typography.body,

@@ -1,4 +1,4 @@
-import { HealthCenter, Professional } from "../types/directory.types";
+import { HealthCenter, Professional, Review } from "../types/directory.types";
 import instance from "./axios";
 
 
@@ -73,5 +73,34 @@ export const getCenterDetails = async (centerId: string): Promise<HealthCenter> 
 
 export const getProfessionalDetails = async (professionalId: string): Promise<Professional> => {
   const response = await instance.get(`/directory/professionals/${professionalId}`);
+  return response.data;
+};
+
+
+export const submitCenterReview = async (
+  centerId: string,
+  review: {
+    rating: number;      
+    comment: string;     
+  }
+): Promise<Review> => {
+  
+  const response = await instance.post(
+    `/directory/centers/${centerId}/reviews`, 
+    review
+  );
+  return response.data;
+};
+export const submitProfessionalReview = async (
+  professionalId: string,
+  review: {
+    rating: number;      
+    comment: string;     
+  }
+): Promise<Review> => {
+  const response = await instance.post(
+    `/directory/professionals/${professionalId}/reviews`, 
+    review
+  );
   return response.data;
 };
