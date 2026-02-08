@@ -428,29 +428,11 @@ export default function ProfessionalDetailsScreen() {
               <Text style={styles.statValue}>{professional.experience}</Text>
               <Text style={styles.statLabel}>{t("professionals.experience")}</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="calendar" size={18} color={professional.nextAvailable.includes("Today") ? colors.primary : colors.secondary} />
-              </View>
-              <Text style={[styles.statValue, professional.nextAvailable.includes("Today") && { color: colors.primary }]}>
-                {professional.nextAvailable.replace("Today, ", "").replace("Tomorrow, ", "")}
-              </Text>
-              <Text style={styles.statLabel}>{professional.nextAvailable.includes("Today") ? "Today" : professional.nextAvailable.split(",")[0]}</Text>
-            </View>
           </View>
         </View>
 
         {/* Quick Info Card */}
         <View style={styles.quickInfoCard}>
-          <View style={styles.quickInfoRow}>
-            <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-            <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>{t("professionals.nextAvailable")}</Text>
-              <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
-            </View>
-          </View>
-          <View style={styles.quickInfoDivider} />
           <View style={styles.quickInfoRow}>
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
