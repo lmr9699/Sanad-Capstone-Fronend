@@ -55,18 +55,6 @@ export default function ProfileScreen() {
           </View>
           <Text style={styles.userName}>{userName}</Text>
           <Text style={styles.userEmail}>{userEmail}</Text>
-          
-          {/* Edit Profile Button */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.editButton,
-              pressed && { opacity: 0.7 },
-            ]}
-            onPress={() => router.push("/(tabs)/profile/edit-profile" as any)}
-          >
-            <Ionicons name="pencil" size={16} color={colors.primary} />
-            <Text style={styles.editButtonText}>Edit Profile</Text>
-          </Pressable>
         </View>
 
         {/* Setup Profile Card - Show if no user info */}
