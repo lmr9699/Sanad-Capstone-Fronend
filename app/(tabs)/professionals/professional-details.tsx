@@ -431,12 +431,12 @@ export default function ProfessionalDetailsScreen() {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <View style={styles.statIconWrap}>
-                <Ionicons name="calendar" size={18} color={professional.availability.includes("today") ? colors.primary : colors.secondary} />
+                <Ionicons name="calendar" size={18} color={professional.nextAvailable.includes("Today") ? colors.primary : colors.secondary} />
               </View>
-              <Text style={[styles.statValue, professional.availability.includes("today") && { color: colors.primary }]}>
-                {professional.availability.includes("today") ? "Today" : professional.availability.replace("Next available: ", "")}
+              <Text style={[styles.statValue, professional.nextAvailable.includes("Today") && { color: colors.primary }]}>
+                {professional.nextAvailable.replace("Today, ", "").replace("Tomorrow, ", "")}
               </Text>
-              <Text style={styles.statLabel}>Next Session</Text>
+              <Text style={styles.statLabel}>{professional.nextAvailable.includes("Today") ? "Today" : professional.nextAvailable.split(",")[0]}</Text>
             </View>
           </View>
         </View>
