@@ -434,6 +434,14 @@ export default function ProfessionalDetailsScreen() {
         {/* Quick Info Card */}
         <View style={styles.quickInfoCard}>
           <View style={styles.quickInfoRow}>
+            <Ionicons name="calendar" size={20} color={colors.primary} />
+            <View style={styles.quickInfoContent}>
+              <Text style={styles.quickInfoLabel}>{t("professionals.nextAvailable")}</Text>
+              <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
+            </View>
+          </View>
+          <View style={styles.quickInfoDivider} />
+          <View style={styles.quickInfoRow}>
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.quickInfoContent}>
               <Text style={styles.quickInfoLabel}>{t("professionals.consultationFee")}</Text>
