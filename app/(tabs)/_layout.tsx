@@ -84,19 +84,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="centers"
-        options={{
-          title: "Centers",
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "business" : "business-outline"}
-              size={22}
-              color={color}
-            />
-          ),
-        }}
-      />
+      {/* Centers hidden from tab bar but still accessible */}
       <Tabs.Screen
         name="professionals"
         options={{
@@ -125,6 +113,7 @@ export default function TabsLayout() {
       />
 
       {/* Hidden routes - accessible via navigation but not visible in tab bar */}
+      <Tabs.Screen name="centers" options={{ href: null }} />
       <Tabs.Screen name="care-path" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="directory" options={{ href: null }} />
