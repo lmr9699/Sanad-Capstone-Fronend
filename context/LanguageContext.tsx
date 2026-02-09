@@ -5,12 +5,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import i18n, { setLocale } from "../i18n";
+import { I18nManager } from "react-native";
+import i18n, { setLocale, type Locale } from "../i18n";
 
 interface LanguageContextType {
-  locale: "en";
-  setLocale: (locale: "en") => void;
+  locale: Locale;
+  setLocale: (locale: Locale) => void;
   t: (key: string, options?: object) => string;
+  isRTL: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -18,25 +20,44 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // English only
-  const [locale, setLocaleState] = useState<"en">("en");
+  const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
     setLocale("en");
+    // Set RTL based on initial locale (English = LTR)
+    I18nManager.forceRTL(false);
+    I18nManager.allowRTL(true); // Allow RTL so it can be enabled when switching to Arabic
   }, []);
 
-  const handleSetLocale = (newLocale: "en") => {
+  // Update RTL when locale changes
+  useEffect(() => {
+    const isRTL = locale === "ar";
+    I18nManager.forceRTL(isRTL);
+    I18nManager.allowRTL(true);
+  }, [locale]);
+
+  const handleSetLocale = (newLocale: Locale) => {
     setLocaleState(newLocale);
     setLocale(newLocale);
+
+    // Update RTL setting based on locale
+    const isRTL = newLocale === "ar";
+    I18nManager.forceRTL(isRTL);
+    I18nManager.allowRTL(isRTL);
+
+    // Note: RTL changes require app restart to take full effect
+    // But this will work for the next render cycle
   };
 
   const t = (key: string, options?: object): string => {
     return i18n.t(key, options);
   };
 
+  const isRTL = locale === "ar";
+
   return (
     <LanguageContext.Provider
-      value={{ locale: "en", setLocale: handleSetLocale, t }}
+      value={{ locale, setLocale: handleSetLocale, t, isRTL }}
     >
       {children}
     </LanguageContext.Provider>

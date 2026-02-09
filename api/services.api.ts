@@ -50,3 +50,11 @@ export const getServiceById = async (serviceId: string): Promise<Service> => {
   // axios interceptor returns response.data directly, so response is already the full response object
   return (response as unknown as ServiceResponse).data.service;
 };
+
+
+export const getServiceProviders = async (serviceId: string) => {
+  const response = await instance.get(`/services/${serviceId}/providers`);
+
+  // console.log("R  ", response.data);
+  return (response).data;
+};

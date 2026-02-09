@@ -87,7 +87,10 @@
     "phone": "PHONE",
     "manageChildren": "Manage Children",
     "settings": "Settings",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "notifications": "Notifications",
+    "language": "Language",
+    "privacy": "Privacy"
   },
   "onboarding": {
     "parentProfile": "Parent Profile",
@@ -128,6 +131,8 @@
     "sort": "Sort",
     "noResults": "No results found",
     "somethingWentWrong": "Something went wrong",
-    "tryAgain": "Please try again"
+    "tryAgain": "Please try again",
+    "on": "On",
+    "off": "Off"
   }
 }

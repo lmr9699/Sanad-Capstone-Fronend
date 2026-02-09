@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { getCenters } from "../../api/directory.api";
-import { HealthCenter } from "../../types/directory.types";
+import { Center } from "../../types/directory.types";
 import { getCurrentUser } from "../../api/users.api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -294,12 +294,12 @@ export default function HomeScreen() {
   });
 
   // Extract centers array from response (handle both array and object responses)
-  const centers: HealthCenter[] = React.useMemo(() => {
+  const centers: Center[] = React.useMemo(() => {
     if (!centersData) return [];
     if (Array.isArray(centersData)) {
       return centersData.slice(0, 3);
     }
-    const centersResponse = centersData as { centers?: HealthCenter[] };
+    const centersResponse = centersData as { centers?: Center[] };
     if (centersResponse?.centers && Array.isArray(centersResponse.centers)) {
       return centersResponse.centers.slice(0, 3);
     }
@@ -942,7 +942,7 @@ export default function HomeScreen() {
                 <Ionicons name="medical" size={22} color={colors.primary} />
               </View>
               <View>
-                <Text style={styles.centersCardTitle}>Health Centers</Text>
+                <Text style={styles.centersCardTitle}>Centers</Text>
                 <Text style={styles.centersCardSubtitle}>
                   Find specialized care centers near you
                 </Text>
@@ -967,7 +967,7 @@ export default function HomeScreen() {
             </View>
           ) : centers.length > 0 ? (
             <View style={styles.centersList}>
-              {centers.map((center: HealthCenter) => (
+              {centers.map((center: Center) => (
                 <Pressable
                   key={center.id}
                   style={({ pressed }) => [

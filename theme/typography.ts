@@ -54,4 +54,12 @@ export const typography = {
   weightMedium: "500" as const,
   weightSemibold: "600" as const,
   weightBold: "700" as const,
+  weightBlack: "900" as const,
+  weightExtraBold: "800" as const,
+  weightExtraLight: "100" as const,
+  weightLight: "300" as const,
+  weightThin: "200" as const,
+  weightExtraThin: "100" as const,
+  weightExtraExtraThin: "50" as const,
+  weightExtraExtraExtraThin: "25" as const,
 } as const;

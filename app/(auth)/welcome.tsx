@@ -73,9 +73,9 @@ export default function WelcomeScreen() {
           />
         </View>
 
-        {/* Health Centers Card */}
+        {/* Centers Card */}
         <TouchableOpacity
-          style={styles.healthCenterCard}
+          style={styles.CenterCard}
           onPress={handleViewCenters}
           activeOpacity={0.8}
         >
@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 18,
   },
-  // Health Center Card
-  healthCenterCard: {
+  //  Center Card
+  CenterCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 20,

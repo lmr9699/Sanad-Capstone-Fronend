@@ -1,4 +1,4 @@
-export interface HealthCenter {
+export interface Center {
   id: string;
   name: string;
   type: "public" | "private";

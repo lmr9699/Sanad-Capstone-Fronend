@@ -167,7 +167,7 @@ export default function ServiceDetailsScreen() {
               ))}
             </View>
             <Text style={styles.ratingText}>
-              {service.rating} ({service.reviews} reviews)
+              ({service.reviews} reviews)
             </Text>
           </View>
         </View>
@@ -232,7 +232,12 @@ export default function ServiceDetailsScreen() {
               pressed && { opacity: 0.8 },
             ]}
             onPress={() => {
-              Alert.alert("Coming Soon", "Provider directory will be available soon!");
+              router.push({
+                pathname: "/(tabs)/directory/SerivceProviders",
+                params: {
+                  serviceId: service.id,
+                },
+              });
             }}
           >
             <Text style={styles.viewProvidersBtnText}>View All</Text>

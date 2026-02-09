@@ -132,11 +132,16 @@ export default function ProfessionalDetailsScreen() {
           <View
             style={[
               styles.heroAvatar,
-              { backgroundColor: `${professional.color}20` },
+              { backgroundColor: `${professional.color || colors.primary}20` },
             ]}
           >
-            <Text style={[styles.heroAvatarText, { color: professional.color }]}>
-              {professional.name.split(" ").slice(1, 3).map(n => n[0]).join("")}
+            <Text style={[styles.heroAvatarText, { color: professional.color || colors.primary }]}>
+              {professional.name
+                .split(" ")
+                .map(n => n[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()}
             </Text>
             {professional.verified && (
               <View style={styles.verifiedBadgeLarge}>
@@ -146,8 +151,8 @@ export default function ProfessionalDetailsScreen() {
           </View>
 
           <Text style={styles.professionalName}>{professional.name}</Text>
-          <Text style={[styles.specialtyLabel, { color: professional.color }]}>
-            {professional.specialtyLabel}
+          <Text style={[styles.specialtyLabel, { color: professional.color || colors.primary }]}>
+            {professional.specialtyLabel || professional.specialty}
           </Text>
 
           {/* Stats Row */}
@@ -156,109 +161,181 @@ export default function ProfessionalDetailsScreen() {
               <View style={styles.statIconWrap}>
                 <Ionicons name="star" size={18} color="#F5A623" />
               </View>
-              <Text style={styles.statValue}>{professional.rating}</Text>
-              <Text style={styles.statLabel}>{professional.reviews} reviews</Text>
+              <Text style={styles.statValue}>{professional.rating || 0}</Text>
+              <Text style={styles.statLabel}>{professional.reviews || 0} reviews</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
-              </View>
-              <Text style={styles.statValue}>{professional.experience}</Text>
-              <Text style={styles.statLabel}>Experience</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <View style={styles.statIconWrap}>
-                <Ionicons name="location-outline" size={18} color={colors.secondary} />
-              </View>
-              <Text style={styles.statValue}>2.5 km</Text>
-              <Text style={styles.statLabel}>Away</Text>
-            </View>
+            {professional.experience && (
+              <>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <View style={styles.statIconWrap}>
+                    <Ionicons name="briefcase-outline" size={18} color={colors.primary} />
+                  </View>
+                  <Text style={styles.statValue}>{professional.experience}</Text>
+                  <Text style={styles.statLabel}>Experience</Text>
+                </View>
+              </>
+            )}
+            {professional.centerName && (
+              <>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <View style={styles.statIconWrap}>
+                    <Ionicons name="business-outline" size={18} color={colors.secondary} />
+                  </View>
+                  <Text style={styles.statValue} numberOfLines={1}>
+                    {professional.centerName}
+                  </Text>
+                  <Text style={styles.statLabel}>Center</Text>
+                </View>
+              </>
+            )}
           </View>
         </View>
 
         {/* Quick Info Card */}
         <View style={styles.quickInfoCard}>
-          <View style={styles.quickInfoRow}>
-            <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-            <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Next Available</Text>
-              <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
+          {professional.nextAvailable && (
+            <>
+              <View style={styles.quickInfoRow}>
+                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                <View style={styles.quickInfoContent}>
+                  <Text style={styles.quickInfoLabel}>Next Available</Text>
+                  <Text style={styles.quickInfoValue}>{professional.nextAvailable}</Text>
+                </View>
+              </View>
+              <View style={styles.quickInfoDivider} />
+            </>
+          )}
+          {professional.consultationFee && (
+            <>
+              <View style={styles.quickInfoRow}>
+                <Ionicons name="cash-outline" size={20} color={colors.primary} />
+                <View style={styles.quickInfoContent}>
+                  <Text style={styles.quickInfoLabel}>Consultation Fee</Text>
+                  <Text style={styles.quickInfoValue}>{professional.consultationFee}</Text>
+                </View>
+              </View>
+              <View style={styles.quickInfoDivider} />
+            </>
+          )}
+          {professional.location && (
+            <View style={styles.quickInfoRow}>
+              <Ionicons name="location-outline" size={20} color={colors.primary} />
+              <View style={styles.quickInfoContent}>
+                <Text style={styles.quickInfoLabel}>Location</Text>
+                <Text style={styles.quickInfoValue}>{professional.location}</Text>
+              </View>
             </View>
-          </View>
-          <View style={styles.quickInfoDivider} />
-          <View style={styles.quickInfoRow}>
-            <Ionicons name="cash-outline" size={20} color={colors.primary} />
-            <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Consultation Fee</Text>
-              <Text style={styles.quickInfoValue}>{professional.consultationFee}</Text>
-            </View>
-          </View>
-          <View style={styles.quickInfoDivider} />
-          <View style={styles.quickInfoRow}>
-            <Ionicons name="location-outline" size={20} color={colors.primary} />
-            <View style={styles.quickInfoContent}>
-              <Text style={styles.quickInfoLabel}>Location</Text>
-              <Text style={styles.quickInfoValue}>{professional.location}</Text>
-            </View>
-          </View>
+          )}
+          {professional.centerName && (
+            <>
+              {(professional.nextAvailable || professional.consultationFee || professional.location) && (
+                <View style={styles.quickInfoDivider} />
+              )}
+              <View style={styles.quickInfoRow}>
+                <Ionicons name="business-outline" size={20} color={colors.primary} />
+                <View style={styles.quickInfoContent}>
+                  <Text style={styles.quickInfoLabel}>Health Center</Text>
+                  <Text style={styles.quickInfoValue}>{professional.centerName}</Text>
+                </View>
+              </View>
+            </>
+          )}
+          {professional.email && (
+            <>
+              {(professional.nextAvailable || professional.consultationFee || professional.location || professional.centerName) && (
+                <View style={styles.quickInfoDivider} />
+              )}
+              <View style={styles.quickInfoRow}>
+                <Ionicons name="mail-outline" size={20} color={colors.primary} />
+                <View style={styles.quickInfoContent}>
+                  <Text style={styles.quickInfoLabel}>Email</Text>
+                  <Text style={styles.quickInfoValue}>{professional.email}</Text>
+                </View>
+              </View>
+            </>
+          )}
+          {professional.phone && (
+            <>
+              {(professional.nextAvailable || professional.consultationFee || professional.location || professional.centerName || professional.email) && (
+                <View style={styles.quickInfoDivider} />
+              )}
+              <View style={styles.quickInfoRow}>
+                <Ionicons name="call-outline" size={20} color={colors.primary} />
+                <View style={styles.quickInfoContent}>
+                  <Text style={styles.quickInfoLabel}>Phone</Text>
+                  <Text style={styles.quickInfoValue}>{professional.phone}</Text>
+                </View>
+              </View>
+            </>
+          )}
         </View>
 
         {/* About Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About</Text>
-          <Text style={styles.bioText}>{professional.bio}</Text>
-        </View>
+        {professional.bio && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>About</Text>
+            <Text style={styles.bioText}>{professional.bio}</Text>
+          </View>
+        )}
 
         {/* Services Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Services Offered</Text>
-          <View style={styles.servicesList}>
-            {professional.services.map((service, index) => (
-              <View key={index} style={styles.serviceItem}>
-                <View style={[styles.serviceDot, { backgroundColor: professional.color }]} />
-                <Text style={styles.serviceText}>{service}</Text>
-              </View>
-            ))}
+        {professional.services && professional.services.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Services Offered</Text>
+            <View style={styles.servicesList}>
+              {professional.services.map((service, index) => (
+                <View key={index} style={styles.serviceItem}>
+                  <View style={[styles.serviceDot, { backgroundColor: professional.color || colors.primary }]} />
+                  <Text style={styles.serviceText}>{service}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Education Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Education</Text>
-          {professional.education.map((edu, index) => (
-            <View key={index} style={styles.educationItem}>
-              <Ionicons name="school-outline" size={18} color={colors.textMuted} />
-              <Text style={styles.educationText}>{edu}</Text>
-            </View>
-          ))}
-        </View>
+        {professional.education && professional.education.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {professional.education.map((edu, index) => (
+              <View key={index} style={styles.educationItem}>
+                <Ionicons name="school-outline" size={18} color={colors.textMuted} />
+                <Text style={styles.educationText}>{edu}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Certifications Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Certifications</Text>
-          <View style={styles.certificationsList}>
-            {professional.certifications.map((cert, index) => (
-              <View key={index} style={styles.certificationBadge}>
-                <Ionicons name="ribbon-outline" size={14} color={colors.primary} />
-                <Text style={styles.certificationText}>{cert}</Text>
-              </View>
-            ))}
+        {professional.certifications && professional.certifications.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Certifications</Text>
+            <View style={styles.certificationsList}>
+              {professional.certifications.map((cert, index) => (
+                <View key={index} style={styles.certificationBadge}>
+                  <Ionicons name="ribbon-outline" size={14} color={colors.primary} />
+                  <Text style={styles.certificationText}>{cert}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Languages Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Languages</Text>
-          <View style={styles.languagesRow}>
-            {professional.languages.map((lang, index) => (
-              <View key={index} style={styles.languageBadge}>
-                <Text style={styles.languageText}>{lang}</Text>
-              </View>
-            ))}
+        {professional.languages && professional.languages.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Languages</Text>
+            <View style={styles.languagesRow}>
+              {professional.languages.map((lang, index) => (
+                <View key={index} style={styles.languageBadge}>
+                  <Text style={styles.languageText}>{lang}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
 
       {/* Bottom CTA */}

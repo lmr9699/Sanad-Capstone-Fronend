@@ -16,8 +16,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getChildById, updateChild } from "../../../api/children.api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getChildById, updateChild, uploadChildMedicalFile, deleteChildMedicalFile } from "../../../api/children.api";
+import * as DocumentPicker from "expo-document-picker";
+import instance from "../../../api/axios";
 
 // Design system colors
 const colors = {
@@ -70,9 +72,12 @@ const COMMON_ALLERGIES = [
 export default function EditChildScreen() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
+    const queryClient = useQueryClient();
     const [currentStep, setCurrentStep] = React.useState(1);
     const [showDatePicker, setShowDatePicker] = React.useState(false);
     const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
+    const [medicalFiles, setMedicalFiles] = React.useState<string[]>([]);
+    const [uploadingFile, setUploadingFile] = React.useState(false);
 
     // Fetch child data
     const { data: child, isLoading: isLoadingChild } = useQuery({
@@ -167,6 +172,11 @@ export default function EditChildScreen() {
                 allergies,
                 allergyNotes: "",
             });
+
+            // Load medical files
+            if (child.medicalFiles && Array.isArray(child.medicalFiles)) {
+                setMedicalFiles(child.medicalFiles);
+            }
         }
     }, [child]);
 
@@ -369,6 +379,90 @@ export default function EditChildScreen() {
             ...prev,
             medications: prev.medications.filter((_, i) => i !== index),
         }));
+    };
+
+    // Handle file upload
+    const handleUploadFile = async () => {
+        try {
+            setUploadingFile(true);
+            
+            // Pick a document
+            const result = await DocumentPicker.getDocumentAsync({
+                type: ["image/*", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+                copyToCacheDirectory: true,
+            });
+
+            if (result.canceled) {
+                setUploadingFile(false);
+                return;
+            }
+
+            const file = result.assets[0];
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append("file", {
+                uri: file.uri,
+                type: file.mimeType || "application/octet-stream",
+                name: file.name || "medical-file",
+            } as any);
+
+            // Upload file
+            const response = await instance.post(
+                `/upload/child/${id}/medical-file`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            const data = (response as any).data;
+            
+            // Add to local state
+            setMedicalFiles((prev) => [...prev, data.fileUrl]);
+            
+            // Refresh child data
+            queryClient.invalidateQueries({ queryKey: ["child", id] });
+            
+            Alert.alert("Success", "Medical file uploaded successfully");
+        } catch (error: any) {
+            Alert.alert("Error", error?.message || "Failed to upload file. Please try again.");
+        } finally {
+            setUploadingFile(false);
+        }
+    };
+
+    // Handle file deletion
+    const handleDeleteFile = async (fileUrl: string) => {
+        Alert.alert(
+            "Delete File",
+            "Are you sure you want to delete this medical file?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const fileName = fileUrl.split("/").pop() || "";
+                            await deleteChildMedicalFile(id as string, fileName);
+                            
+                            // Remove from local state
+                            setMedicalFiles((prev) => prev.filter((file) => file !== fileUrl));
+                            
+                            // Refresh child data
+                            queryClient.invalidateQueries({ queryKey: ["child", id] });
+                            
+                            Alert.alert("Success", "Medical file deleted successfully");
+                        } catch (error: any) {
+                            Alert.alert("Error", error?.message || "Failed to delete file. Please try again.");
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     // Loading state while fetching child data
@@ -618,6 +712,67 @@ export default function EditChildScreen() {
                     numberOfLines={4}
                     textAlignVertical="top"
                 />
+            </View>
+
+            {/* Medical Files Section */}
+            <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Medical Files</Text>
+                <Text style={styles.inputSubLabel}>
+                    Upload medical documents, reports, or images (PDF, DOC, DOCX, Images)
+                </Text>
+                
+                {/* Uploaded Files List */}
+                {medicalFiles.length > 0 && (
+                    <View style={styles.filesList}>
+                        {medicalFiles.map((fileUrl, index) => {
+                            const fileName = fileUrl.split("/").pop() || `File ${index + 1}`;
+                            const isImage = /\.(jpg|jpeg|png|gif)$/i.test(fileName);
+                            const isPdf = /\.pdf$/i.test(fileName);
+                            
+                            return (
+                                <View key={index} style={styles.fileItem}>
+                                    <View style={styles.fileInfo}>
+                                        <Ionicons
+                                            name={isImage ? "image-outline" : isPdf ? "document-text-outline" : "document-outline"}
+                                            size={20}
+                                            color={colors.primary}
+                                        />
+                                        <Text style={styles.fileName} numberOfLines={1}>
+                                            {fileName}
+                                        </Text>
+                                    </View>
+                                    <Pressable
+                                        onPress={() => handleDeleteFile(fileUrl)}
+                                        style={styles.deleteFileButton}
+                                    >
+                                        <Ionicons name="trash-outline" size={18} color={colors.error} />
+                                    </Pressable>
+                                </View>
+                            );
+                        })}
+                    </View>
+                )}
+
+                {/* Upload Button */}
+                <Pressable
+                    style={[
+                        styles.uploadButton,
+                        uploadingFile && styles.uploadButtonDisabled,
+                    ]}
+                    onPress={handleUploadFile}
+                    disabled={uploadingFile}
+                >
+                    {uploadingFile ? (
+                        <ActivityIndicator size="small" color={colors.primary} />
+                    ) : (
+                        <>
+                            <Ionicons name="cloud-upload-outline" size={20} color={colors.primary} />
+                            <Text style={styles.uploadButtonText}>
+                                {medicalFiles.length > 0 ? "Add Another File" : "Upload Medical File"}
+                            </Text>
+                        </>
+                    )}
+                </Pressable>
             </View>
 
             <Pressable
@@ -1293,5 +1448,58 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontWeight: "600",
         color: "#FFFFFF",
+    },
+    inputSubLabel: {
+        fontSize: 12,
+        color: colors.textMuted,
+        marginBottom: 12,
+    },
+    filesList: {
+        marginBottom: 12,
+        gap: 8,
+    },
+    fileItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: colors.bgCard,
+        borderRadius: 12,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    fileInfo: {
+        flexDirection: "row",
+        alignItems: "center",
+        flex: 1,
+        gap: 10,
+    },
+    fileName: {
+        fontSize: 14,
+        color: colors.text,
+        flex: 1,
+    },
+    deleteFileButton: {
+        padding: 4,
+    },
+    uploadButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        backgroundColor: `${colors.primary}15`,
+        borderRadius: 12,
+        paddingVertical: 14,
+        borderWidth: 1,
+        borderColor: colors.primary,
+        borderStyle: "dashed",
+    },
+    uploadButtonDisabled: {
+        opacity: 0.6,
+    },
+    uploadButtonText: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: colors.primary,
     },
 });

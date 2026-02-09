@@ -127,7 +127,7 @@ export default function ProfileScreen() {
             <View style={styles.settingsIcon}>
               <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
             </View>
-            <Text style={styles.settingsText}>App Settings</Text>
+            <Text style={styles.settingsText}>Settings</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
 

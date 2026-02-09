@@ -11,11 +11,12 @@ import {
   TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getProfessionals,
+import {
+  getProfessionals,
   getProfessionalSpecialties,
-  getProfessionalTags,  
+  getProfessionalTags,
   getCities,
- } from "../../../api/directory.api";
+} from "../../../api/directory.api";
 import {
   cardShadow,
   colors,
@@ -28,15 +29,15 @@ import { Professional } from "../../../types/directory.types";
 
 
 //const CATEGORIES = [
-  //{ key: "all", label: "All" },
-  //{ key: "Pediatrician", label: "Doctor" },
-  //{ key: "Speech Therapist", label: "Speech" },
-  //{ key: "Physiotherapist", label: "Physio" },
+//{ key: "all", label: "All" },
+//{ key: "Pediatrician", label: "Doctor" },
+//{ key: "Speech Therapist", label: "Speech" },
+//{ key: "Physiotherapist", label: "Physio" },
 //];
 
 export default function ProfessionalsScreen() {
   const router = useRouter();
-  
+
   // States للفلترة
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
@@ -113,9 +114,9 @@ export default function ProfessionalsScreen() {
       >
         <Text style={styles.title}>Healthcare Professionals</Text>
 
-        
-                {/* Search Bar */}
-                <View style={styles.searchContainer}>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
             placeholder="Search for a professional..."
@@ -176,215 +177,216 @@ export default function ProfessionalsScreen() {
         )}
 
         {professionals?.length === 0 ? (
-  <View style={styles.emptyState}>
-    <Text style={styles.emptyText}>No professionals found</Text>
-  </View>
-) : (
-  professionals?.map((professional: Professional) => (
-    <TouchableOpacity
-      key={professional.id}
-      style={[styles.professionalCard, cardShadow]}
-      onPress={() =>
-        router.push(
-          `/(tabs)/directory/professional-details?id=${professional.id}`
-        )
-      }
-      activeOpacity={0.85}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.professionalName}>{professional.name}</Text>
-        {/* Rating Display */}
-        {professional.rating !== undefined && (
-          <View style={styles.ratingContainer}>
-            <Text style={styles.ratingStar}>⭐</Text>
-            <Text style={styles.ratingText}>
-              {professional.rating.toFixed(1)}
-            </Text>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No professionals found</Text>
           </View>
-        )}
-      </View>
-      
-            {/* Specialty Badge */}
-            <View style={styles.specialtyBadge}>
-        <Text style={styles.specialtyText}>{professional.specialty}</Text>
-      </View>
+        ) : (
+          professionals?.map((professional: Professional) => (
+            <TouchableOpacity
+              key={professional.id}
+              style={[styles.professionalCard, cardShadow]}
+              onPress={() =>
+                router.push(
+                  `/(tabs)/directory/professional-details?id=${professional.id}`
+                )
+              }
+              activeOpacity={0.85}
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.professionalName}>{professional.name}</Text>
+                {/* Rating Display */}
+                {professional.rating !== undefined && (
+                  <View style={styles.ratingContainer}>
+                    <Text style={styles.ratingStar}>⭐</Text>
+                    <Text style={styles.ratingText}>
+                      {professional.rating.toFixed(1)}
+                    </Text>
+                  </View>
+                )}
+              </View>
 
-      {/* Display City */}
-      {professional.city && (
+              {/* Specialty Badge */}
+              <View style={styles.specialtyBadge}>
+                <Text style={styles.specialtyText}>{professional.specialty}</Text>
+              </View>
+
+              {/* Display City */}
+              {/* {professional.city && (
         <View style={styles.locationContainer}>
           <Text style={styles.locationText}>📍 {professional.city}</Text>
         </View>
-      )}
+      )} */}
 
-      {/* Display Center */}
-      {professional.centerName && (
-        <View style={styles.centerContainer}>
-          <Text style={styles.centerText}>🏥 {professional.centerName}</Text>
-        </View>
-      )}
+              {/* Display Center */}
+              {professional.centerName && (
+                <View style={styles.centerContainer}>
+                  <Text style={styles.centerText}>🏥 {professional.centerName}</Text>
+                </View>
+              )}
 
-      {/* Display Tags */}
-      {professional.tags && professional.tags.length > 0 && (
-        <View style={styles.tagsContainer}>
-          {professional.tags.map((tag, index) => (
+              {/* Display Tags */}
+              {professional.specialtyLabel && professional.specialtyLabel.length > 0 && (
+                <View style={styles.tagsContainer}>
+                  {/* {professional.tags.map((tag, index) => (
             <View key={index} style={styles.tagBadge}>
               <Text style={styles.tagText}>{tag}</Text>
             </View>
-          ))}
-        </View>
-      )}
-    </TouchableOpacity>
-  ))
-)}
+          ))} */}
+                  <Text style={styles.tagText}>{professional.specialtyLabel}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
-{/* Filter Modal */}
-<Modal
-  visible={showFilters}
-  animationType="slide"
-  transparent={true}
-  onRequestClose={() => setShowFilters(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <View style={styles.modalHeader}>
-        <Text style={styles.modalTitle}>Filter Professionals</Text>
-        <TouchableOpacity onPress={() => setShowFilters(false)}>
-          <Text style={styles.closeButton}>✕</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView style={styles.modalBody}>
-        {/* Specialty Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterSectionTitle}>Specialty</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                selectedSpecialty === "all" && styles.filterOptionActive,
-              ]}
-              onPress={() => setSelectedSpecialty("all")}
-            >
-              <Text
-                style={[
-                  styles.filterOptionText,
-                  selectedSpecialty === "all" && styles.filterOptionTextActive,
-                ]}
-              >
-                All
-              </Text>
-            </TouchableOpacity>
-            {specialties.map((spec) => (
-              <TouchableOpacity
-                key={spec}
-                style={[
-                  styles.filterOption,
-                  selectedSpecialty === spec && styles.filterOptionActive,
-                ]}
-                onPress={() => setSelectedSpecialty(spec)}
-              >
-                <Text
-                  style={[
-                    styles.filterOptionText,
-                    selectedSpecialty === spec && styles.filterOptionTextActive,
-                  ]}
-                >
-                  {spec}
-                </Text>
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Professionals</Text>
+              <TouchableOpacity onPress={() => setShowFilters(false)}>
+                <Text style={styles.closeButton}>✕</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+            </View>
 
-        {/* City Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterSectionTitle}>City</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[
-                styles.filterOption,
-                selectedCity === "all" && styles.filterOptionActive,
-              ]}
-              onPress={() => setSelectedCity("all")}
-            >
-              <Text
-                style={[
-                  styles.filterOptionText,
-                  selectedCity === "all" && styles.filterOptionTextActive,
-                ]}
-              >
-                All
-              </Text>
-            </TouchableOpacity>
-            {cities.map((city) => (
-              <TouchableOpacity
-                key={city}
-                style={[
-                  styles.filterOption,
-                  selectedCity === city && styles.filterOptionActive,
-                ]}
-                onPress={() => setSelectedCity(city)}
-              >
-                <Text
-                  style={[
-                    styles.filterOptionText,
-                    selectedCity === city && styles.filterOptionTextActive,
-                  ]}
-                >
-                  {city}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+            <ScrollView style={styles.modalBody}>
+              {/* Specialty Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Specialty</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      selectedSpecialty === "all" && styles.filterOptionActive,
+                    ]}
+                    onPress={() => setSelectedSpecialty("all")}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        selectedSpecialty === "all" && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                  {specialties.map((spec) => (
+                    <TouchableOpacity
+                      key={spec}
+                      style={[
+                        styles.filterOption,
+                        selectedSpecialty === spec && styles.filterOptionActive,
+                      ]}
+                      onPress={() => setSelectedSpecialty(spec)}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedSpecialty === spec && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        {spec}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
 
-        {/* Tags Filter */}
-        <View style={styles.filterSection}>
-          <Text style={styles.filterSectionTitle}>Tags</Text>
-          <View style={styles.tagsGrid}>
-            {tags.map((tag) => (
+              {/* City Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>City</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      selectedCity === "all" && styles.filterOptionActive,
+                    ]}
+                    onPress={() => setSelectedCity("all")}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        selectedCity === "all" && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                  {cities.map((city) => (
+                    <TouchableOpacity
+                      key={city}
+                      style={[
+                        styles.filterOption,
+                        selectedCity === city && styles.filterOptionActive,
+                      ]}
+                      onPress={() => setSelectedCity(city)}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedCity === city && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        {city}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Tags Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Tags</Text>
+                <View style={styles.tagsGrid}>
+                  {tags.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      style={[
+                        styles.tagFilterOption,
+                        selectedTags.includes(tag) && styles.tagFilterOptionActive,
+                      ]}
+                      onPress={() => toggleTag(tag)}
+                    >
+                      <Text
+                        style={[
+                          styles.tagFilterOptionText,
+                          selectedTags.includes(tag) && styles.tagFilterOptionTextActive,
+                        ]}
+                      >
+                        {tag}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
               <TouchableOpacity
-                key={tag}
-                style={[
-                  styles.tagFilterOption,
-                  selectedTags.includes(tag) && styles.tagFilterOptionActive,
-                ]}
-                onPress={() => toggleTag(tag)}
+                style={styles.clearButton}
+                onPress={resetFilters}
               >
-                <Text
-                  style={[
-                    styles.tagFilterOptionText,
-                    selectedTags.includes(tag) && styles.tagFilterOptionTextActive,
-                  ]}
-                >
-                  {tag}
-                </Text>
+                <Text style={styles.clearButtonText}>Clear All</Text>
               </TouchableOpacity>
-            ))}
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={() => setShowFilters(false)}
+              >
+                <Text style={styles.applyButtonText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </ScrollView>
+      </Modal>
+    </SafeAreaView>
 
-      <View style={styles.modalFooter}>
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={resetFilters}
-        >
-          <Text style={styles.clearButtonText}>Clear All</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.applyButton}
-          onPress={() => setShowFilters(false)}
-        >
-          <Text style={styles.applyButtonText}>Apply</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-</SafeAreaView>
-     
   );
 }
 
@@ -413,69 +415,71 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: sectionSpacing.default,
   },
-    // Search and Filter
-    searchContainer: {
-      flexDirection: "row",
-      marginBottom: spacing.md,
-      gap: spacing.sm,
-    },
-    searchInput: {
-      flex: 1,
-      backgroundColor: colors.backgroundCard,
-      borderRadius: radius.md,
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.sm,
-      fontSize: typography.body,
-      color: colors.text,
-      borderWidth: 1,
-      borderColor: "#e5e7eb",
-    },
-    filterButton: {
-      backgroundColor: "#2563eb",
-      paddingHorizontal: spacing.lg,
-      paddingVertical: spacing.sm,
-      borderRadius: radius.md,
-      justifyContent: "center",
-    },
-    filterButtonText: {
-      color: "#ffffff",
-      fontSize: typography.body,
-      fontWeight: "600",
-    },
-    // Active Filters
-    activeFiltersContainer: {
-      marginBottom: spacing.md,
-    },
-    activeFilterTag: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "#dbeafe",
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.xs,
-      borderRadius: radius.full || 20,
-      marginRight: spacing.sm,
-    },
-    activeFilterText: {
-      fontSize: typography.caption,
-      color: "#1d4ed8",
-      marginRight: spacing.xs,
-    },
-    removeFilter: {
-      fontSize: typography.caption,
-      color: "#1d4ed8",
-      fontWeight: "bold",
-    },
-    clearAllButton: {
-      backgroundColor: "#fee2e2",
-      paddingHorizontal: spacing.md,
-      paddingVertical: spacing.xs,
-      borderRadius: radius.full || 20,
-    },
-    clearAllText: {
-      fontSize: typography.caption,
-      color: "#dc2626",
-      fontWeight: "600",
-    },
+  // Search and Filter
+  searchContainer: {
+    flexDirection: "row",
+    marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.body,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    justifyContent: "center",
+  },
+  filterButtonText: {
+    color: "#FFFFFF",
+    fontSize: typography.body,
+    fontWeight: "600",
+  },
+  // Active Filters
+  activeFiltersContainer: {
+    marginBottom: spacing.md,
+  },
+  activeFilterTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: `${colors.primary}15`,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full || 20,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
+  },
+  activeFilterText: {
+    fontSize: typography.caption,
+    color: colors.primary,
+    marginRight: spacing.xs,
+  },
+  removeFilter: {
+    fontSize: typography.caption,
+    color: colors.primary,
+    fontWeight: "bold",
+  },
+  clearAllButton: {
+    backgroundColor: colors.errorLight,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full || 20,
+  },
+  clearAllText: {
+    fontSize: typography.caption,
+    color: colors.error,
+    fontWeight: "600",
+  },
   // Professional Card
   professionalCard: {
     backgroundColor: colors.backgroundCard,
@@ -500,7 +504,7 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fef3c7",
+    backgroundColor: `${colors.warning}20`,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radius.sm || 8,
@@ -512,19 +516,21 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: typography.caption,
     fontWeight: "600",
-    color: "#92400e",
+    color: colors.warning,
   },
   // Specialty Badge
   specialtyBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#dbeafe",
+    backgroundColor: `${colors.primary}15`,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: radius.md || 12,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
   },
   specialtyText: {
     fontSize: typography.caption,
-    color: "#1d4ed8",
+    color: colors.primary,
     fontWeight: "500",
   },
   locationContainer: {
@@ -548,14 +554,16 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   tagBadge: {
-    backgroundColor: "#f3f4f6",
+    backgroundColor: colors.backgroundSecondary,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   tagText: {
     fontSize: typography.caption,
-    color: "#6b7280",
+    color: colors.textSecondary,
   },
   // Modal
   modalOverlay: {
@@ -576,7 +584,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    borderBottomColor: colors.border,
   },
   modalTitle: {
     fontSize: typography.h3,
@@ -603,22 +611,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full || 20,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: colors.backgroundSecondary,
     marginRight: spacing.sm,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: colors.border,
   },
   filterOptionActive: {
-    backgroundColor: "#2563eb",
-    borderColor: "#2563eb",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   filterOptionText: {
     fontSize: typography.body,
-    color: "#6b7280",
+    color: colors.textSecondary,
     fontWeight: "500",
   },
   filterOptionTextActive: {
-    color: "#ffffff",
+    color: "#FFFFFF",
     fontWeight: "600",
   },
   tagsGrid: {
@@ -630,27 +638,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: colors.border,
   },
   tagFilterOptionActive: {
-    backgroundColor: "#2563eb",
-    borderColor: "#2563eb",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   tagFilterOptionText: {
     fontSize: typography.body,
-    color: "#6b7280",
+    color: colors.textSecondary,
   },
   tagFilterOptionTextActive: {
-    color: "#ffffff",
+    color: "#FFFFFF",
     fontWeight: "600",
   },
   modalFooter: {
     flexDirection: "row",
     padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
+    borderTopColor: colors.border,
     gap: spacing.sm,
   },
   clearButton: {
@@ -658,25 +666,26 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: colors.backgroundSecondary,
   },
   clearButtonText: {
-    color: "#6b7280",
+    color: colors.textSecondary,
     fontSize: typography.body,
     fontWeight: "600",
   },
   applyButton: {
     flex: 2,
-    backgroundColor: "#2563eb",
+    backgroundColor: colors.primary,
     paddingVertical: spacing.md,
     borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
   },
   applyButtonText: {
-    color: "#ffffff",
+    color: "#FFFFFF",
     fontSize: typography.body,
     fontWeight: "600",
   },
