@@ -1,3 +1,22 @@
+<<<<<<< HEAD
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  cardShadow,
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../../theme";
+import { useLanguage } from "../../../context/LanguageContext";
+
+export default function SettingsScreen() {
+  const { locale, setLocale, t } = useLanguage();
+
+  const handleLanguageChange = (newLocale: "en" | "ar") => {
+    setLocale(newLocale);
+=======
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -125,6 +144,7 @@ export default function SettingsScreen() {
     modalOption: {
       backgroundColor: colors.background,
     },
+>>>>>>> main
   };
 
   return (
@@ -133,6 +153,56 @@ export default function SettingsScreen() {
         style={styles.container}
         contentContainerStyle={styles.content}
       >
+<<<<<<< HEAD
+        <Text style={styles.title}>{t("profile.settings")}</Text>
+        <TouchableOpacity style={styles.settingItem} activeOpacity={0.85}>
+          <Text style={styles.settingLabel}>{t("profile.notifications")}</Text>
+          <Text style={styles.settingValue}>{t("common.on")}</Text>
+        </TouchableOpacity>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>{t("profile.language")}</Text>
+          <View style={styles.languageButtons}>
+            <TouchableOpacity
+              style={[
+                styles.languageButton,
+                locale === "ar" && styles.languageButtonActive,
+              ]}
+              onPress={() => handleLanguageChange("ar")}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.languageButtonText,
+                  locale === "ar" && styles.languageButtonTextActive,
+                ]}
+              >
+                AR
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.languageButton,
+                locale === "en" && styles.languageButtonActive,
+              ]}
+              onPress={() => handleLanguageChange("en")}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.languageButtonText,
+                  locale === "en" && styles.languageButtonTextActive,
+                ]}
+              >
+                EN
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.settingItem} activeOpacity={0.85}>
+          <Text style={styles.settingLabel}>{t("profile.privacy")}</Text>
+          <Text style={styles.settingValue}>→</Text>
+        </TouchableOpacity>
+=======
         {/* Header */}
         <View style={styles.header}>
           <Pressable
@@ -292,6 +362,7 @@ export default function SettingsScreen() {
             {isArabic ? "صُنع بحب في الكويت 🇰🇼" : "Made with ❤️ in Kuwait"}
           </Text>
         </View>
+>>>>>>> main
       </ScrollView>
 
       {/* Language Selection Modal */}
@@ -535,5 +606,29 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 16,
     fontWeight: "500",
+  },
+  languageButtons: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  languageButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.backgroundSecondary,
+  },
+  languageButtonActive: {
+    borderColor: colors.primary,
+    backgroundColor: `${colors.primary}15`,
+  },
+  languageButtonText: {
+    fontSize: typography.body,
+    fontWeight: typography.weightSemibold,
+    color: colors.textMuted,
+  },
+  languageButtonTextActive: {
+    color: colors.primary,
   },
 });

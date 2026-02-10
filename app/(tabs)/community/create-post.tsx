@@ -33,7 +33,7 @@ export default function CreatePostScreen() {
     if (!content.trim()) {
       return;
     }
-    createPostMutation.mutate({ content });
+    createPostMutation.mutate({ content: content.trim(), title: "Untitled" });
   };
 
   return (

@@ -1,798 +1,1358 @@
 import { Ionicons } from "@expo/vector-icons";
+// import { useRouter } from "expo-router";
+// import React from "react";
+// import {
+//   ActivityIndicator,
+//   Image,
+//   Pressable,
+//   ScrollView,
+//   StyleSheet,
+//   Text,
+//   View,
+// } from "react-native";
+// import { SafeAreaView } from "react-native-safe-area-context";
+// import { useQuery } from "@tanstack/react-query";
+// import { getProfessionals } from "../../../api/directory.api";
+
+
+// // Design system colors
+// const colors = {
+//   bgApp: "#FAF9F6",
+//   bgCard: "#FFFFFF",
+//   primary: "#7FB77E",
+//   primaryLight: "#E8F5E8",
+//   secondary: "#5F8F8B",
+//   text: "#2F2F2F",
+//   textSecondary: "#4A4A4A",
+//   textMuted: "#8A8A8A",
+//   border: "rgba(0, 0, 0, 0.06)",
+// };
+
+// // Specializations for filtering
+// const SPECIALIZATIONS = [
+//   { id: "all", label: "All", icon: "apps-outline" },
+//   { id: "speech", label: "Speech", icon: "chatbubble-outline" },
+//   { id: "behavioral", label: "Behavioral", icon: "heart-outline" },
+//   { id: "occupational", label: "Occupational", icon: "hand-left-outline" },
+//   { id: "physical", label: "Physical", icon: "fitness-outline" },
+//   { id: "educational", label: "Educational", icon: "school-outline" },
+// ];
+
+// export default function ProfessionalsScreen() {
+//   const router = useRouter();
+//   const [selectedFilter, setSelectedFilter] = React.useState("all");
+
+//   // Fetch professionals from API
+//   const { data: professionals = [], isLoading, error } = useQuery({
+//     queryKey: ["professionals", selectedFilter],
+//     queryFn: () =>
+//       getProfessionals({
+//         specialty: selectedFilter === "all" ? undefined : selectedFilter,
+//       }),
+//     retry: false,
+//   });
+
+//   // Calculate counts for each specialty
+//   const specialtyCounts = React.useMemo(() => {
+//     const counts: Record<string, number> = {};
+//     professionals.forEach((prof) => {
+//       counts[prof.specialty] = (counts[prof.specialty] || 0) + 1;
+//     });
+//     return counts;
+//   }, [professionals]);
+
+//   const specializationsWithCounts = SPECIALIZATIONS.map((spec) => ({
+//     ...spec,
+//     count: spec.id === "all" ? professionals.length : specialtyCounts[spec.id] || 0,
+//   }));
+
+//   const filteredProfessionals = professionals;
+
+//   const handleProfessionalPress = (professionalId: string) => {
+//     router.push({
+//       pathname: "/(tabs)/professionals/professional-details",
+//       params: { id: professionalId },
+//     });
+//   };
+
+//   return (
+//     <SafeAreaView style={styles.container} edges={["top"]}>
+//       <ScrollView
+//         style={styles.scroll}
+//         contentContainerStyle={styles.scrollContent}
+//         showsVerticalScrollIndicator={false}
+//       >
+//         {/* Header */}
+//         <View style={styles.header}>
+//           <View style={styles.headerIcon}>
+//             <Ionicons name="people" size={24} color="#FFFFFF" />
+//           </View>
+//           <View style={styles.headerText}>
+//             <Text style={styles.title}>Professionals</Text>
+//             <Text style={styles.subtitle}>
+//               Find specialists for your child&apos;s needs
+//             </Text>
+//           </View>
+//         </View>
+
+//         {/* Search Bar Placeholder */}
+//         <Pressable style={styles.searchBar}>
+//           <Ionicons name="search-outline" size={20} color={colors.textMuted} />
+//           <Text style={styles.searchPlaceholder}>Search professionals...</Text>
+//         </Pressable>
+
+//         {/* Filter Section */}
+//         <Text style={styles.sectionLabel}>Filter by Specialization</Text>
+//         <ScrollView
+//           horizontal
+//           showsHorizontalScrollIndicator={false}
+//           style={styles.filterScroll}
+//           contentContainerStyle={styles.filterRow}
+//         >
+//           {specializationsWithCounts.map((spec) => (
+//             <Pressable
+//               key={spec.id}
+//               style={({ pressed }) => [
+//                 styles.filterChip,
+//                 selectedFilter === spec.id && styles.filterChipActive,
+//                 pressed && { transform: [{ scale: 0.96 }] },
+//               ]}
+//               onPress={() => setSelectedFilter(spec.id)}
+//             >
+//               <Ionicons
+//                 name={spec.icon as any}
+//                 size={18}
+//                 color={selectedFilter === spec.id ? "#FFFFFF" : colors.textSecondary}
+//               />
+//               <Text
+//                 style={[
+//                   styles.filterChipText,
+//                   selectedFilter === spec.id && styles.filterChipTextActive,
+//                 ]}
+//               >
+//                 {spec.label}
+//               </Text>
+//               {spec.id !== "all" && (
+//                 <View
+//                   style={[
+//                     styles.filterCount,
+//                     selectedFilter === spec.id && styles.filterCountActive,
+//                   ]}
+//                 >
+//                   <Text
+//                     style={[
+//                       styles.filterCountText,
+//                       selectedFilter === spec.id && styles.filterCountTextActive,
+//                     ]}
+//                   >
+//                     {spec.count}
+//                   </Text>
+//                 </View>
+//               )}
+//             </Pressable>
+//           ))}
+//         </ScrollView>
+
+//         {/* Loading State */}
+//         {isLoading && (
+//           <View style={styles.loadingContainer}>
+//             <ActivityIndicator size="large" color={colors.primary} />
+//             <Text style={styles.loadingText}>Loading professionals...</Text>
+//           </View>
+//         )}
+
+//         {/* Error State */}
+//         {error && (
+//           <View style={styles.errorContainer}>
+//             <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
+//             <Text style={styles.errorText}>Failed to load professionals</Text>
+//             <Text style={styles.errorSubtext}>Please try again later</Text>
+//           </View>
+//         )}
+
+//         {/* Results Count */}
+//         {!isLoading && !error && (
+//           <>
+//             <View style={styles.resultsHeader}>
+//               <Text style={styles.resultsCount}>
+//                 {filteredProfessionals.length} professional
+//                 {filteredProfessionals.length !== 1 ? "s" : ""} found
+//               </Text>
+//               <Pressable style={styles.sortButton}>
+//                 <Ionicons name="funnel-outline" size={16} color={colors.textSecondary} />
+//                 <Text style={styles.sortButtonText}>Sort</Text>
+//               </Pressable>
+//             </View>
+
+//             {/* Professionals List */}
+//             <View style={styles.professionalsList}>
+//               {filteredProfessionals.length === 0 ? (
+//                 <View style={styles.emptyState}>
+//                   <View style={styles.emptyIconWrap}>
+//                     <Ionicons name="search-outline" size={32} color={colors.primary} />
+//                   </View>
+//                   <Text style={styles.emptyTitle}>No professionals found</Text>
+//                   <Text style={styles.emptySubtitle}>
+//                     Try selecting a different specialization
+//                   </Text>
+//                   <Pressable
+//                     style={styles.resetButton}
+//                     onPress={() => setSelectedFilter("all")}
+//                   >
+//                     <Text style={styles.resetButtonText}>Show All</Text>
+//                   </Pressable>
+//                 </View>
+//               ) : (
+//                 filteredProfessionals.map((professional) => (
+//                   <Pressable
+//                     key={professional.id}
+//                     style={({ pressed }) => [
+//                       styles.professionalCard,
+//                       pressed && { transform: [{ scale: 0.98 }] },
+//                     ]}
+//                     onPress={() => handleProfessionalPress(professional.id)}
+//                   >
+//                     {/* Avatar */}
+//                     <View
+//                       style={[
+//                         styles.avatarContainer,
+//                         { backgroundColor: `${professional.color}15` },
+//                       ]}
+//                     >
+//                       <Text style={[styles.avatarText, { color: professional.color }]}>
+//                         {professional.name.split(" ").slice(1, 3).map(n => n[0]).join("")}
+//                       </Text>
+//                       {professional.verified && (
+//                         <View style={styles.verifiedBadge}>
+//                           <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+//                         </View>
+//                       )}
+//                     </View>
+
+//                     {/* Content */}
+//                     <View style={styles.professionalContent}>
+//                       <View style={styles.nameRow}>
+//                         <Text style={styles.professionalName}>{professional.name}</Text>
+//                       </View>
+//                       <Text style={[styles.specialtyLabel, { color: professional.color }]}>
+//                         {professional.specialtyLabel}
+//                       </Text>
+
+//                       {/* Meta Row */}
+//                       <View style={styles.metaRow}>
+//                         <View style={styles.ratingWrap}>
+//                           <Ionicons name="star" size={14} color="#F5A623" />
+//                           <Text style={styles.ratingText}>{professional.rating}</Text>
+//                           <Text style={styles.reviewsText}>({professional.reviews})</Text>
+//                         </View>
+//                         <View style={styles.metaDot} />
+//                         <Text style={styles.experienceText}>{professional.experience}</Text>
+//                       </View>
+
+//                       {/* Availability */}
+//                       <View style={styles.availabilityRow}>
+//                         <View
+//                           style={[
+//                             styles.availabilityDot,
+//                             professional.availability && typeof professional.availability === "string" && professional.availability.includes("today") && styles.availabilityDotActive,
+//                           ]}
+//                         />
+//                         <Text
+//                           style={[
+//                             styles.availabilityText,
+//                             professional.availability && typeof professional.availability === "string" && professional.availability.includes("today") && styles.availabilityTextActive,
+//                           ]}
+//                         >
+//                           {professional.availability || "Not available"}
+//                         </Text>
+//                       </View>
+//                     </View>
+
+//                     {/* Arrow */}
+//                     <View style={styles.arrowWrap}>
+//                       <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+//                     </View>
+//                   </Pressable>
+//                 ))
+//               )}
+//             </View>
+//           </>
+//         )}
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: colors.bgApp,
+//   },
+//   scroll: {
+//     flex: 1,
+//   },
+//   scrollContent: {
+//     paddingHorizontal: 20,
+//     paddingTop: 20,
+//     paddingBottom: 100,
+//   },
+//   // Header
+//   header: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 20,
+//   },
+//   headerIcon: {
+//     width: 52,
+//     height: 52,
+//     borderRadius: 16,
+//     backgroundColor: colors.secondary,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginRight: 14,
+//   },
+//   headerText: {
+//     flex: 1,
+//   },
+//   title: {
+//     fontSize: 26,
+//     fontWeight: "700",
+//     color: colors.text,
+//     letterSpacing: -0.5,
+//   },
+//   subtitle: {
+//     fontSize: 14,
+//     color: colors.textSecondary,
+//     marginTop: 4,
+//   },
+//   // Search Bar
+//   searchBar: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     backgroundColor: colors.bgCard,
+//     borderRadius: 14,
+//     paddingHorizontal: 16,
+//     paddingVertical: 14,
+//     marginBottom: 20,
+//     gap: 10,
+//     borderWidth: 1,
+//     borderColor: colors.border,
+//   },
+//   searchPlaceholder: {
+//     fontSize: 15,
+//     color: colors.textMuted,
+//   },
+//   // Filter Section
+//   sectionLabel: {
+//     fontSize: 13,
+//     fontWeight: "600",
+//     color: colors.textSecondary,
+//     marginBottom: 12,
+//     textTransform: "uppercase",
+//     letterSpacing: 0.5,
+//   },
+//   filterScroll: {
+//     marginHorizontal: -20,
+//     marginBottom: 20,
+//   },
+//   filterRow: {
+//     flexDirection: "row",
+//     gap: 10,
+//     paddingHorizontal: 20,
+//   },
+//   filterChip: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 8,
+//     paddingHorizontal: 16,
+//     paddingVertical: 10,
+//     borderRadius: 25,
+//     backgroundColor: colors.bgCard,
+//     borderWidth: 1.5,
+//     borderColor: colors.border,
+//   },
+//   filterChipActive: {
+//     backgroundColor: colors.primary,
+//     borderColor: colors.primary,
+//   },
+//   filterChipText: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//     color: colors.textSecondary,
+//   },
+//   filterChipTextActive: {
+//     color: "#FFFFFF",
+//   },
+//   filterCount: {
+//     backgroundColor: colors.bgApp,
+//     paddingHorizontal: 8,
+//     paddingVertical: 2,
+//     borderRadius: 10,
+//   },
+//   filterCountActive: {
+//     backgroundColor: "rgba(255, 255, 255, 0.25)",
+//   },
+//   filterCountText: {
+//     fontSize: 11,
+//     fontWeight: "600",
+//     color: colors.textSecondary,
+//   },
+//   filterCountTextActive: {
+//     color: "#FFFFFF",
+//   },
+//   // Results Header
+//   resultsHeader: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "space-between",
+//     marginBottom: 16,
+//   },
+//   resultsCount: {
+//     fontSize: 15,
+//     fontWeight: "600",
+//     color: colors.text,
+//   },
+//   sortButton: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 6,
+//     paddingHorizontal: 12,
+//     paddingVertical: 6,
+//     backgroundColor: colors.bgCard,
+//     borderRadius: 10,
+//     borderWidth: 1,
+//     borderColor: colors.border,
+//   },
+//   sortButtonText: {
+//     fontSize: 13,
+//     color: colors.textSecondary,
+//   },
+//   // Professionals List
+//   professionalsList: {
+//     gap: 12,
+//   },
+//   professionalCard: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     backgroundColor: colors.bgCard,
+//     borderRadius: 18,
+//     padding: 16,
+//     shadowColor: "#000",
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.05,
+//     shadowRadius: 8,
+//     elevation: 2,
+//   },
+//   avatarContainer: {
+//     width: 60,
+//     height: 60,
+//     borderRadius: 20,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginRight: 14,
+//     position: "relative",
+//   },
+//   avatarText: {
+//     fontSize: 18,
+//     fontWeight: "700",
+//   },
+//   verifiedBadge: {
+//     position: "absolute",
+//     bottom: -2,
+//     right: -2,
+//     width: 18,
+//     height: 18,
+//     borderRadius: 9,
+//     backgroundColor: colors.primary,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     borderWidth: 2,
+//     borderColor: colors.bgCard,
+//   },
+//   professionalContent: {
+//     flex: 1,
+//   },
+//   nameRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 6,
+//     marginBottom: 2,
+//   },
+//   professionalName: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: colors.text,
+//   },
+//   specialtyLabel: {
+//     fontSize: 13,
+//     fontWeight: "500",
+//     marginBottom: 6,
+//   },
+//   metaRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginBottom: 6,
+//   },
+//   ratingWrap: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 4,
+//   },
+//   ratingText: {
+//     fontSize: 13,
+//     fontWeight: "600",
+//     color: colors.text,
+//   },
+//   reviewsText: {
+//     fontSize: 12,
+//     color: colors.textMuted,
+//   },
+//   metaDot: {
+//     width: 3,
+//     height: 3,
+//     borderRadius: 1.5,
+//     backgroundColor: colors.textMuted,
+//     marginHorizontal: 8,
+//   },
+//   experienceText: {
+//     fontSize: 12,
+//     color: colors.textMuted,
+//   },
+//   availabilityRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     gap: 6,
+//   },
+//   availabilityDot: {
+//     width: 6,
+//     height: 6,
+//     borderRadius: 3,
+//     backgroundColor: colors.textMuted,
+//   },
+//   availabilityDotActive: {
+//     backgroundColor: "#4CAF50",
+//   },
+//   availabilityText: {
+//     fontSize: 12,
+//     color: colors.textMuted,
+//   },
+//   availabilityTextActive: {
+//     color: "#4CAF50",
+//     fontWeight: "500",
+//   },
+//   arrowWrap: {
+//     width: 32,
+//     height: 32,
+//     borderRadius: 10,
+//     backgroundColor: colors.bgApp,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginLeft: 8,
+//   },
+//   // Empty State
+//   emptyState: {
+//     alignItems: "center",
+//     paddingVertical: 48,
+//     paddingHorizontal: 24,
+//   },
+//   emptyIconWrap: {
+//     width: 72,
+//     height: 72,
+//     borderRadius: 36,
+//     backgroundColor: `${colors.primary}15`,
+//     alignItems: "center",
+//     justifyContent: "center",
+//     marginBottom: 16,
+//   },
+//   emptyTitle: {
+//     fontSize: 18,
+//     fontWeight: "600",
+//     color: colors.text,
+//     marginBottom: 8,
+//   },
+//   emptySubtitle: {
+//     fontSize: 14,
+//     color: colors.textMuted,
+//     textAlign: "center",
+//     marginBottom: 20,
+//   },
+//   resetButton: {
+//     paddingHorizontal: 20,
+//     paddingVertical: 10,
+//     backgroundColor: colors.primary,
+//     borderRadius: 10,
+//   },
+//   resetButtonText: {
+//     fontSize: 14,
+//     fontWeight: "600",
+//     color: "#FFFFFF",
+//   },
+//   // Loading & Error States
+//   loadingContainer: {
+//     alignItems: "center",
+//     justifyContent: "center",
+//     paddingVertical: 40,
+//   },
+//   loadingText: {
+//     marginTop: 12,
+//     fontSize: 14,
+//     color: colors.textSecondary,
+//   },
+//   errorContainer: {
+//     alignItems: "center",
+//     justifyContent: "center",
+//     paddingVertical: 40,
+//   },
+//   errorText: {
+//     marginTop: 16,
+//     fontSize: 16,
+//     fontWeight: "600",
+//     color: colors.text,
+//   },
+//   errorSubtext: {
+//     marginTop: 4,
+//     fontSize: 14,
+//     color: colors.textMuted,
+//   },
+// });
+
+
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import React from "react";
+import { useState } from "react";
 import {
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
+  TouchableOpacity,
   View,
+  Modal,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useLanguage } from "../../../context/LanguageContext";
+import {
+  getProfessionals,
+  getProfessionalSpecialties,
+  getProfessionalTags,
+  getCities,
+} from "../../../api/directory.api";
+import {
+  cardShadow,
+  colors,
+  radius,
+  sectionSpacing,
+  spacing,
+  typography,
+} from "../../../theme";
+import { Professional } from "../../../types/directory.types";
 
-// Design system colors
-const colors = {
-  bgApp: "#FAF9F6",
-  bgCard: "#FFFFFF",
-  primary: "#7FB77E",
-  primaryLight: "#E8F5E8",
-  secondary: "#5F8F8B",
-  text: "#2F2F2F",
-  textSecondary: "#4A4A4A",
-  textMuted: "#8A8A8A",
-  border: "rgba(0, 0, 0, 0.06)",
-};
 
-// Specializations for filtering
-const SPECIALIZATIONS = [
-  { id: "all", label: "All", icon: "apps-outline", count: 8 },
-  { id: "speech", label: "Speech", icon: "chatbubble-outline", count: 2 },
-  { id: "behavioral", label: "Behavioral", icon: "heart-outline", count: 2 },
-  { id: "occupational", label: "Occupational", icon: "hand-left-outline", count: 2 },
-  { id: "physical", label: "Physical", icon: "fitness-outline", count: 1 },
-  { id: "educational", label: "Educational", icon: "school-outline", count: 1 },
-];
-
-// Gender filter options
-const GENDERS = [
-  { id: "all", label: "All", icon: "people-outline" },
-  { id: "male", label: "Male", icon: "man-outline" },
-  { id: "female", label: "Female", icon: "woman-outline" },
-];
-
-// Mock professionals data with Kuwait workplace locations
-const PROFESSIONALS = [
-  {
-    id: "1",
-    name: "Dr. Sarah Al-Mutairi",
-    specialty: "speech",
-    specialtyLabel: "Speech Therapist",
-    experience: "10 years",
-    rating: 4.9,
-    reviews: 127,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#7FB77E",
-    gender: "female",
-    workplace: "Kuwait Autism Center",
-    workplaceArea: "Sharq, Capital",
-  },
-  {
-    id: "2",
-    name: "Dr. Mohammed Al-Sabah",
-    specialty: "behavioral",
-    specialtyLabel: "Behavioral Specialist",
-    experience: "8 years",
-    rating: 4.8,
-    reviews: 98,
-    availability: "Next available: Tomorrow",
-    verified: true,
-    image: null,
-    color: "#E8A838",
-    gender: "male",
-    workplace: "Hope Therapy Clinic",
-    workplaceArea: "Mirqab, Capital",
-  },
-  {
-    id: "3",
-    name: "Dr. Fatima Al-Kandari",
-    specialty: "occupational",
-    specialtyLabel: "Occupational Therapist",
-    experience: "12 years",
-    rating: 4.9,
-    reviews: 156,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#5F8F8B",
-    gender: "female",
-    workplace: "Al-Wafaa Rehabilitation Center",
-    workplaceArea: "Salmiya, Hawalli",
-  },
-  {
-    id: "4",
-    name: "Dr. Omar Al-Rashidi",
-    specialty: "educational",
-    specialtyLabel: "Educational Psychologist",
-    experience: "6 years",
-    rating: 4.7,
-    reviews: 67,
-    availability: "Next available: Wed",
-    verified: true,
-    image: null,
-    color: "#7B68EE",
-    gender: "male",
-    workplace: "Al-Amal Learning Center",
-    workplaceArea: "Jahra City, Jahra",
-  },
-  {
-    id: "5",
-    name: "Dr. Layla Al-Enezi",
-    specialty: "speech",
-    specialtyLabel: "Speech Therapist",
-    experience: "15 years",
-    rating: 5.0,
-    reviews: 203,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#7FB77E",
-    gender: "female",
-    workplace: "Al-Noor Special Education School",
-    workplaceArea: "Khaitan, Farwaniya",
-  },
-  {
-    id: "6",
-    name: "Dr. Youssef Al-Hajri",
-    specialty: "behavioral",
-    specialtyLabel: "Behavioral Analyst",
-    experience: "9 years",
-    rating: 4.8,
-    reviews: 112,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#E8A838",
-    gender: "male",
-    workplace: "Kuwait Autism Center",
-    workplaceArea: "Sharq, Capital",
-  },
-  {
-    id: "7",
-    name: "Dr. Nour Al-Shammari",
-    specialty: "occupational",
-    specialtyLabel: "Occupational Therapist",
-    experience: "7 years",
-    rating: 4.6,
-    reviews: 89,
-    availability: "Next available: Thu",
-    verified: false,
-    image: null,
-    color: "#5F8F8B",
-    gender: "female",
-    workplace: "Kuwait Physical Therapy Center",
-    workplaceArea: "Abu Fatira, Mubarak Al-Kabeer",
-  },
-  {
-    id: "8",
-    name: "Dr. Ahmad Al-Fadhli",
-    specialty: "physical",
-    specialtyLabel: "Physical Therapist",
-    experience: "11 years",
-    rating: 4.9,
-    reviews: 145,
-    availability: "Available today",
-    verified: true,
-    image: null,
-    color: "#D9534F",
-    gender: "male",
-    workplace: "Kuwait Physical Therapy Center",
-    workplaceArea: "Abu Fatira, Mubarak Al-Kabeer",
-  },
-];
+//const CATEGORIES = [
+//{ key: "all", label: "All" },
+//{ key: "Pediatrician", label: "Doctor" },
+//{ key: "Speech Therapist", label: "Speech" },
+//{ key: "Physiotherapist", label: "Physio" },
+//];
 
 export default function ProfessionalsScreen() {
   const router = useRouter();
-  const { t } = useLanguage();
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [selectedSpecialization, setSelectedSpecialization] = React.useState("all");
-  const [selectedGender, setSelectedGender] = React.useState("all");
 
-  const filteredProfessionals = PROFESSIONALS.filter((p) => {
-    const matchesSpecialization = selectedSpecialization === "all" || p.specialty === selectedSpecialization;
-    const matchesGender = selectedGender === "all" || p.gender === selectedGender;
-    
-    // Search filter - matches name, specialty, or workplace
-    const searchLower = searchQuery.toLowerCase().trim();
-    const matchesSearch = searchQuery === "" ||
-      p.name.toLowerCase().includes(searchLower) ||
-      p.specialtyLabel.toLowerCase().includes(searchLower) ||
-      p.workplace.toLowerCase().includes(searchLower) ||
-      p.workplaceArea.toLowerCase().includes(searchLower);
-    
-    return matchesSpecialization && matchesGender && matchesSearch;
+  // States للفلترة
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
+  const [selectedCity, setSelectedCity] = useState<string>("all");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchText, setSearchText] = useState("");
+
+  // جلب قوائم الفلترة
+  const { data: specialties = [] } = useQuery({
+    queryKey: ["professional-specialties"],
+    queryFn: getProfessionalSpecialties,
   });
 
-  const handleProfessionalPress = (professionalId: string) => {
-    router.push({
-      pathname: "/(tabs)/professionals/professional-details",
-      params: { id: professionalId },
-    });
+  const { data: tags = [] } = useQuery({
+    queryKey: ["professional-tags"],
+    queryFn: getProfessionalTags,
+  });
+
+  const { data: cities = [] } = useQuery({
+    queryKey: ["cities"],
+    queryFn: getCities,
+  });
+
+  // جلب المهنيين مع الفلترة
+  const { data: professionals, isLoading } = useQuery({
+    queryKey: ["professionals", selectedSpecialty, selectedCity, selectedTags, searchText],
+    queryFn: () =>
+      getProfessionals({
+        specialty: selectedSpecialty === "all" ? undefined : selectedSpecialty,
+        city: selectedCity === "all" ? undefined : selectedCity,
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
+        search: searchText || undefined,
+      }),
+  });
+
+  // تبديل الـ tag
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
+  // إعادة تعيين الفلاتر
+  const resetFilters = () => {
+    setSelectedSpecialty("all");
+    setSelectedCity("all");
+    setSelectedTags([]);
+    setSearchText("");
+  };
+
+  // حساب عدد الفلاتر النشطة
+  const activeFiltersCount =
+    (selectedSpecialty !== "all" ? 1 : 0) +
+    (selectedCity !== "all" ? 1 : 0) +
+    selectedTags.length;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.wrapper} edges={["top"]}>
+        <View style={styles.container}>
+          <Text style={styles.loadingText}>Loading professionals...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.wrapper} edges={["top"]}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerIcon}>
-            <Ionicons name="people" size={24} color="#FFFFFF" />
+        <View style={styles.headerContainer}>
+          <View style={[
+            styles.professionalIconWrap,
+            { backgroundColor: `${colors.primary}15` },
+          ]}
+          >
+            <Ionicons
+              name="people"
+              size={24}
+              color={colors.primary}
+            />
           </View>
           <View style={styles.headerText}>
-            <Text style={styles.title}>{t("professionals.title")}</Text>
-            <Text style={styles.subtitle}>
-              {t("directory.healthcareProfessionals")}
-            </Text>
+            <Text style={styles.title}>Professionals</Text>
           </View>
         </View>
 
+
+
+
         {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={20} color={colors.textMuted} />
+        <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by name, specialty, or workplace..."
+            placeholder="Search for a professional..."
             placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            returnKeyType="search"
+            value={searchText}
+            onChangeText={setSearchText}
           />
-          {searchQuery.length > 0 && (
-            <Pressable
-              onPress={() => setSearchQuery("")}
-              style={({ pressed }) => [
-                styles.clearButton,
-                pressed && { opacity: 0.6 },
-              ]}
-            >
-              <Ionicons name="close-circle" size={20} color={colors.textMuted} />
-            </Pressable>
-          )}
+          <TouchableOpacity
+            style={styles.filterButton}
+            onPress={() => setShowFilters(true)}
+          >
+            <Text style={styles.filterButtonText}>
+              🔍 Filter {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Gender Filter Section */}
-        <Text style={styles.sectionLabel}>{t("professionals.filterByGender")}</Text>
-        <View style={styles.genderFilterRow}>
-          {GENDERS.map((gender) => (
-            <Pressable
-              key={gender.id}
-              style={({ pressed }) => [
-                styles.genderChip,
-                selectedGender === gender.id && styles.genderChipActive,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}
-              onPress={() => setSelectedGender(gender.id)}
-            >
-              <Ionicons
-                name={gender.icon as any}
-                size={18}
-                color={selectedGender === gender.id ? "#FFFFFF" : colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.genderChipText,
-                  selectedGender === gender.id && styles.genderChipTextActive,
-                ]}
-              >
-                {gender.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-
-        {/* Specialization Filter Section */}
-        <Text style={styles.sectionLabel}>{t("professionals.filterBySpecialization")}</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterScroll}
-          contentContainerStyle={styles.filterRow}
-        >
-          {SPECIALIZATIONS.map((spec) => (
-            <Pressable
-              key={spec.id}
-              style={({ pressed }) => [
-                styles.filterChip,
-                selectedSpecialization === spec.id && styles.filterChipActive,
-                pressed && { transform: [{ scale: 0.96 }] },
-              ]}
-              onPress={() => setSelectedSpecialization(spec.id)}
-            >
-              <Ionicons
-                name={spec.icon as any}
-                size={18}
-                color={selectedSpecialization === spec.id ? "#FFFFFF" : colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.filterChipText,
-                  selectedSpecialization === spec.id && styles.filterChipTextActive,
-                ]}
-              >
-                {spec.label}
-              </Text>
-              {spec.id !== "all" && (
-                <View
-                  style={[
-                    styles.filterCount,
-                    selectedSpecialization === spec.id && styles.filterCountActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.filterCountText,
-                      selectedSpecialization === spec.id && styles.filterCountTextActive,
-                    ]}
-                  >
-                    {spec.count}
+        {/* Active Filters Display */}
+        {(selectedSpecialty !== "all" || selectedCity !== "all" || selectedTags.length > 0) && (
+          <View style={styles.activeFiltersContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {selectedSpecialty !== "all" && (
+                <View style={styles.activeFilterTag}>
+                  <Text style={styles.activeFilterText}>
+                    Specialty: {selectedSpecialty}
                   </Text>
+                  <TouchableOpacity onPress={() => setSelectedSpecialty("all")}>
+                    <Text style={styles.removeFilter}>✕</Text>
+                  </TouchableOpacity>
                 </View>
               )}
-            </Pressable>
-          ))}
-        </ScrollView>
-
-        {/* Results Count */}
-        <View style={styles.resultsHeader}>
-          <Text style={styles.resultsCount}>
-            {filteredProfessionals.length} professional
-            {filteredProfessionals.length !== 1 ? "s" : ""} found
-          </Text>
-          <Pressable style={styles.sortButton}>
-            <Ionicons name="funnel-outline" size={16} color={colors.textSecondary} />
-            <Text style={styles.sortButtonText}>Sort</Text>
-          </Pressable>
-        </View>
-
-        {/* Professionals List */}
-        <View style={styles.professionalsList}>
-          {filteredProfessionals.map((professional) => (
-            <Pressable
-              key={professional.id}
-              style={({ pressed }) => [
-                styles.professionalCard,
-                pressed && { transform: [{ scale: 0.98 }] },
-              ]}
-              onPress={() => handleProfessionalPress(professional.id)}
-            >
-              {/* Avatar */}
-              <View
-                style={[
-                  styles.avatarContainer,
-                  { backgroundColor: `${professional.color}15` },
-                ]}
+              {selectedCity !== "all" && (
+                <View style={styles.activeFilterTag}>
+                  <Text style={styles.activeFilterText}>
+                    City: {selectedCity}
+                  </Text>
+                  <TouchableOpacity onPress={() => setSelectedCity("all")}>
+                    <Text style={styles.removeFilter}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {selectedTags.map(tag => (
+                <View key={tag} style={styles.activeFilterTag}>
+                  <Text style={styles.activeFilterText}>{tag}</Text>
+                  <TouchableOpacity onPress={() => toggleTag(tag)}>
+                    <Text style={styles.removeFilter}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              <TouchableOpacity
+                style={styles.clearAllButton}
+                onPress={resetFilters}
               >
-                <Text style={[styles.avatarText, { color: professional.color }]}>
-                  {professional.name.split(" ").slice(1, 3).map(n => n[0]).join("")}
-                </Text>
-                {professional.verified && (
-                  <View style={styles.verifiedBadge}>
-                    <Ionicons name="checkmark" size={10} color="#FFFFFF" />
+                <Text style={styles.clearAllText}>Clear All</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        )}
+
+        {professionals?.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No professionals found</Text>
+          </View>
+        ) : (
+          professionals?.map((professional: Professional) => (
+            console.log("Professional PAGE", professional),
+            <TouchableOpacity
+              key={professional.id}
+              style={[styles.professionalCard, cardShadow]}
+              onPress={() =>
+                router.push(
+                  `/(tabs)/professionals/professional-details?id=${professional.id}`
+                )
+              }
+              activeOpacity={0.85}
+            >
+              <View style={styles.cardHeader}>
+                <Text style={styles.professionalName}>{professional.name}</Text>
+                {/* Rating Display */}
+                {professional.rating !== undefined && (
+                  <View style={styles.ratingContainer}>
+                    <Text style={styles.ratingStar}>⭐</Text>
+                    <Text style={styles.ratingText}>
+                      {professional.rating.toFixed(1)}
+                    </Text>
                   </View>
                 )}
               </View>
 
-              {/* Content */}
-              <View style={styles.professionalContent}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.professionalName}>{professional.name}</Text>
-                </View>
-                <Text style={[styles.specialtyLabel, { color: professional.color }]}>
-                  {professional.specialtyLabel}
-                </Text>
-                
-                {/* Next Session Availability */}
-                <View style={styles.availabilityRow}>
-                  <Ionicons 
-                    name="calendar" 
-                    size={14} 
-                    color={professional.availability.includes("today") ? colors.primary : colors.secondary} 
-                  />
-                  <Text
-                    style={[
-                      styles.availabilityText,
-                      professional.availability.includes("today") && styles.availabilityTextActive,
-                    ]}
-                  >
-                    Next Session: {professional.availability.replace("Available ", "").replace("Next available: ", "")}
-                  </Text>
-                </View>
-
-                {/* Meta Row */}
-                <View style={styles.metaRow}>
-                  <Text style={styles.experienceText}>{professional.experience} experience</Text>
-                </View>
+              {/* Specialty Badge */}
+              <View style={styles.specialtyBadge}>
+                <Text style={styles.specialtyText}>{professional.specialty}</Text>
               </View>
 
-              {/* Arrow */}
-              <View style={styles.arrowWrap}>
-                <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
-              </View>
-            </Pressable>
-          ))}
+              {/* Display City */}
+              {/* {professional.city && (
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationText}>📍 {professional.city}</Text>
         </View>
+      )} */}
 
-        {/* Empty State */}
-        {filteredProfessionals.length === 0 && (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyIconWrap}>
-              <Ionicons name="search-outline" size={32} color={colors.primary} />
+              {/* Display Center */}
+              {professional.centerName && (
+                <View style={styles.centerContainer}>
+                  <Text style={styles.centerText}>🏥 {professional.centerName}</Text>
+                </View>
+              )}
+
+              {/* Display Tags */}
+              {professional.specialtyLabel && professional.specialtyLabel.length > 0 && (
+                <View style={styles.tagsContainer}>
+                  {/* {professional.tags.map((tag, index) => (
+            <View key={index} style={styles.tagBadge}>
+              <Text style={styles.tagText}>{tag}</Text>
             </View>
-            <Text style={styles.emptyTitle}>No professionals found</Text>
-            <Text style={styles.emptySubtitle}>
-              {searchQuery ? `No results for "${searchQuery}"` : "Try selecting different filters"}
-            </Text>
-            <Pressable
-              style={styles.resetButton}
-              onPress={() => {
-                setSearchQuery("");
-                setSelectedSpecialization("all");
-                setSelectedGender("all");
-              }}
-            >
-              <Text style={styles.resetButtonText}>Reset All</Text>
-            </Pressable>
-          </View>
+          ))} */}
+                  <Text style={styles.tagText}>{professional.specialtyLabel}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))
         )}
       </ScrollView>
+
+      {/* Filter Modal */}
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Professionals</Text>
+              <TouchableOpacity onPress={() => setShowFilters(false)}>
+                <Text style={styles.closeButton}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {/* Specialty Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Specialty</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      selectedSpecialty === "all" && styles.filterOptionActive,
+                    ]}
+                    onPress={() => setSelectedSpecialty("all")}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        selectedSpecialty === "all" && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                  {specialties.map((spec) => (
+                    <TouchableOpacity
+                      key={spec}
+                      style={[
+                        styles.filterOption,
+                        selectedSpecialty === spec && styles.filterOptionActive,
+                      ]}
+                      onPress={() => setSelectedSpecialty(spec)}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedSpecialty === spec && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        {spec}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* City Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>City</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <TouchableOpacity
+                    style={[
+                      styles.filterOption,
+                      selectedCity === "all" && styles.filterOptionActive,
+                    ]}
+                    onPress={() => setSelectedCity("all")}
+                  >
+                    <Text
+                      style={[
+                        styles.filterOptionText,
+                        selectedCity === "all" && styles.filterOptionTextActive,
+                      ]}
+                    >
+                      All
+                    </Text>
+                  </TouchableOpacity>
+                  {cities.map((city) => (
+                    <TouchableOpacity
+                      key={city}
+                      style={[
+                        styles.filterOption,
+                        selectedCity === city && styles.filterOptionActive,
+                      ]}
+                      onPress={() => setSelectedCity(city)}
+                    >
+                      <Text
+                        style={[
+                          styles.filterOptionText,
+                          selectedCity === city && styles.filterOptionTextActive,
+                        ]}
+                      >
+                        {city}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Tags Filter */}
+              <View style={styles.filterSection}>
+                <Text style={styles.filterSectionTitle}>Tags</Text>
+                <View style={styles.tagsGrid}>
+                  {tags.map((tag) => (
+                    <TouchableOpacity
+                      key={tag}
+                      style={[
+                        styles.tagFilterOption,
+                        selectedTags.includes(tag) && styles.tagFilterOptionActive,
+                      ]}
+                      onPress={() => toggleTag(tag)}
+                    >
+                      <Text
+                        style={[
+                          styles.tagFilterOptionText,
+                          selectedTags.includes(tag) && styles.tagFilterOptionTextActive,
+                        ]}
+                      >
+                        {tag}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={resetFilters}
+              >
+                <Text style={styles.clearButtonText}>Clear All</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={() => setShowFilters(false)}
+              >
+                <Text style={styles.applyButtonText}>Apply</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     flex: 1,
-    backgroundColor: colors.bgApp,
+    backgroundColor: colors.background,
   },
   scroll: {
     flex: 1,
   },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 120,
+  container: {
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.xl,
+    paddingBottom: 100,
   },
-  // Header
-  header: {
+  loadingText: {
+    fontSize: typography.body,
+    color: colors.textMuted,
+  },
+  headerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
-  },
-  headerIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: colors.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
+    marginBottom: sectionSpacing.default,
   },
   headerText: {
     flex: 1,
+    marginLeft: spacing.md,
   },
   title: {
-    fontSize: 26,
-    fontWeight: "700",
+    fontSize: typography.title,
+    lineHeight: typography.h1LineHeight,
+    fontWeight: typography.weightBold,
     color: colors.text,
-    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: typography.body,
     color: colors.textSecondary,
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
-  // Search Bar
-  searchBar: {
-    flexDirection: "row",
+  professionalIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.md || 16,
     alignItems: "center",
-    backgroundColor: colors.bgCard,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    marginBottom: 20,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
+    justifyContent: "center",
+  },
+  // Search and Filter
+  searchContainer: {
+    flexDirection: "row",
+    marginBottom: spacing.md,
+    gap: spacing.sm,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: typography.body,
     color: colors.text,
-    paddingVertical: 10,
-  },
-  clearButton: {
-    padding: 4,
-  },
-  // Filter Section
-  sectionLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.textSecondary,
-    marginBottom: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  // Gender Filter
-  genderFilterRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 20,
-  },
-  genderChip: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: colors.bgCard,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  genderChipActive: {
-    backgroundColor: colors.secondary,
-    borderColor: colors.secondary,
-  },
-  genderChipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.textSecondary,
-  },
-  genderChipTextActive: {
-    color: "#FFFFFF",
-  },
-  filterScroll: {
-    marginHorizontal: -20,
-    marginBottom: 20,
-  },
-  filterRow: {
-    flexDirection: "row",
-    gap: 10,
-    paddingHorizontal: 20,
-  },
-  filterChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 25,
-    backgroundColor: colors.bgCard,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  filterChipActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  filterChipText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: colors.textSecondary,
-  },
-  filterChipTextActive: {
-    color: "#FFFFFF",
-  },
-  filterCount: {
-    backgroundColor: colors.bgApp,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  filterCountActive: {
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-  },
-  filterCountText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: colors.textSecondary,
-  },
-  filterCountTextActive: {
-    color: "#FFFFFF",
-  },
-  // Results Header
-  resultsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  resultsCount: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.text,
-  },
-  sortButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.bgCard,
-    borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  sortButtonText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-  },
-  // Professionals List
-  professionalsList: {
-    gap: 12,
-  },
-  professionalCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.bgCard,
-    borderRadius: 18,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  avatarContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-    position: "relative",
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  verifiedBadge: {
-    position: "absolute",
-    bottom: -2,
-    right: -2,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+  filterButton: {
     backgroundColor: colors.primary,
-    alignItems: "center",
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: colors.bgCard,
   },
-  professionalContent: {
-    flex: 1,
+  filterButtonText: {
+    color: "#FFFFFF",
+    fontSize: typography.body,
+    fontWeight: "600",
   },
-  nameRow: {
+  // Active Filters
+  activeFiltersContainer: {
+    marginBottom: spacing.md,
+  },
+  activeFilterTag: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 2,
+    backgroundColor: `${colors.primary}15`,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full || 20,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
+  },
+  activeFilterText: {
+    fontSize: typography.caption,
+    color: colors.primary,
+    marginRight: spacing.xs,
+  },
+  removeFilter: {
+    fontSize: typography.caption,
+    color: colors.primary,
+    fontWeight: "bold",
+  },
+  clearAllButton: {
+    backgroundColor: colors.errorLight,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.full || 20,
+  },
+  clearAllText: {
+    fontSize: typography.caption,
+    color: colors.error,
+    fontWeight: "600",
+  },
+  // Professional Card
+  professionalCard: {
+    backgroundColor: colors.backgroundCard,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: spacing.sm,
   },
   professionalName: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: typography.h3,
+    lineHeight: typography.h3LineHeight,
+    fontWeight: typography.weightSemibold,
     color: colors.text,
-  },
-  specialtyLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  workplaceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-    gap: 4,
-  },
-  workplaceText: {
-    fontSize: 12,
-    color: colors.textSecondary,
-    fontWeight: "500",
     flex: 1,
   },
-  workplaceArea: {
-    fontSize: 11,
-    color: colors.textMuted,
-  },
-  metaRow: {
+  // Rating
+  ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 6,
+    backgroundColor: `${colors.warning}20`,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.sm || 8,
   },
-  ratingWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
+  ratingStar: {
+    fontSize: 14,
+    marginRight: 4,
   },
   ratingText: {
-    fontSize: 13,
+    fontSize: typography.caption,
     fontWeight: "600",
-    color: colors.text,
+    color: colors.warning,
   },
-  reviewsText: {
-    fontSize: 12,
-    color: colors.textMuted,
+  // Specialty Badge
+  specialtyBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: `${colors.primary}15`,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.md || 12,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
   },
-  metaDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: colors.textMuted,
-    marginHorizontal: 8,
-  },
-  experienceText: {
-    fontSize: 12,
-    color: colors.textMuted,
-  },
-  availabilityRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  availabilityDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.textMuted,
-  },
-  availabilityDotActive: {
-    backgroundColor: "#4CAF50",
-  },
-  availabilityText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: colors.secondary,
-    marginLeft: 6,
-  },
-  availabilityTextActive: {
+  specialtyText: {
+    fontSize: typography.caption,
     color: colors.primary,
     fontWeight: "500",
   },
-  arrowWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: colors.bgApp,
+  locationContainer: {
+    marginTop: spacing.xs,
+  },
+  locationText: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
+  },
+  centerContainer: {
+    marginTop: spacing.xs,
+  },
+  centerText: {
+    fontSize: typography.caption,
+    color: colors.textMuted,
+  },
+  tagsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  tagBadge: {
+    backgroundColor: colors.backgroundSecondary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tagText: {
+    fontSize: typography.caption,
+    color: colors.textSecondary,
+  },
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: radius.xl || 28,
+    borderTopRightRadius: radius.xl || 28,
+    maxHeight: "80%",
+    paddingBottom: spacing.xl,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: typography.h3,
+    fontWeight: typography.weightBold,
+    color: colors.text,
+  },
+  closeButton: {
+    fontSize: typography.h2,
+    color: colors.textMuted,
+  },
+  modalBody: {
+    padding: spacing.lg,
+  },
+  filterSection: {
+    marginBottom: spacing.xl,
+  },
+  filterSectionTitle: {
+    fontSize: typography.h3,
+    fontWeight: typography.weightSemibold,
+    color: colors.text,
+    marginBottom: spacing.md,
+  },
+  filterOption: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.full || 20,
+    backgroundColor: colors.backgroundSecondary,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  filterOptionActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  filterOptionText: {
+    fontSize: typography.body,
+    color: colors.textSecondary,
+    fontWeight: "500",
+  },
+  filterOptionTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  tagsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+  },
+  tagFilterOption: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  tagFilterOptionActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  tagFilterOptionText: {
+    fontSize: typography.body,
+    color: colors.textSecondary,
+  },
+  tagFilterOptionTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  modalFooter: {
+    flexDirection: "row",
+    padding: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    gap: spacing.sm,
+  },
+  clearButton: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 8,
+    backgroundColor: colors.backgroundSecondary,
+  },
+  clearButtonText: {
+    color: colors.textSecondary,
+    fontSize: typography.body,
+    fontWeight: "600",
+  },
+  applyButton: {
+    flex: 2,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  applyButtonText: {
+    color: "#FFFFFF",
+    fontSize: typography.body,
+    fontWeight: "600",
   },
   // Empty State
   emptyState: {
     alignItems: "center",
-    paddingVertical: 48,
-    paddingHorizontal: 24,
+    paddingVertical: spacing.xl,
   },
-  emptyIconWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: `${colors.primary}15`,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
+  emptyText: {
+    fontSize: typography.body,
     color: colors.textMuted,
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  resetButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-  },
-  resetButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#FFFFFF",
   },
 });

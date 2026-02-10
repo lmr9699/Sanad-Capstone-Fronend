@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+//import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   ReactNode,
@@ -7,11 +7,11 @@ import {
   useState,
 } from "react";
 import { I18nManager } from "react-native";
-import i18n, { Locale, setLocale } from "../i18n";
+import i18n, { setLocale, type Locale } from "../i18n";
 
 interface LanguageContextType {
   locale: Locale;
-  setLanguage: (locale: Locale) => Promise<void>;
+  setLocale: (locale: Locale) => void;
   t: (key: string, options?: object) => string;
   isRTL: boolean;
 }
@@ -24,52 +24,44 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
-  const [isRTL, setIsRTL] = useState(false);
 
   // Load saved language on mount
   useEffect(() => {
-    const loadLanguage = async () => {
-      try {
-        const savedLocale = await AsyncStorage.getItem(LANGUAGE_KEY);
-        if (savedLocale === "ar" || savedLocale === "en") {
-          setLocaleState(savedLocale);
-          setLocale(savedLocale);
-          setIsRTL(savedLocale === "ar");
-        }
-      } catch (error) {
-        console.log("Error loading language:", error);
-      }
-    };
-    loadLanguage();
+    setLocale("en");
+    // Set RTL based on initial locale (English = LTR)
+    I18nManager.forceRTL(false);
+    I18nManager.allowRTL(true); // Allow RTL so it can be enabled when switching to Arabic
   }, []);
 
-  const setLanguage = async (newLocale: Locale) => {
-    try {
-      // Save to storage
-      await AsyncStorage.setItem(LANGUAGE_KEY, newLocale);
-      
-      // Update state
-      setLocaleState(newLocale);
-      setLocale(newLocale);
-      
-      // Update RTL
-      const shouldBeRTL = newLocale === "ar";
-      setIsRTL(shouldBeRTL);
-      
-      // Note: Full RTL support would require I18nManager.forceRTL(shouldBeRTL)
-      // and app restart, but for this demo we'll just update the locale
-    } catch (error) {
-      console.log("Error saving language:", error);
-    }
+  // Update RTL when locale changes
+  useEffect(() => {
+    const isRTL = locale === "ar";
+    I18nManager.forceRTL(isRTL);
+    I18nManager.allowRTL(true);
+  }, [locale]);
+
+  const handleSetLocale = (newLocale: Locale) => {
+    setLocaleState(newLocale);
+    setLocale(newLocale);
+
+    // Update RTL setting based on locale
+    const isRTL = newLocale === "ar";
+    I18nManager.forceRTL(isRTL);
+    I18nManager.allowRTL(isRTL);
+
+    // Note: RTL changes require app restart to take full effect
+    // But this will work for the next render cycle
   };
 
   const t = (key: string, options?: object): string => {
     return i18n.t(key, options);
   };
 
+  const isRTL = locale === "ar";
+
   return (
     <LanguageContext.Provider
-      value={{ locale, setLanguage, t, isRTL }}
+      value={{ locale, setLocale: handleSetLocale, t, isRTL }}
     >
       {children}
     </LanguageContext.Provider>

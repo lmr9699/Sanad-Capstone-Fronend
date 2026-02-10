@@ -155,7 +155,7 @@ export default function ServiceDetailsScreen() {
           </View>
 
           {/* Rating */}
-          <View style={styles.ratingRow}>
+          {/* <View style={styles.ratingRow}>
             <View style={styles.starsRow}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <Ionicons
@@ -167,9 +167,9 @@ export default function ServiceDetailsScreen() {
               ))}
             </View>
             <Text style={styles.ratingText}>
-              {service.rating} ({service.reviews} reviews)
+              ({service.reviews} reviews)
             </Text>
-          </View>
+          </View> */}
         </View>
 
         {/* Quick Stats */}
@@ -233,9 +233,17 @@ export default function ServiceDetailsScreen() {
             ]}
             onPress={() => {
               router.push({
+<<<<<<< HEAD
+                pathname: "/(tabs)/directory/SerivceProviders",
+                params: {
+                  serviceId: service.id,
+                },
+              });
+=======
                 pathname: "/(tabs)/services/service-providers",
                 params: { serviceName: service.name },
               } as any);
+>>>>>>> main
             }}
           >
             <Text style={styles.viewProvidersBtnText}>View All</Text>

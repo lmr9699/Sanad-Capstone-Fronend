@@ -18,6 +18,7 @@ export interface Child {
   medications?: Medication[];
   allergies?: string[];
   parentId: string;
+  medicalFiles?: string[]; // Array of medical file paths
   createdAt?: string;
   updatedAt?: string;
 }
@@ -101,4 +102,45 @@ export const updateChild = async (
 ): Promise<Child> => {
   const response = await instance.put<ChildResponse>(`/children/${childId}`, data);
   return (response as unknown as ChildResponse).data.child;
+};
+
+/**
+ * Upload medical file for child
+ * POST /api/upload/child/:childId/medical-file
+ */
+export const uploadChildMedicalFile = async (
+  childId: string,
+  file: { uri: string; type: string; name: string }
+): Promise<{ fileUrl: string; message: string }> => {
+  const formData = new FormData();
+  formData.append("file", {
+    uri: file.uri,
+    type: file.type,
+    name: file.name,
+  } as any);
+
+  const response = await instance.post<{ success: boolean; data: { fileUrl: string; message: string } }>(
+    `/upload/child/${childId}/medical-file`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+  return (response as unknown as { success: boolean; data: { fileUrl: string; message: string } }).data;
+};
+
+/**
+ * Delete medical file from child
+ * DELETE /api/upload/child/:childId/medical-file/:fileName
+ */
+export const deleteChildMedicalFile = async (
+  childId: string,
+  fileName: string
+): Promise<{ message: string }> => {
+  const response = await instance.delete<{ success: boolean; data: { message: string } }>(
+    `/upload/child/${childId}/medical-file/${fileName}`
+  );
+  return (response as unknown as { success: boolean; data: { message: string } }).data;
 };

@@ -1,10 +1,13 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { colors, typography } from "../../../theme";
+import { TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 /**
  * Directory Stack Layout — Directory screens with back button
  */
 export default function DirectoryLayout() {
+  const router = useRouter();
   return (
     <Stack
       screenOptions={{
@@ -23,7 +26,14 @@ export default function DirectoryLayout() {
         name="centers"
         options={{
           headerShown: true,
-          headerTitle: "Health Centers",
+          headerLeft: () => {
+            return (
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={24} color={colors.text} />
+              </TouchableOpacity>
+            );
+          },
+          headerTitle: "Centers",
           headerTitleStyle: {
             fontSize: typography.h2,
             fontWeight: typography.weightBold,
@@ -46,13 +56,7 @@ export default function DirectoryLayout() {
       <Stack.Screen
         name="center-details"
         options={{
-          headerShown: true,
-          headerTitle: "Center Details",
-          headerTitleStyle: {
-            fontSize: typography.h2,
-            fontWeight: typography.weightBold,
-            color: colors.text,
-          },
+          headerShown: false, // Custom header is implemented in the component
         }}
       />
       <Stack.Screen
@@ -69,6 +73,12 @@ export default function DirectoryLayout() {
       />
       <Stack.Screen
         name="helpCenter"
+        options={{
+          headerShown: false, // We have a custom header in the component
+        }}
+      />
+      <Stack.Screen
+        name="SerivceProviders"
         options={{
           headerShown: false, // We have a custom header in the component
         }}

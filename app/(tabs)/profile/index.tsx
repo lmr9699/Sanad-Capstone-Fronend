@@ -1,6 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+<<<<<<< HEAD
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+=======
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+>>>>>>> main
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../../context/AuthContext";
 
@@ -46,7 +50,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <Text style={styles.pageTitle}>Profile</Text>
+        {/* <Text style={styles.pageTitle}>Profile</Text> */}
 
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
@@ -133,7 +137,7 @@ export default function ProfileScreen() {
             <View style={styles.settingsIcon}>
               <Ionicons name="settings-outline" size={20} color={colors.textSecondary} />
             </View>
-            <Text style={styles.settingsText}>App Settings</Text>
+            <Text style={styles.settingsText}>Settings</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
 
@@ -150,6 +154,79 @@ export default function ProfileScreen() {
               <Ionicons name="help-circle-outline" size={20} color={colors.secondary} />
             </View>
             <Text style={styles.settingsText}>Help & Support</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+        </View>
+
+        {/* Support Card */}
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Support</Text>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.settingsRow,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => router.push("/(tabs)/directory/helpCenter")}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.settingsText}>Help Center</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+
+          <View style={styles.divider} />
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.settingsRow,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => {
+              Alert.alert(
+                "Contact Us",
+                "SANAD Support\n+96596999699",
+                [
+                  {
+                    text: "OK",
+                    style: "default",
+                  },
+                ]
+              );
+            }}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name="call-outline" size={20} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.settingsText}>Contact Us</Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
+          </Pressable>
+
+          <View style={styles.divider} />
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.settingsRow,
+              pressed && { opacity: 0.7 },
+            ]}
+            onPress={() => {
+              Alert.alert(
+                "Email Support",
+                "SANAD Support Email\nsupport@sanad.com",
+                [
+                  {
+                    text: "OK",
+                    style: "default",
+                  },
+                ]
+              );
+            }}
+          >
+            <View style={styles.settingsIcon}>
+              <Ionicons name="mail-outline" size={20} color={colors.textSecondary} />
+            </View>
+            <Text style={styles.settingsText}>Email Support</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
           </Pressable>
         </View>

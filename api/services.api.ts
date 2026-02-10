@@ -193,3 +193,11 @@ export const getServiceById = async (serviceId: string): Promise<Service> => {
     throw new Error("Service not found");
   }
 };
+
+
+export const getServiceProviders = async (serviceId: string) => {
+  const response = await instance.get(`/services/${serviceId}/providers`);
+
+  // console.log("R  ", response.data);
+  return (response).data;
+};

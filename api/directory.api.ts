@@ -1,4 +1,4 @@
-import { HealthCenter, Professional } from "../types/directory.types";
+import { Center, Professional } from "../types/directory.types";
 import instance from "./axios";
 
 
@@ -12,7 +12,7 @@ export interface CenterFilters {
  * Get health centers
  * GET /api/directory/centers
  */
-export const getCenters = async (filters?: CenterFilters): Promise<HealthCenter[]> => {
+export const getCenters = async (filters?: CenterFilters): Promise<Center[]> => {
   const params: Record<string, string> = {};
 
   if (filters?.type) params.type = filters.type;
@@ -21,9 +21,9 @@ export const getCenters = async (filters?: CenterFilters): Promise<HealthCenter[
     params.specialties = filters.specialties.join(",");
   }
 
-  const response = await instance.get<{ success: boolean; data: { centers: HealthCenter[]; count: number } }>("/directory/centers", { params });
+  const response = await instance.get<{ success: boolean; data: { centers: Center[]; count: number } }>("/centers", { params });
   // axios interceptor returns response.data directly, so response is already the full response object
-  const data = (response as unknown as { success: boolean; data: { centers: HealthCenter[]; count: number } }).data;
+  const data = (response as unknown as { success: boolean; data: { centers: Center[]; count: number } }).data;
   // Ensure we return an array
   if (Array.isArray(data.centers)) {
     return data.centers;
@@ -89,7 +89,7 @@ export const getProfessionals = async (filters?: ProfessionalFilters): Promise<P
   if (filters?.city) params.city = filters.city;
   if (filters?.search) params.search = filters.search;
   
-  const response = await instance.get<{ success: boolean; data: { professionals: Professional[]; count: number } }>("/directory/professionals", { params });
+  const response = await instance.get<{ success: boolean; data: { professionals: Professional[]; count: number } }>("/professionals", { params });
   // axios interceptor returns response.data directly, so response is already the full response object
   const data = (response as unknown as { success: boolean; data: { professionals: Professional[]; count: number } }).data;
   // Ensure we return an array
@@ -104,7 +104,7 @@ export const getProfessionals = async (filters?: ProfessionalFilters): Promise<P
  * GET /api/directory/professionals/specialties/list
  */
 export const getProfessionalSpecialties = async (): Promise<string[]> => {
-  const response = await instance.get<{ success: boolean; data: string[] }>("/directory/professionals/specialties/list");
+  const response = await instance.get<{ success: boolean; data: string[] }>("/professionals/specialties/list");
   // axios interceptor returns response.data directly, so response is already the full response object
   const data = (response as unknown as { success: boolean; data: string[] }).data;
   // Ensure we return an array
@@ -115,12 +115,17 @@ export const getProfessionalSpecialties = async (): Promise<string[]> => {
 };
 
 /**
- * Get list of professional tags (NOT IMPLEMENTED IN BACKEND)
- * GET /api/directory/professionals/tags/list
+ * Get list of professional tags
+ * GET /api/professionals/tags/list
  */
 export const getProfessionalTags = async (): Promise<string[]> => {
-  // This endpoint is not implemented in the backend yet
-  console.warn("Professional tags endpoint is not implemented in the backend");
+  const response = await instance.get<{ success: boolean; data: string[] }>("/professionals/tags/list");
+  // axios interceptor returns response.data directly, so response is already the full response object
+  const data = (response as unknown as { success: boolean; data: string[] }).data;
+  // Ensure we return an array
+  if (Array.isArray(data)) {
+    return data;
+  }
   return [];
 };
 
@@ -128,16 +133,16 @@ export const getProfessionalTags = async (): Promise<string[]> => {
  * Get center details by ID
  * GET /api/directory/centers/:centerId
  */
-export const getCenterDetails = async (centerId: string): Promise<HealthCenter> => {
-  const response = await instance.get<{ success: boolean; data: { center: HealthCenter } }>(`/directory/centers/${centerId}`);
+export const getCenterDetails = async (centerId: string): Promise<Center> => {
+  const response = await instance.get<{ success: boolean; data: { center: Center } }>(`/centers/${centerId}`);
   // axios interceptor returns response.data directly, so response is already the full response object
-  return (response as unknown as { success: boolean; data: { center: HealthCenter } }).data.center;
+  return (response as unknown as { success: boolean; data: { center: Center } }).data.center;
 };
 
 
 
 export const getProfessionalDetails = async (professionalId: string): Promise<Professional> => {
-  const response = await instance.get<{ success: boolean; data: { professional: Professional } }>(`/directory/professionals/${professionalId}`);
+  const response = await instance.get<{ success: boolean; data: { professional: Professional } }>(`/professionals/${professionalId}`);
   // axios interceptor returns response.data directly, so response is already the full response object
   return (response as unknown as { success: boolean; data: { professional: Professional } }).data.professional;
 };
