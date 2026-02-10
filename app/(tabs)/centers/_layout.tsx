@@ -1,11 +1,10 @@
 import { Stack } from "expo-router";
 
-export default function ServicesLayout() {
+export default function CentersLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="service-details" />
-      <Stack.Screen name="service-providers" />
+      <Stack.Screen name="center-details" />
     </Stack>
   );
 }

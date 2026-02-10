@@ -43,7 +43,7 @@ export default function ProfessionalsScreen() {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  
+
   // States مؤقتة للفلترة في الـ Modal (قبل الضغط على Apply)
   const [tempSpecialty, setTempSpecialty] = useState<string>("all");
   const [tempCity, setTempCity] = useState<string>("all");
@@ -574,6 +574,24 @@ const styles = StyleSheet.create({
   centerText: {
     fontSize: typography.caption,
     color: colors.textMuted,
+  },
+  // Contact Information
+  contactContainer: {
+    marginTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  contactIcon: {
+    fontSize: 14,
+  },
+  contactText: {
+    fontSize: typography.caption,
+    color: colors.text,
+    fontWeight: "500",
   },
   tagsContainer: {
     flexDirection: "row",

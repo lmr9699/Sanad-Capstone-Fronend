@@ -5,6 +5,7 @@ export default function ProfessionalsLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="professional-details" />
+      <Stack.Screen name="book-appointment" />
     </Stack>
   );
 }

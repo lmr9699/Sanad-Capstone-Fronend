@@ -7,7 +7,7 @@
 **Platform:** iOS & Android  
 **Framework:** Expo SDK 54 with Expo Router  
 **Language:** TypeScript  
-**Purpose:** A comprehensive mobile application designed to support parents of children with special needs by providing personalized care paths, community support, resource management, and progress tracking.
+**Purpose:** A comprehensive mobile application designed to support parents of People of Determination by providing personalized care paths, community support, resource management, and progress tracking.
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Primary Goals
 
-1. **User Support**: Provide a user-friendly platform for parents managing children with special needs
+1. **User Support**: Provide a user-friendly platform for parents supporting People of Determination
 2. **Care Management**: Enable personalized care path creation and tracking
 3. **Community Building**: Facilitate connection and support among families
 4. **Resource Access**: Centralize access to documents, professionals, and centers
@@ -369,7 +369,7 @@ Sanad-Capstone-Fronend/
 
 ## 🙏 Acknowledgments
 
-This project represents a comprehensive effort to create a meaningful application for families managing special needs care. The focus on user experience, accessibility, and clean code architecture demonstrates professional mobile development practices.
+This project represents a comprehensive effort to create a meaningful application for families supporting People of Determination. The focus on user experience, accessibility, and clean code architecture demonstrates professional mobile development practices.
 
 ---
 
