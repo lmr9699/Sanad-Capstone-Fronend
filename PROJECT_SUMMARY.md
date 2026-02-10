@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-SANAD is a comprehensive mobile application designed to support parents of children with special needs. Built using React Native and Expo, the application provides a user-friendly platform for care management, community support, and resource access.
+SANAD is a comprehensive mobile application designed to support parents of People of Determination. Built using React Native and Expo, the application provides a user-friendly platform for care management, community support, and resource access.
 
 ## Project Highlights
 
@@ -88,7 +88,7 @@ SANAD is a comprehensive mobile application designed to support parents of child
 
 ## Conclusion
 
-SANAD represents a complete, production-ready mobile application demonstrating professional development practices, user-centered design, and technical excellence. The project successfully delivers a meaningful solution for families managing special needs care.
+SANAD represents a complete, production-ready mobile application demonstrating professional development practices, user-centered design, and technical excellence. The project successfully delivers a meaningful solution for families supporting People of Determination.
 
 ---
 

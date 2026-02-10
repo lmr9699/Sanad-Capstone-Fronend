@@ -103,6 +103,10 @@ export default function ProfessionalDetailsScreen() {
     );
   }
 
+  function t(arg0: string): React.ReactNode {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/* Header */}
@@ -350,7 +354,7 @@ export default function ProfessionalDetailsScreen() {
           ]}
           onPress={handleBookAppointment}
         >
-          <Text style={styles.bookButtonText}>Book Appointment</Text>
+          <Text style={styles.bookButtonText}>{t("professionals.bookAppointment")}</Text>
           <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
         </Pressable>
       </View>

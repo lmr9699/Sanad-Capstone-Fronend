@@ -1,6 +1,6 @@
 # SANAD — Frontend Application
 
-A React Native mobile application built with Expo Router for parents of children with special needs. Provides personalized care paths, community support, and resource management.
+A React Native mobile application built with Expo Router for parents of People of Determination. Provides personalized care paths, community support, and resource management.
 
 ## 🚀 Quick Start
 

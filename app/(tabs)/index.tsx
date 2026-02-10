@@ -373,7 +373,7 @@ export default function HomeScreen() {
           <View style={styles.welcomeContent}>
             <Text style={styles.welcomeTitle}>Welcome to Sanad</Text>
             <Text style={styles.welcomeSubtitle}>
-              Your trusted companion for special needs resources
+              Your trusted companion for People of Determination
             </Text>
           </View>
           <TouchableOpacity

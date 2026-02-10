@@ -57,7 +57,7 @@ export default function TabsLayout() {
         },
       }}
     >
-      {/* Main tabs - 4 tabs evenly distributed */}
+      {/* Main tabs - 5 tabs evenly distributed */}
       <Tabs.Screen
         name="index"
         options={{
@@ -65,7 +65,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -79,12 +79,13 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
         }}
       />
+      {/* Centers hidden from tab bar but still accessible */}
       <Tabs.Screen
         name="professionals"
         options={{
@@ -92,7 +93,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "people" : "people-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -105,7 +106,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "person" : "person-outline"}
-              size={24}
+              size={22}
               color={color}
             />
           ),
@@ -113,6 +114,7 @@ export default function TabsLayout() {
       />
 
       {/* Hidden routes - accessible via navigation but not visible in tab bar */}
+      <Tabs.Screen name="centers" options={{ href: null }} />
       <Tabs.Screen name="care-path" options={{ href: null }} />
       <Tabs.Screen name="community" options={{ href: null }} />
       <Tabs.Screen name="directory" options={{ href: null }} />

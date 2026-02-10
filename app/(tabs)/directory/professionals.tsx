@@ -576,6 +576,24 @@ const styles = StyleSheet.create({
     fontSize: typography.caption,
     color: colors.textMuted,
   },
+  // Contact Information
+  contactContainer: {
+    marginTop: spacing.sm,
+    gap: spacing.xs,
+  },
+  contactItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+  },
+  contactIcon: {
+    fontSize: 14,
+  },
+  contactText: {
+    fontSize: typography.caption,
+    color: colors.text,
+    fontWeight: "500",
+  },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",

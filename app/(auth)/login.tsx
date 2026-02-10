@@ -1,6 +1,8 @@
-import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation, useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -12,10 +14,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useMutation } from "@tanstack/react-query";
-import * as SecureStore from "expo-secure-store";
-import { Ionicons } from "@expo/vector-icons";
-import { login } from "../../api/auth.api";
 import { useAuth } from "../../context/AuthContext";
 
 // Design system colors
@@ -29,37 +27,67 @@ const colors = {
   textSecondary: "#4A4A4A",
   textTertiary: "#8A8A8A",
   border: "rgba(0, 0, 0, 0.06)",
+  error: "#FF4B4B",
 };
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { setUser } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: async (data) => {
-      if (data.token) {
-        await SecureStore.setItemAsync("token", data.token);
-      }
-      if (data.user) {
-        setUser(data.user);
-      }
-      router.replace("/(tabs)");
-    },
-    onError: (error: any) => {
-      Alert.alert("Login Failed", error.message || "Invalid credentials");
-    },
+  const navigation = useNavigation();
+  const { login } = useAuth();
+  const canGoBack = navigation.canGoBack();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
   });
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
-      return;
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { email: "", password: "" };
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+      isValid = false;
     }
-    loginMutation.mutate({ email, password });
+
+    // Password validation
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+      isValid = false;
+    } else if (formData.password.length < 4) {
+      newErrors.password = "Password must be at least 4 characters";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Login Failed", "Unable to sign in. Please try again.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,73 +101,103 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.authTitle}>Sign In</Text>
+          {canGoBack && (
+            <Pressable
+              style={({ pressed }) => [
+                styles.authBack,
+                pressed && { opacity: 0.7 },
+              ]}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
+            </Pressable>
+          )}
+
+          <Text style={[styles.authTitle, !canGoBack && { marginTop: 20 }]}>Sign In</Text>
           <Text style={styles.authWelcome}>Welcome back</Text>
           <Text style={styles.authSub}>
-            Sign in to continue. We&apos;re here to support you every step of the
+            Sign in to continue. We're here to support you every step of the
             way.
           </Text>
 
           <View style={styles.authForm}>
-            <View style={styles.authError} />
+            {/* Email */}
             <View style={styles.formGroup}>
               <Text style={styles.label}>Email Address</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, errors.email && styles.inputError]}
                 placeholder="Enter your email"
                 placeholderTextColor={colors.textTertiary}
-                value={email}
-                onChangeText={setEmail}
+                value={formData.email}
+                onChangeText={(text) => {
+                  setFormData({ ...formData, email: text });
+                  if (errors.email) setErrors({ ...errors, email: "" });
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
               />
+              {errors.email ? (
+                <Text style={styles.errorText}>{errors.email}</Text>
+              ) : null}
             </View>
 
+            {/* Password */}
             <View style={styles.formGroup}>
               <Text style={styles.label}>Password</Text>
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={styles.inputInWrap}
+                  style={[styles.inputInWrap, errors.password && styles.inputError]}
                   placeholder="Enter your password"
                   placeholderTextColor={colors.textTertiary}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!isPasswordVisible}
+                  value={formData.password}
+                  onChangeText={(text) => {
+                    setFormData({ ...formData, password: text });
+                    if (errors.password) setErrors({ ...errors, password: "" });
+                  }}
+                  secureTextEntry={!showPassword}
                 />
                 <Pressable
                   style={({ pressed }) => [
                     styles.togglePassword,
                     pressed && { opacity: 0.7 },
                   ]}
-                  onPress={() => setIsPasswordVisible((prev) => !prev)}
+                  onPress={() => setShowPassword((p) => !p)}
                 >
                   <Ionicons
-                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
-                    size={20}
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
                     color={colors.textTertiary}
                   />
                 </Pressable>
               </View>
+              {errors.password ? (
+                <Text style={styles.errorText}>{errors.password}</Text>
+              ) : null}
             </View>
 
+            {/* Sign In Button */}
             <Pressable
               style={({ pressed }) => [
                 styles.btnPrimary,
                 pressed && { opacity: 0.8 },
+                isLoading && { opacity: 0.7 },
               ]}
               onPress={handleLogin}
-              disabled={loginMutation.isPending}
+              disabled={isLoading}
             >
-              <Text style={styles.btnPrimaryText}>
-                {loginMutation.isPending ? "Signing In..." : "Sign In"}
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.btnPrimaryText}>Sign In</Text>
+              )}
             </Pressable>
           </View>
 
           <Pressable onPress={() => router.push("/(auth)/register")}>
             {({ pressed }) => (
               <Text style={[styles.authFooter, pressed && { opacity: 0.7 }]}>
-                Don&apos;t have an account?{" "}
+                Don't have an account?{" "}
                 <Text style={styles.authFooterLink}>Create account</Text>
               </Text>
             )}
@@ -164,8 +222,25 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     alignItems: "center",
   },
+  authBack: {
+    alignSelf: "flex-start",
+    width: 46,
+    height: 46,
+    borderRadius: 12,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 28,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 3,
+    elevation: 1,
+  },
   authTitle: {
-    fontSize: 22.4, // 1.4rem
+    fontSize: 22,
     fontWeight: "600",
     marginBottom: 24,
     textAlign: "center",
@@ -173,7 +248,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.32,
   },
   authWelcome: {
-    fontSize: 24, // 1.5rem
+    fontSize: 24,
     fontWeight: "600",
     marginBottom: 10,
     textAlign: "center",
@@ -181,29 +256,22 @@ const styles = StyleSheet.create({
     letterSpacing: -0.32,
   },
   authSub: {
-    fontSize: 15.2, // 0.95rem
+    fontSize: 15,
     color: colors.textSecondary,
     textAlign: "center",
     marginBottom: 32,
     maxWidth: 320,
-    lineHeight: 22.8,
+    lineHeight: 22,
   },
   authForm: {
     width: "100%",
     maxWidth: 360,
   },
-  authError: {
-    opacity: 0,
-    height: 0,
-    marginBottom: 0,
-    paddingVertical: 0,
-    paddingHorizontal: 0,
-  },
   formGroup: {
     marginBottom: 20,
   },
   label: {
-    fontSize: 14.4, // 0.9rem
+    fontSize: 14,
     fontWeight: "600",
     marginBottom: 8,
     color: colors.text,
@@ -212,12 +280,20 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 12, // Rounded inputs
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
     fontSize: 16,
-    backgroundColor: colors.bgCard, // Semi-transparent
+    backgroundColor: colors.bgCard,
     color: colors.text,
+  },
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 12,
+    marginTop: 6,
   },
   inputWrap: {
     position: "relative",
@@ -227,18 +303,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingRight: 48,
     paddingLeft: 16,
-    borderRadius: 12, // Rounded inputs
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
     fontSize: 16,
-    backgroundColor: colors.bgCard, // Semi-transparent
+    backgroundColor: colors.bgCard,
     color: colors.text,
   },
   togglePassword: {
     position: "absolute",
     right: 12,
     top: "50%",
-    transform: [{ translateY: -10 }],
+    transform: [{ translateY: -11 }],
     borderRadius: 6,
     padding: 6,
   },
@@ -246,32 +322,25 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 16,
     backgroundColor: colors.primary,
-    borderRadius: 24, // Rounded button
+    borderRadius: 24,
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 3,
     elevation: 1,
+    minHeight: 52,
   },
   btnPrimaryText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "600",
   },
-  createAccountContainer: {
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  createAccountText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#333333",
-  },
   authFooter: {
     textAlign: "center",
-    fontSize: 14.4,
+    fontSize: 14,
     color: colors.textSecondary,
   },
   authFooterLink: {

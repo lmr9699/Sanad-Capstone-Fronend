@@ -1,3 +1,4 @@
+//import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   ReactNode,
@@ -15,6 +16,8 @@ interface LanguageContextType {
   isRTL: boolean;
 }
 
+const LANGUAGE_KEY = "@sanad_language";
+
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
 );
@@ -22,6 +25,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
 
+  // Load saved language on mount
   useEffect(() => {
     setLocale("en");
     // Set RTL based on initial locale (English = LTR)

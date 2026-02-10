@@ -233,11 +233,17 @@ export default function ServiceDetailsScreen() {
             ]}
             onPress={() => {
               router.push({
+<<<<<<< HEAD
                 pathname: "/(tabs)/directory/SerivceProviders",
                 params: {
                   serviceId: service.id,
                 },
               });
+=======
+                pathname: "/(tabs)/services/service-providers",
+                params: { serviceName: service.name },
+              } as any);
+>>>>>>> main
             }}
           >
             <Text style={styles.viewProvidersBtnText}>View All</Text>

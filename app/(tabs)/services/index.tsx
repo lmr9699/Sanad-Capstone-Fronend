@@ -81,11 +81,6 @@ export default function ServicesScreen() {
             <Text style={styles.statNumber}>{totalProviders}</Text>
             <Text style={styles.statLabel}>Providers</Text>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{avgRating.toFixed(1)}</Text>
-            <Text style={styles.statLabel}>Avg Rating</Text>
-          </View>
         </View>
 
         {/* Loading State */}
