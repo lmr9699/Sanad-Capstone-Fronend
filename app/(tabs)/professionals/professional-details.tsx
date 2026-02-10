@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+//import * as Haptics from "expo-haptics";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
 import {
@@ -68,7 +69,7 @@ export default function ProfessionalDetailsScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerTitle}>Professional Profile</Text>
-          <View style={styles.headerRight} />
+          <View style={{ width: 24 }} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
@@ -90,14 +91,10 @@ export default function ProfessionalDetailsScreen() {
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
           <Text style={styles.headerTitle}>Professional Profile</Text>
-          <View style={styles.headerRight} />
+          <View style={{ width: 24 }} />
         </View>
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle-outline" size={48} color={colors.textMuted} />
           <Text style={styles.errorText}>Professional not found</Text>
-          <Text style={styles.errorSubtext}>
-            {error ? "Failed to load professional details" : "The professional you're looking for doesn't exist"}
-          </Text>
           <Pressable style={styles.backButton} onPress={() => router.back()}>
             <Text style={styles.backButtonText}>Go Back</Text>
           </Pressable>
@@ -401,7 +398,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 140,
   },
   // Hero Section
   heroSection: {
@@ -510,6 +507,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: colors.text,
+  },
+  quickInfoSubValue: {
+    fontSize: 12,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   quickInfoDivider: {
     height: 1,
@@ -642,6 +644,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFFFFF",
   },
+  // Loading
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: colors.textMuted,
+  },
   // Error
   errorContainer: {
     flex: 1,
@@ -664,27 +677,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
     color: "#FFFFFF",
-  },
-  headerRight: {
-    width: 40,
-  },
-  // Loading & Error States
-  loadingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 60,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  errorSubtext: {
-    marginTop: 8,
-    fontSize: 14,
-    color: colors.textMuted,
-    textAlign: "center",
-    marginBottom: 20,
   },
 });

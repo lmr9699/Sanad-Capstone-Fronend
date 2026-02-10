@@ -43,7 +43,7 @@ export default function ProfessionalsScreen() {
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchText, setSearchText] = useState("");
-  
+
   // States مؤقتة للفلترة في الـ Modal (قبل الضغط على Apply)
   const [tempSpecialty, setTempSpecialty] = useState<string>("all");
   const [tempCity, setTempCity] = useState<string>("all");
@@ -221,18 +221,19 @@ export default function ProfessionalsScreen() {
                 {/* Rating Display */}
                 {professional.rating !== undefined && (
                   <View style={styles.ratingContainer}>
-                    <Text style={styles.ratingStar}>⭐</Text>
+                    <Text style={styles.specialtyText}>{professional.specialty}</Text>
+                    {/* <Text style={styles.ratingStar}>⭐</Text>
                     <Text style={styles.ratingText}>
                       {professional.rating.toFixed(1)}
-                    </Text>
+                    </Text> */}
                   </View>
                 )}
               </View>
 
               {/* Specialty Badge */}
-              <View style={styles.specialtyBadge}>
+              {/* <View style={styles.specialtyBadge}>
                 <Text style={styles.specialtyText}>{professional.specialty}</Text>
-              </View>
+              </View> */}
 
               {/* Display City */}
               {/* {professional.city && (
