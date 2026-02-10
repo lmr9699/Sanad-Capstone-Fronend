@@ -347,8 +347,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   providersText: {
-    fontSize: 12,
-    color: colors.textMuted,
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.text,
   },
   arrowWrap: {
     width: 32,
