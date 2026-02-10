@@ -188,7 +188,7 @@ const SerivceProviders = () => {
                 {centers.length > 0 && (
                     <>
                         <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}> providers</Text>
+                            <Text style={styles.sectionTitle}>providers </Text>
                             <View style={styles.filterContainer}>
                                 <Pressable
                                     style={({ pressed }) => [
@@ -237,7 +237,7 @@ const SerivceProviders = () => {
                                 </Pressable>
                             </View>
                         </View>
-                        <Text style={styles.sectionTitle}>centers</Text>
+                        {/* <Text style={styles.sectionTitle}>centers</Text> */}
                         {filteredCenters.map((center: any) => (
                             <TouchableOpacity
                                 key={center._id || center.id}
@@ -309,9 +309,9 @@ const SerivceProviders = () => {
                 {/* Professionals Section */}
                 {professionals.length > 0 && (
                     <>
-                        <Text style={[styles.sectionTitle, filteredCenters.length > 0 && styles.sectionTitleWithMargin]}>
+                        {/* <Text style={[styles.sectionTitle, filteredCenters.length > 0 && styles.sectionTitleWithMargin]}>
                             Professionals
-                        </Text>
+                        </Text> */}
                         {filteredProfessionals.map((professional: any) => (
                             <TouchableOpacity
                                 key={professional._id || professional.id}
