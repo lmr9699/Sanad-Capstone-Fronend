@@ -944,7 +944,7 @@ export default function HomeScreen() {
               <View>
                 <Text style={styles.centersCardTitle}>Centers</Text>
                 <Text style={styles.centersCardSubtitle}>
-                  Find specialized care centers near you
+                  Top 3 rated centers
                 </Text>
               </View>
             </View>
@@ -1933,6 +1933,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 6,
+    marginBottom: 18,
   },
   centersViewAllText: {
     fontSize: 14,

@@ -155,7 +155,7 @@ export default function ServiceDetailsScreen() {
           </View>
 
           {/* Rating */}
-          <View style={styles.ratingRow}>
+          {/* <View style={styles.ratingRow}>
             <View style={styles.starsRow}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <Ionicons
@@ -169,7 +169,7 @@ export default function ServiceDetailsScreen() {
             <Text style={styles.ratingText}>
               ({service.reviews} reviews)
             </Text>
-          </View>
+          </View> */}
         </View>
 
         {/* Quick Stats */}

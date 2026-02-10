@@ -28,7 +28,7 @@ export default function DirectoryLayout() {
           headerShown: true,
           headerLeft: () => {
             return (
-              <TouchableOpacity onPress={() => router.push("/(tabs)")}>
+              <TouchableOpacity onPress={() => router.back()}>
                 <Ionicons name="arrow-back" size={24} color={colors.text} />
               </TouchableOpacity>
             );

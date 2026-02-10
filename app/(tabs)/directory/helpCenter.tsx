@@ -161,33 +161,35 @@ export default function HelpCenterScreen() {
                 </ScrollView>
 
                 {/* Input Area */}
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Type your message..."
-                        placeholderTextColor={colors.textLight}
-                        value={inputText}
-                        onChangeText={setInputText}
-                        multiline
-                        maxLength={500}
-                        editable={!sendMessageMutation.isPending}
-                    />
-                    <TouchableOpacity
-                        style={[
-                            styles.sendButton,
-                            (!inputText.trim() || sendMessageMutation.isPending) && styles.sendButtonDisabled,
-                        ]}
-                        onPress={handleSend}
-                        disabled={!inputText.trim() || sendMessageMutation.isPending}
-                        activeOpacity={0.7}
-                    >
-                        {sendMessageMutation.isPending ? (
-                            <ActivityIndicator size="small" color="#FFFFFF" />
-                        ) : (
-                            <Ionicons name="send" size={20} color="#FFFFFF" />
-                        )}
-                    </TouchableOpacity>
-                </View>
+                <SafeAreaView edges={["bottom"]} style={styles.inputSafeArea}>
+                    <View style={styles.inputContainer}>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Type your message..."
+                            placeholderTextColor={colors.textLight}
+                            value={inputText}
+                            onChangeText={setInputText}
+                            multiline
+                            maxLength={500}
+                            editable={!sendMessageMutation.isPending}
+                        />
+                        <TouchableOpacity
+                            style={[
+                                styles.sendButton,
+                                (!inputText.trim() || sendMessageMutation.isPending) && styles.sendButtonDisabled,
+                            ]}
+                            onPress={handleSend}
+                            disabled={!inputText.trim() || sendMessageMutation.isPending}
+                            activeOpacity={0.7}
+                        >
+                            {sendMessageMutation.isPending ? (
+                                <ActivityIndicator size="small" color="#FFFFFF" />
+                            ) : (
+                                <Ionicons name="send" size={20} color="#FFFFFF" />
+                            )}
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
     },
     messagesContent: {
         padding: spacing.md,
-        paddingBottom: spacing.xl,
+        paddingBottom: spacing.md,
     },
     messageWrapper: {
         flexDirection: "row",
@@ -291,17 +293,21 @@ const styles = StyleSheet.create({
         marginLeft: spacing.xs,
         marginBottom: spacing.xs,
     },
-    inputContainer: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.md,
+    inputSafeArea: {
         backgroundColor: colors.background,
         borderTopWidth: 1,
         borderTopColor: colors.border,
     },
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "flex-end",
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.sm,
+        paddingBottom: spacing.pageBottom,
+        backgroundColor: colors.background,
+    },
     input: {
-        flex: 1,
+        flex: 2,
         borderWidth: 1,
         borderColor: colors.border,
         borderRadius: radius.lg,

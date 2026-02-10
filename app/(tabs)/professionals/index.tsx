@@ -1,4 +1,4 @@
-// import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 // import { useRouter } from "expo-router";
 // import React from "react";
 // import {
@@ -731,7 +731,24 @@ export default function ProfessionalsScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.container}
       >
-        <Text style={styles.title}>Healthcare Professionals</Text>
+        <View style={styles.headerContainer}>
+          <View style={[
+            styles.professionalIconWrap,
+            { backgroundColor: `${colors.primary}15` },
+          ]}
+          >
+            <Ionicons
+              name="people"
+              size={24}
+              color={colors.primary}
+            />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>Professionals</Text>
+          </View>
+        </View>
+
+
 
 
         {/* Search Bar */}
@@ -1028,12 +1045,32 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     color: colors.textMuted,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: sectionSpacing.default,
+  },
+  headerText: {
+    flex: 1,
+    marginLeft: spacing.md,
+  },
   title: {
     fontSize: typography.title,
     lineHeight: typography.h1LineHeight,
     fontWeight: typography.weightBold,
     color: colors.text,
-    marginBottom: sectionSpacing.default,
+  },
+  subtitle: {
+    fontSize: typography.body,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+  },
+  professionalIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: radius.md || 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   // Search and Filter
   searchContainer: {

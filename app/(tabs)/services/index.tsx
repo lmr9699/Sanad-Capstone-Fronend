@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { getServices } from "../../../api/services.api";
+import { getProfessionals } from "../../../api/directory.api";
 
 // Design system colors
 const colors = {
@@ -29,6 +30,13 @@ export default function ServicesScreen() {
     retry: false,
   });
 
+  // Fetch all professionals from database to count total providers
+  const { data: professionals = [] } = useQuery({
+    queryKey: ["professionals-count"],
+    queryFn: () => getProfessionals(),
+    retry: false,
+  });
+
   const handleServicePress = (serviceId: string) => {
     router.push({
       pathname: "/(tabs)/services/service-details",
@@ -36,8 +44,8 @@ export default function ServicesScreen() {
     });
   };
 
-  // Calculate stats from services data
-  const totalProviders = services.reduce((acc, s) => acc + s.providers, 0);
+  // Calculate stats from database
+  const totalProviders = professionals.length; // Count from database
   const avgRating = services.length > 0
     ? services.reduce((acc, s) => acc + s.rating, 0) / services.length
     : 0;
@@ -109,72 +117,73 @@ export default function ServicesScreen() {
                 </View>
               ) : (
                 services.map((service) => (
-            <Pressable
-              key={service.id}
-              style={({ pressed }) => [
-                styles.serviceCard,
-                pressed && { transform: [{ scale: 0.98 }] },
-              ]}
-              onPress={() => handleServicePress(service.id)}
-            >
-              {/* Service Icon */}
-              <View
-                style={[
-                  styles.serviceIconWrap,
-                  { backgroundColor: `${service.color}15` },
-                ]}
-              >
-                <Ionicons
-                  name={service.icon as any}
-                  size={26}
-                  color={service.color}
-                />
-              </View>
+                  <Pressable
+                    key={service.id}
+                    style={({ pressed }) => [
+                      styles.serviceCard,
+                      pressed && { transform: [{ scale: 0.98 }] },
+                    ]}
+                    onPress={() => handleServicePress(service.id)}
+                  >
+                    {/* Service Icon */}
+                    <View
+                      style={[
+                        styles.serviceIconWrap,
+                        { backgroundColor: `${service.color}15` },
+                      ]}
+                    >
+                      <Ionicons
+                        name={service.icon as any}
+                        size={26}
+                        color={service.color}
+                      />
+                    </View>
 
-              {/* Service Info */}
-              <View style={styles.serviceInfo}>
-                <View style={styles.serviceHeader}>
-                  <Text style={styles.serviceName}>{service.name}</Text>
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryText}>{service.category}</Text>
-                  </View>
-                </View>
-                <Text style={styles.serviceDescription} numberOfLines={2}>
-                  {service.description}
-                </Text>
-                <View style={styles.serviceMeta}>
-                  <View style={styles.ratingWrap}>
-                    <Ionicons name="star" size={14} color="#F5A623" />
-                    <Text style={styles.ratingText}>{service.rating}</Text>
-                  </View>
-                  <View style={styles.metaDot} />
-                  <Ionicons
-                    name="person-outline"
-                    size={14}
-                    color={colors.textMuted}
-                  />
-                  <Text style={styles.providersText}>
-                    {service.providers} providers
-                  </Text>
-                </View>
-              </View>
+                    {/* Service Info */}
+                    <View style={styles.serviceInfo}>
+                      <View style={styles.serviceHeader}>
+                        <Text style={styles.serviceName}>{service.name}</Text>
+                        <View style={styles.categoryBadge}>
+                          <Text style={styles.categoryText}>{service.category}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.serviceDescription} numberOfLines={2}>
+                        {service.description}
+                      </Text>
+                      <View style={styles.serviceMeta}>
+                        {/* <View style={styles.ratingWrap}>
+                          <Ionicons name="star" size={14} color="#F5A623" />
+                          <Text style={styles.ratingText}>{service.rating}</Text>
+                        </View> */}
+                        {/* <View style={styles.metaDot} /> */}
+                        <Ionicons
+                          name="person-outline"
+                          size={14}
+                          color={colors.textMuted}
+                        />
+                        <Text style={styles.providersText}>
+                          {service.providers} providers
+                        </Text>
+                      </View>
+                    </View>
 
-              {/* Arrow */}
-              <View style={styles.arrowWrap}>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={colors.textMuted}
-                />
-              </View>
-                </Pressable>
+                    {/* Arrow */}
+                    <View style={styles.arrowWrap} >
+                      <Ionicons
+                        name="chevron-forward"
+                        size={20}
+                        color={colors.textMuted}
+                      />
+                    </View>
+                  </Pressable>
                 ))
               )}
             </View>
           </>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+        )
+        }
+      </ScrollView >
+    </SafeAreaView >
   );
 }
 

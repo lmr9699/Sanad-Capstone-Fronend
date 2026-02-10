@@ -75,6 +75,7 @@ export default function TabsLayout() {
         name="services"
         options={{
           title: "Services",
+          href: "/services",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "grid" : "grid-outline"}

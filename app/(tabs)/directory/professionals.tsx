@@ -38,12 +38,17 @@ import { Professional } from "../../../types/directory.types";
 export default function ProfessionalsScreen() {
   const router = useRouter();
 
-  // States للفلترة
+  // States للفلترة (المطبقة فعلياً)
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [selectedCity, setSelectedCity] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [searchText, setSearchText] = useState("");
+  
+  // States مؤقتة للفلترة في الـ Modal (قبل الضغط على Apply)
+  const [tempSpecialty, setTempSpecialty] = useState<string>("all");
+  const [tempCity, setTempCity] = useState<string>("all");
+  const [tempTags, setTempTags] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
 
   // جلب قوائم الفلترة
   const { data: specialties = [] } = useQuery({
@@ -73,21 +78,40 @@ export default function ProfessionalsScreen() {
       }),
   });
 
-  // تبديل الـ tag
+  // تبديل الـ tag في الـ Modal
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev =>
+    setTempTags(prev =>
       prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
   };
 
+  // تطبيق الفلاتر عند الضغط على Apply
+  const applyFilters = () => {
+    setSelectedSpecialty(tempSpecialty);
+    setSelectedCity(tempCity);
+    setSelectedTags([...tempTags]);
+    setShowFilters(false);
+  };
+
   // إعادة تعيين الفلاتر
   const resetFilters = () => {
+    setTempSpecialty("all");
+    setTempCity("all");
+    setTempTags([]);
     setSelectedSpecialty("all");
     setSelectedCity("all");
     setSelectedTags([]);
     setSearchText("");
+  };
+
+  // تهيئة الفلاتر المؤقتة عند فتح الـ Modal
+  const openFiltersModal = () => {
+    setTempSpecialty(selectedSpecialty);
+    setTempCity(selectedCity);
+    setTempTags([...selectedTags]);
+    setShowFilters(true);
   };
 
   // حساب عدد الفلاتر النشطة
@@ -126,7 +150,7 @@ export default function ProfessionalsScreen() {
           />
           <TouchableOpacity
             style={styles.filterButton}
-            onPress={() => setShowFilters(true)}
+            onPress={openFiltersModal}
           >
             <Text style={styles.filterButtonText}>
               🔍 Filter {activeFiltersCount > 0 && `(${activeFiltersCount})`}
@@ -264,14 +288,14 @@ export default function ProfessionalsScreen() {
                   <TouchableOpacity
                     style={[
                       styles.filterOption,
-                      selectedSpecialty === "all" && styles.filterOptionActive,
+                      tempSpecialty === "all" && styles.filterOptionActive,
                     ]}
-                    onPress={() => setSelectedSpecialty("all")}
+                    onPress={() => setTempSpecialty("all")}
                   >
                     <Text
                       style={[
                         styles.filterOptionText,
-                        selectedSpecialty === "all" && styles.filterOptionTextActive,
+                        tempSpecialty === "all" && styles.filterOptionTextActive,
                       ]}
                     >
                       All
@@ -282,14 +306,14 @@ export default function ProfessionalsScreen() {
                       key={spec}
                       style={[
                         styles.filterOption,
-                        selectedSpecialty === spec && styles.filterOptionActive,
+                        tempSpecialty === spec && styles.filterOptionActive,
                       ]}
-                      onPress={() => setSelectedSpecialty(spec)}
+                      onPress={() => setTempSpecialty(spec)}
                     >
                       <Text
                         style={[
                           styles.filterOptionText,
-                          selectedSpecialty === spec && styles.filterOptionTextActive,
+                          tempSpecialty === spec && styles.filterOptionTextActive,
                         ]}
                       >
                         {spec}
@@ -306,14 +330,14 @@ export default function ProfessionalsScreen() {
                   <TouchableOpacity
                     style={[
                       styles.filterOption,
-                      selectedCity === "all" && styles.filterOptionActive,
+                      tempCity === "all" && styles.filterOptionActive,
                     ]}
-                    onPress={() => setSelectedCity("all")}
+                    onPress={() => setTempCity("all")}
                   >
                     <Text
                       style={[
                         styles.filterOptionText,
-                        selectedCity === "all" && styles.filterOptionTextActive,
+                        tempCity === "all" && styles.filterOptionTextActive,
                       ]}
                     >
                       All
@@ -324,14 +348,14 @@ export default function ProfessionalsScreen() {
                       key={city}
                       style={[
                         styles.filterOption,
-                        selectedCity === city && styles.filterOptionActive,
+                        tempCity === city && styles.filterOptionActive,
                       ]}
-                      onPress={() => setSelectedCity(city)}
+                      onPress={() => setTempCity(city)}
                     >
                       <Text
                         style={[
                           styles.filterOptionText,
-                          selectedCity === city && styles.filterOptionTextActive,
+                          tempCity === city && styles.filterOptionTextActive,
                         ]}
                       >
                         {city}
@@ -350,14 +374,14 @@ export default function ProfessionalsScreen() {
                       key={tag}
                       style={[
                         styles.tagFilterOption,
-                        selectedTags.includes(tag) && styles.tagFilterOptionActive,
+                        tempTags.includes(tag) && styles.tagFilterOptionActive,
                       ]}
                       onPress={() => toggleTag(tag)}
                     >
                       <Text
                         style={[
                           styles.tagFilterOptionText,
-                          selectedTags.includes(tag) && styles.tagFilterOptionTextActive,
+                          tempTags.includes(tag) && styles.tagFilterOptionTextActive,
                         ]}
                       >
                         {tag}
@@ -371,13 +395,17 @@ export default function ProfessionalsScreen() {
             <View style={styles.modalFooter}>
               <TouchableOpacity
                 style={styles.clearButton}
-                onPress={resetFilters}
+                onPress={() => {
+                  setTempSpecialty("all");
+                  setTempCity("all");
+                  setTempTags([]);
+                }}
               >
                 <Text style={styles.clearButtonText}>Clear All</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.applyButton}
-                onPress={() => setShowFilters(false)}
+                onPress={applyFilters}
               >
                 <Text style={styles.applyButtonText}>Apply</Text>
               </TouchableOpacity>
